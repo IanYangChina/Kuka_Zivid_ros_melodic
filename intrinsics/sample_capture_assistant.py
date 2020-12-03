@@ -51,7 +51,7 @@ class Sample:
     def on_image_color(self, data):
         image_array = ros_numpy.numpify(data)
         im = PIL.Image.fromarray(image_array[:, :, :3])
-        im.save("/home/xintong/Documents/PyProjects/zivid_camera/imgs/12.png")
+        im.save("/home/xintong/Documents/PyProjects/Zivid_project/intrinsics/imgs/18.png")
         rospy.loginfo("2D color image received")
 
 
