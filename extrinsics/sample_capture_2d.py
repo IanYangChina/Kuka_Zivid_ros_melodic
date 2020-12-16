@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 
 import rospy
-import rosnode
-import numpy as np
+import ros_numpy
+import PIL.Image
 import dynamic_reconfigure.client
 from zivid_camera.srv import *
-from std_msgs.msg import String
 from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
-bridge = CvBridge()
 
 
 class Sample:
@@ -43,9 +40,9 @@ class Sample:
 
     def on_image_color(self, data):
         rospy.loginfo("Color image received")
-        cv_images = bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
-        cv_images = np.asarray(cv_images)
-        print(cv_images.dtype)
+        # image_array = ros_numpy.numpify(data)
+        # im = PIL.Image.fromarray(image_array[:, :, :3])
+        # im.save("/home/xintong/Documents/PyProjects/Zivid_project/intrinsics/test_imgs/04.png")
         self.capture()
 
 
