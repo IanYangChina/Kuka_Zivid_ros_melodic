@@ -55,7 +55,8 @@ if __name__ == "__main__":
     # o3d.visualization.draw_geometries([pcd])
 
     print("Downsample the point cloud with a voxel of 0.02")
-    voxel_down_pcd = pcd.voxel_down_sample(voxel_size=2.0)
+    # voxel_down_pcd = pcd.voxel_down_sample(voxel_size=2.0)
+    voxel_down_pcd = o3d.geometry.voxel_down_sample(pcd, voxel_size=2.0)
     # o3d.visualization.draw_geometries([voxel_down_pcd])
     print(voxel_down_pcd)
 
@@ -73,4 +74,4 @@ if __name__ == "__main__":
     # o3d.visualization.draw_geometries([cropped])
     # print(cropped)
 
-    o3d.io.write_point_cloud(cwd + "/../point_clouds/0"+str(file_index)+"_ds_cropped.ply", cropped)
+    # o3d.io.write_point_cloud(cwd + "/../point_clouds/0"+str(file_index)+"_ds_cropped.ply", cropped)

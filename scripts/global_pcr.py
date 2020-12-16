@@ -18,11 +18,11 @@ def draw_registration_result(source, target, transformation):
 
 def preprocess_point_cloud(pcd, voxel_size, radius_normal, radius_feature):
     print(":: Downsample with a voxel size %.3f." % voxel_size)
-    pcd_down = pcd.voxel_down_sample(voxel_size)
-
+    pcd_down = o3d.geometry.voxel_down_sample(pcd, voxel_size=voxel_size)
     # radius_normal = voxel_size * 2
     print(":: Estimate normal with search radius %.3f." % radius_normal)
-    pcd_down.estimate_normals(
+    o3d.geometry.estimate_normals(
+        pcd_down,
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
 
     # radius_feature = voxel_size * 5
@@ -35,8 +35,8 @@ def preprocess_point_cloud(pcd, voxel_size, radius_normal, radius_feature):
 
 def execute_fast_global_registration(source_down, target_down, source_fpfh,
                                      target_fpfh, distance_threshold):
-    print(":: Apply fast global registration with distance threshold %.3f" \
-            % distance_threshold)
+    print(":: Apply fast global registration with distance threshold %.3f"
+          % distance_threshold)
     result = o3d.registration.registration_fast_based_on_feature_matching(
         source_down, target_down, source_fpfh, target_fpfh,
         o3d.registration.FastGlobalRegistrationOption(
