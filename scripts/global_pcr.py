@@ -18,11 +18,14 @@ def draw_registration_result(source, target, transformation):
 
 def preprocess_point_cloud(pcd, voxel_size, radius_normal, radius_feature):
     print(":: Downsample with a voxel size %.3f." % voxel_size)
-    pcd_down = o3d.geometry.voxel_down_sample(pcd, voxel_size=voxel_size)
+    # pcd_down = o3d.geometry.voxel_down_sample(pcd, voxel_size=voxel_size)
+    pcd_down = pcd.voxel_down_sample(voxel_size)
     # radius_normal = voxel_size * 2
     print(":: Estimate normal with search radius %.3f." % radius_normal)
-    o3d.geometry.estimate_normals(
-        pcd_down,
+    # o3d.geometry.estimate_normals(
+    #     pcd_down,
+    #     o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
+    pcd_down.estimate_normals(
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
 
     # radius_feature = voxel_size * 5
@@ -45,10 +48,9 @@ def execute_fast_global_registration(source_down, target_down, source_fpfh,
 
 
 if __name__ == "__main__":
-
     print(":: Load two point clouds and disturb initial pose.")
-    source = o3d.io.read_point_cloud("/home/xintong/Documents/PyProjects/ICP_test/src/Zivid_project/point_clouds/01_ds_cropped.ply")
-    target = o3d.io.read_point_cloud("/home/xintong/Documents/PyProjects/ICP_test/src/Zivid_project/point_clouds/04_ds_cropped.ply")
+    source = o3d.io.read_point_cloud("/home/xintong/Documents/PyProjects/Zivid_project/point_clouds/01_ds_cropped.ply")
+    target = o3d.io.read_point_cloud("/home/xintong/Documents/PyProjects/Zivid_project/point_clouds/04_ds_cropped.ply")
     source_down, source_fpfh = preprocess_point_cloud(source, voxel_size=1.0, radius_normal=2.3, radius_feature=10.0)
     target_down, target_fpfh = preprocess_point_cloud(target, voxel_size=1.0, radius_normal=2.3, radius_feature=10.0)
     o3d.visualization.draw_geometries([source_down, target_down])

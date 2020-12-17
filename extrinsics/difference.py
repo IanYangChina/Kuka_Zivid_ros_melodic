@@ -5,6 +5,7 @@ from scipy.spatial.transform import Rotation
 # qy: -0.995
 # qz: 0.086
 print("non_rectified camera angle", Rotation.from_quat([0.003, -0.995, 0.086, 0.035]).as_euler('zxy', degrees=True))
+print("non_rectified camera angle", Rotation.from_quat([0.003, -0.995, 0.086, 0.035]).as_dcm())
 # qw: 0.085
 # qx: -0.030
 # qy: -0.991
