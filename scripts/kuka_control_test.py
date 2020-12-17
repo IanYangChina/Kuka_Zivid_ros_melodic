@@ -34,7 +34,8 @@ class Controller:
         self.pub = rospy.Publisher('/iiwa/command/CartesianPose', PoseStamped, queue_size=2)
 
     def current_pose(self, data):
-        position, angle, quat = from_ps_to_np(data)
+        # position, angle, quat = from_ps_to_np(data)
+        # print(position, angle, quat)
         # print(Rotation.from_euler('zxy', angle, degrees=True).as_quat())
         # print(-quat)
         # quat = Rotation.from_euler('zxy', [-57.3, 1.59, -180.24], degrees=True).as_quat()
@@ -42,6 +43,7 @@ class Controller:
         rospy.loginfo('Pose received')
         # data.pose.position.x = -0.5
         # data.pose.position.y = 0.0
+        # data.pose.position.z = 0.318
         # data.pose.orientation.x = quat[0]
         # data.pose.orientation.y = quat[1]
         # data.pose.orientation.z = quat[2]
