@@ -1,2 +1,6 @@
 /.idea
 /scripts/__pycache__
+/build
+/devel
+/.catkin_workspace
+/.catkin_tools
