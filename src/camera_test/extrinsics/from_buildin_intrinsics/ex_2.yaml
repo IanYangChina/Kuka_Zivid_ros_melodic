@@ -1,0 +1,17 @@
+parameters:
+  eye_on_hand: false
+  move_group: manipulator
+  move_group_namespace: /iiwa
+  namespace: /my_eye_on_base/
+  robot_base_frame: iiwa_link_0
+  robot_effector_frame: iiwa_link_ee
+  tracking_base_frame: zivid_optical_frame
+  tracking_marker_frame: camera_marker
+transformation:
+  qw: 0.31608628115840914
+  qx: -0.07213690576340492
+  qy: -0.9451211908184672
+  qz: 0.040393865328922876
+  x: -0.32528786831471135
+  y: 0.09204531772717668
+  z: 1.0066837014010286

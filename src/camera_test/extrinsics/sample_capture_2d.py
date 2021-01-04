@@ -10,14 +10,14 @@ from zivid_camera.srv import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
-
+# zivid build-in camera matrix
 K = np.array([
-    [2747.785993, 0.0, 1008.464956],
-    [0.0, 2737.721711, 598.176104],
+    [2768.09082, 0.0, 949.384399],
+    [0.0, 2767.74096, 591.804870],
     [0.0, 0.0, 1.0]
 ])
 
-d = np.array([-0.25515395, 0.0, 0.0, 0.0, 0.0])
+d = np.array([-0.2714506, 0.42517313, 0.00039262, -0.00094772, -0.5916040])
 
 
 class Sample:
