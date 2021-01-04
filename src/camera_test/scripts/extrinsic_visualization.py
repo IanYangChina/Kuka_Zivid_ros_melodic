@@ -35,8 +35,8 @@ polygon = o3d.geometry.PointCloud(
 polygon.paint_uniform_color([1, 0, 0])
 
 # homogeneous transformation matrix from Robot frame to Camera frame
-translation_matrix = np.array([-0.456, 0.150, 1.060]).reshape((3, 1))   # xyz
-rotation_matrix = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([-0.030, -0.991, 0.093, 0.085]).reshape((4, 1)))  # xyzw
+translation_matrix = np.array([-0.4650, 0.107589, 1.102322]).reshape((3, 1))   # xyz
+rotation_matrix = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([0.0, 0.0, -0.99, 0.08]).reshape((4, 1)))  # xyzw
 transformation_matrix = np.append(rotation_matrix, translation_matrix, axis=1)
 transformation_matrix = np.append(transformation_matrix, np.array([[0, 0, 0, 1]]), axis=0)
 
