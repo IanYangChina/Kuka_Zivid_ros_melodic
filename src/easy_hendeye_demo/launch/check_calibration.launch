@@ -32,7 +32,7 @@
 
         <param name="eye_on_hand" value="$(arg eye_on_hand)" />
         <!-- transformations for the eye-on-base case -->
-        <param unless="$(arg eye_on_hand)" name="ground_truth_calibration_transformation" value="1 0 0.5 0 0 0 1" />
+        <param unless="$(arg eye_on_hand)" name="ground_truth_calibration_transformation" value="-0.4650 0.107589 1.102322 0.0 0.0 -0.99 0.08" />
         <param unless="$(arg eye_on_hand)" name="arbitrary_marker_placement_transformation" value="0.12 0.21 0.137 0 0 0 1" />
         <!-- transformations for the eye-on-hand case -->
         <param if="$(arg eye_on_hand)" name="ground_truth_calibration_transformation" value="0.12 0.21 0.137 0 0 0 1" />

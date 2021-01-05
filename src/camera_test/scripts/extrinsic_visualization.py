@@ -34,9 +34,13 @@ polygon = o3d.geometry.PointCloud(
     )
 polygon.paint_uniform_color([1, 0, 0])
 
+# quat_ = np.array([-0.009, -0.99, 0.08, 0.01])
+# quat_norm = quat_ / np.linalg.norm(quat_)
+# -0.00906054 -0.9966595 0.08053814 0.01006727
+
 # homogeneous transformation matrix from Robot frame to Camera frame
-translation_matrix = np.array([-0.4650, 0.107589, 1.102322]).reshape((3, 1))   # xyz
-rotation_matrix = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([0.0, 0.0, -0.99, 0.08]).reshape((4, 1)))  # xyzw
+translation_matrix = np.array([-0.4650, 0.107, 1.102322]).reshape((3, 1))   # xyz
+rotation_matrix = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([0.01006727, -0.00906054, -0.9966595, 0.08083814]).reshape((4, 1)))  # wxyz
 transformation_matrix = np.append(rotation_matrix, translation_matrix, axis=1)
 transformation_matrix = np.append(transformation_matrix, np.array([[0, 0, 0, 1]]), axis=0)
 
@@ -61,7 +65,7 @@ if __name__ == "__main__":
     mesh_t = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2).transform(transformation_matrix_)
 
     print("Load a ply point cloud, print it, and render it")
-    pcd = o3d.io.read_point_cloud(cwd + "/../objects/part_xyz_4.ply")
+    pcd = o3d.io.read_point_cloud(cwd + "/../objects/part_reference.ply")
     # print(np.asarray(pcd.points))
     # o3d.visualization.draw_geometries([pcd])
 

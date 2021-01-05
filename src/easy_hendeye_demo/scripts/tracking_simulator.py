@@ -90,6 +90,7 @@ if is_calibration:
                                               rotation=Quaternion(*ground_truth_calibration_transformation[1])))
     tfStaticBroadcaster.sendTransform(calib_gt_msg_stmpd)
 
+
 # set the ground truth calibration; during demo this allows us to compute the correct tracking output even if the calibration failed
 calib_gt_msg_stmpd = TransformStamped(header=Header(frame_id=calibration_origin_frame),
                                       child_frame_id=CAMERA_DUMMY_FRAME,

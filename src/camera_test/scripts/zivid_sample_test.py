@@ -88,7 +88,7 @@ class Sample:
         # pcd.rotate(R=rotation_matrix)
         # print(np.asarray(pcd.points))
         # o3d.visualization.draw_geometries([pcd_raw, pcd])
-        o3d.io.write_point_cloud("/home/xintong/Documents/PyProjects/Zivid_project/objects/cube_xyz_4.ply", pcd_raw)
+        o3d.io.write_point_cloud("/home/xintong/Documents/PyProjects/Zivid_project/src/camera_test/objects/part_reference.ply", pcd_raw)
         # print('')
 
     def on_image_color(self, data):
