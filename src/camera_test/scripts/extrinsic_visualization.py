@@ -5,7 +5,7 @@ import json
 
 cwd = os.getcwd()
 
-workspace_bounding_box_array = np.load(os.path.join(cwd, 'workspace_bounding_box_array_in_base.npy'))
+workspace_bounding_box_array = np.load(os.path.join(cwd, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
 workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float64'))
 workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
 workspace_bounding_box.color = (0, 1, 0)
@@ -16,6 +16,7 @@ workspace_bounding_box.color = (0, 1, 0)
 # -0.000672717656, -0.009060777, -0.996685658, 0.0808402617
 
 # homogeneous transformation matrix from Robot frame to Camera frame
+# data from extrinsic calibration
 translation_cam = np.array([-0.4650, 0.107, 1.102322]).reshape((3, 1))   # xyz
 rotation_cam = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([-0.000672717656, -0.009060777, -0.996685658, 0.0808402617]).reshape((4, 1)))  # wxyz
 transformation_cam = np.append(rotation_cam, translation_cam, axis=1)
@@ -24,6 +25,7 @@ transformation_cam = np.append(transformation_cam, np.array([[0, 0, 0, 1]]), axi
 transformation_cam_inv = np.linalg.inv(transformation_cam)
 
 # extra homogeneous transformation matrix from Robot frame to Camera frame
+# hand calibration
 translation = np.array([-0.12, 0.06, 0.0]).reshape((3, 1))
 rotation = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([1.0, 0.0, 0.0, 0.0]).reshape((4, 1)))  # wxyz
 transformation_extra = np.append(rotation, translation, axis=1)
