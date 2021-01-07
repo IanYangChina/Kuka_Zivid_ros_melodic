@@ -1,95 +1,67 @@
 import os
 import numpy as np
-import open3d as o3d
+import open3d as o3d  # 0.12.0
+import json
 
 cwd = os.getcwd()
 
-polygon = np.array([
-    # [-0.7, 0.2, 2.5],
-    # [-0.3, 0.2, 2.5],
-    # [-0.7, -0.3, 2.5],
-    # [-0.3, -0.3, 2.5]
-    [0.0, 0.0, 0.0],
-    [0.0, 0.0, 0.02],
-    [0.0, 0.0, 0.04],
-    [0.0, 0.0, 0.06],
-    [0.0, 0.0, 0.08],
-    [0.0, 0.0, 0.10],
-    [0.0, 0.0, 0.12],
-    [0.0, 0.0, 0.14],
-    [0.02, 0.0, 0.0],
-    [0.04, 0.0, 0.0],
-    [0.06, 0.0, 0.0],
-    [0.08, 0.0, 0.0],
-    [0.10, 0.0, 0.0],
-    [0.0, 0.02, 0.0],
-    [0.0, 0.04, 0.0],
-    [0.0, 0.06, 0.0],
-    [0.0, 0.08, 0.0],
-    [0.0, 0.10, 0.0],
-    [0.0, 0.12, 0.0]
-])
-polygon = o3d.geometry.PointCloud(
-        points=o3d.utility.Vector3dVector(polygon.tolist())
-    )
-polygon.paint_uniform_color([1, 0, 0])
+workspace_bounding_box_array = np.load(os.path.join(cwd, 'workspace_bounding_box_array_in_base.npy'))
+workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float64'))
+workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
+workspace_bounding_box.color = (0, 1, 0)
 
-# quat_ = np.array([-0.009, -0.99, 0.08, 0.01])
+"""Create transformation matrices (already saved)"""
+# quat_ = np.array([-0.0006727, -0.00906054, -0.9966595, 0.08083814])
 # quat_norm = quat_ / np.linalg.norm(quat_)
-# -0.00906054 -0.9966595 0.08053814 0.01006727
+# -0.000672717656, -0.009060777, -0.996685658, 0.0808402617
 
 # homogeneous transformation matrix from Robot frame to Camera frame
-translation_matrix = np.array([-0.4650, 0.107, 1.102322]).reshape((3, 1))   # xyz
-rotation_matrix = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([0.01006727, -0.00906054, -0.9966595, 0.08083814]).reshape((4, 1)))  # wxyz
-transformation_matrix = np.append(rotation_matrix, translation_matrix, axis=1)
-transformation_matrix = np.append(transformation_matrix, np.array([[0, 0, 0, 1]]), axis=0)
+translation_cam = np.array([-0.4650, 0.107, 1.102322]).reshape((3, 1))   # xyz
+rotation_cam = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([-0.000672717656, -0.009060777, -0.996685658, 0.0808402617]).reshape((4, 1)))  # wxyz
+transformation_cam = np.append(rotation_cam, translation_cam, axis=1)
+transformation_cam = np.append(transformation_cam, np.array([[0, 0, 0, 1]]), axis=0)
+# homogeneous transformation matrix from Camera frame to Robot frame (inverse)
+transformation_cam_inv = np.linalg.inv(transformation_cam)
 
-# homogeneous transformation matrix from Camera frame to Robot frame
-transformation_matrix_ = np.linalg.inv(transformation_matrix)
+# extra homogeneous transformation matrix from Robot frame to Camera frame
+translation = np.array([-0.12, 0.06, 0.0]).reshape((3, 1))
+rotation = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([1.0, 0.0, 0.0, 0.0]).reshape((4, 1)))  # wxyz
+transformation_extra = np.append(rotation, translation, axis=1)
+transformation_extra = np.append(transformation_extra, np.array([[0, 0, 0, 1]]), axis=0)
 
+# homogeneous transformation matrix from Robot frame to gripper frame
+translate_grip = np.array([-0.66257, -0.07707, 0.30143]).reshape((3, 1))   # xyz
+rotate_grip = np.radians(np.array([-179.00, -1.21, 11.36])).reshape((3, 1))  # CBA in radians
+rotate_grip = o3d.geometry.get_rotation_matrix_from_axis_angle(rotate_grip)
+transform_grip = np.append(rotate_grip, translate_grip, axis=1)
+transform_grip = np.append(transform_grip, np.array([[0, 0, 0, 1]]), axis=0)
 
-def display_inlier_outlier(cloud, ind):
-    inlier_cloud = cloud.select_down_sample(ind)
-    outlier_cloud = cloud.select_down_sample(ind, invert=True)
+"""Visualize transformation"""
+# The x, y, z axis will be rendered as red, green, and blue arrows respectively.
+# Robot frame, origin of the world
+robot_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+# Camera frame, transformed into Robot frame
+cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+cam_frame.transform(transformation_cam_inv)
+cam_frame.transform(transformation_extra)
+# Robot frame, transformed into gripper frame
+grip_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+grip_frame.transform(transform_grip)
 
-    print("Showing outliers (red) and inliers (gray): ")
-    outlier_cloud.paint_uniform_color([1, 0, 0])
-    inlier_cloud.paint_uniform_color([0.8, 0.8, 0.8])
-    o3d.visualization.draw_geometries([inlier_cloud, outlier_cloud])
+# print("Load point cloud")
+# pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_crop.ply'))
+pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference.ply'))
+pcd = pcd.transform(transformation_cam_inv)
+pcd = pcd.transform(transformation_extra)
+o3d.visualization.draw_geometries([robot_frame, cam_frame, grip_frame, pcd, workspace_bounding_box])
 
+# voxel_down_pcd.estimate_normals(
+#     o3d.geometry.KDTreeSearchParamHybrid(radius=0.01, max_nn=30))
 
-if __name__ == "__main__":
-    # Robot frame
-    mesh = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-    # Camera frame, transformed into Robot frame
-    mesh_t = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2).transform(transformation_matrix_)
+# print("Crop visualization")
+# cropped = pcd.crop(part_bounding_box)
+# bounding_box = cropped.get_axis_aligned_bounding_box()
+# bounding_box.color = (0, 0, 1)
+# o3d.visualization.draw_geometries([mesh, mesh_t, mesh_grip, cropped, part_bounding_box, workspace_bounding_box, bounding_box])
 
-    print("Load a ply point cloud, print it, and render it")
-    pcd = o3d.io.read_point_cloud(cwd + "/../objects/part_reference.ply")
-    # print(np.asarray(pcd.points))
-    # o3d.visualization.draw_geometries([pcd])
-
-    print("Downsample the point cloud with a voxel of 0.02")
-    voxel_down_pcd = pcd.voxel_down_sample(voxel_size=0.005)
-    voxel_down_pcd = voxel_down_pcd.transform(transformation_matrix_)
-    voxel_down_pcd.estimate_normals(
-        o3d.geometry.KDTreeSearchParamHybrid(radius=0.01, max_nn=30))
-
-    # voxel_down_pcd = o3d.geometry.voxel_down_sample(pcd, voxel_size=2.0)
-    # o3d.visualization.draw_geometries([voxel_down_pcd])
-    # print(voxel_down_pcd)
-
-    # voxel_down_pcd.translate(translation=translation_matrix)
-    # voxel_down_pcd.rotate(R=rotation_matrix)
-    # print(np.asarray(voxel_down_pcd.points))
-
-    print("Polygon visualisation")
-    o3d.visualization.draw_geometries([mesh, mesh_t, voxel_down_pcd])
-
-    # print("Load a polygon volume and use it to crop the original point cloud")
-    # vol = o3d.visualization.read_selection_polygon_volume(cwd + "/json/crop.json")
-    # cropped = vol.crop_point_cloud(voxel_down_pcd)
-    # o3d.visualization.draw_geometries([cropped])
-    # print(cropped)
-
-    # o3d.io.write_point_cloud(cwd + "/../point_clouds/0"+str(file_index)+"_ds_cropped.ply", cropped)
+# o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_crop.ply'), cropped)
