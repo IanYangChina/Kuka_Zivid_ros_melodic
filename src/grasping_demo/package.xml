@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>grasping_demo</name>
+  <version>0.0.0</version>
+  <description>The grasping_demo package</description>
+
+  <maintainer email="yangx66@cardiff.ac.uk">xintong</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>iiwa_moveit</exec_depend>
+  <exec_depend>zivid_camera</exec_depend>
+  <exec_depend>rospy</exec_depend>
+
+  <export>
+  </export>
+</package>
