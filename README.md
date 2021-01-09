@@ -41,7 +41,7 @@ to automatic mode and run the `ROSSmartServo` application. You should see the ap
 ros driver. It is recommended to run a few tutorials in the zivid official repository to test the camera before using
 this package.
 
-2.2 Go to the root of this project `.../Zivid_project/`, run `catkin build` and `source devel/setup.bash`. Add `--extend`
+2.2 Clone the project. Go to the root of this project `.../Zivid_project/`, run `catkin build` and `source devel/setup.bash`. Add `--extend`
 to the source command if you need to activate multiple catkin workspaces.
 
 2.3 The project contains the robotiq gripper driver, so you don't need to install it from somewhere else.
