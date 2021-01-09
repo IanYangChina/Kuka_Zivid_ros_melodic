@@ -26,11 +26,11 @@ cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
 cam_frame.transform(transform_cam_to_base_hand_calibrated)
 
 # default registration parameters unit: meter
-VOXEL_SIZE = 0.01
-RADIUS_NORMAL = 0.01
-RADIUS_FEATURE = 0.2
-GLOBAL_DISTANCE_THRESHOLD = 0.5
-ICP_REFINE_DISTANCE_THRESHOLD = 0.005
+VOXEL_SIZE = 0.005
+RADIUS_NORMAL = 0.005
+RADIUS_FEATURE = 0.03
+GLOBAL_DISTANCE_THRESHOLD = 0.2
+ICP_REFINE_DISTANCE_THRESHOLD = 0.002
 
 
 def preprocess_point_cloud(pcd, voxel_size=VOXEL_SIZE, radius_normal=RADIUS_NORMAL, radius_feature=RADIUS_FEATURE):
@@ -44,6 +44,7 @@ def preprocess_point_cloud(pcd, voxel_size=VOXEL_SIZE, radius_normal=RADIUS_NORM
 
 def execute_fast_global_registration(source_down, target_down, source_fpfh, target_fpfh,
                                      distance_threshold=GLOBAL_DISTANCE_THRESHOLD):
+    print("[INFO] Fast global registration with fpfh features")
     result = o3d.registration.registration_fast_based_on_feature_matching(
         source=source_down,
         target=target_down,
@@ -56,8 +57,7 @@ def execute_fast_global_registration(source_down, target_down, source_fpfh, targ
 
 def refine_registration(source, target, previous_transformation,
                         distance_threshold=ICP_REFINE_DISTANCE_THRESHOLD):
-    print(":: Point-to-plane ICP registration is applied on original point")
-    print("   clouds to refine the alignment. This time we use a strict")
+    print("[INFO] Point-to-plane ICP registration")
     result = o3d.registration.registration_icp(
         source, target, distance_threshold, previous_transformation,
         o3d.registration.TransformationEstimationPointToPlane())
@@ -68,7 +68,7 @@ def refine_registration(source, target, previous_transformation,
 target = o3d.io.read_point_cloud(os.path.join(script_dir, 'reference_grasp', 'part_reference_merged.ply'))
 # into robot frame
 target.transform(transform_cam_to_base_hand_calibrated)
-target.paint_uniform_color([1, 1, 0])
+target.paint_uniform_color([0.6, 0.6, 0.6])
 # compute fpfh
 target_down, target_fpfh = preprocess_point_cloud(target)
 # a transformation to move the source pcd away from the target
@@ -81,6 +81,7 @@ pose_msg = PoseStamped()
 def get_target_grasp_pose(source_pcd):
     # copy the source pcd and transform into robot frame
     source_pcd_original = dcp(source_pcd)
+    source_pcd_original.paint_uniform_color([0, 0, 1])
     source_pcd_original.transform(transform_cam_to_base_hand_calibrated)
     # copy one to be processed, and crop
     source_pcd_to_process = dcp(source_pcd_original)
@@ -103,8 +104,8 @@ def get_target_grasp_pose(source_pcd):
     transform_target_to_source = np.linalg.inv(transform_source_to_target)
     transform_target_grasp = np.matmul(transform_target_to_source, transform_base_to_reference_grasp)
     new_grasp_frame.transform(transform_target_grasp)
-    print('[ INFO] Visualizing the found grasping pose')
-    o3d.visualization.draw_geometries([robot_frame, new_grasp_frame, source_pcd_original],
+    print('[INFO] Visualizing the found grasping pose')
+    o3d.visualization.draw_geometries([robot_frame, new_grasp_frame, source_pcd_original, target],
                                       window_name='Grasping pose proposal', width=1200, height=960)
 
     # convert transformation matrix to coordinate and quaternion
@@ -123,6 +124,6 @@ def get_target_grasp_pose(source_pcd):
     return pose
 
 
-# source_original = o3d.io.read_point_cloud(os.path.join(script_dir, 'example_pcd.ply'))
-# target_pose = get_target_grasp_pose(source_original)
-# print(target_pose)
+# for i in ['0', '1', '2', '3', '4']:
+#     source_original = o3d.io.read_point_cloud(os.path.join(script_dir, '..', '..', '..', 'camera_test', 'objects', 'pcl_part', 'part_xyz_'+i+'.ply'))
+#     _ = get_target_grasp_pose(source_original)
