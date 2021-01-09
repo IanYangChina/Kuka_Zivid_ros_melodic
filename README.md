@@ -1,4 +1,9 @@
-### Instruction to use the grasping_demo package
+### Calibration, Registration-based automatic grasping project
+
+####Robotics and Autonomous Systems Lab, Engineering School, Cardiff University
+<img src="/Cardiff-University-log.jpg" width="80"/>
+
+#### Instruction to use the grasping_demo package
 
 #### 1. Hardware (Network) connection
 
