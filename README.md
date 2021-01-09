@@ -1,6 +1,7 @@
 ### Calibration, Registration-based automatic grasping project
 
 ####Robotics and Autonomous Systems Lab, Engineering School, Cardiff University
+
 <img src="/CardiffUnivLogo.jpg" width="80"/>
 
 #### Instruction to use the grasping_demo package
