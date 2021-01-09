@@ -6,6 +6,7 @@ find_package(catkin REQUIRED)
 catkin_python_setup()
 catkin_package()
 catkin_install_python(PROGRAMS
+    nodes/capture_helper.py
     nodes/pcd_processing.py
     nodes/kuka_controller.py
     nodes/command_prompt.py
@@ -13,6 +14,7 @@ catkin_install_python(PROGRAMS
 )
 
 install(FILES
-    launch/grasping_demo.launch
+    launch/grasping_pcd_processing.launch
+    launch/grasping_controller.launch
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

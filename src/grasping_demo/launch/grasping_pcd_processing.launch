@@ -1,6 +1,5 @@
 <launch>
     <node ns="zivid_camera" name="zivid_camera" pkg="zivid_camera" type="zivid_camera_node" output="screen"/>
     <node ns="grasping_demo" name="pcd_processing" pkg="grasping_demo" type="pcd_processing.py" output="screen"/>
-    <node ns="grasping_demo" name="kuka_controller" pkg="grasping_demo" type="kuka_controller.py" output="screen"/>
     <node ns="grasping_demo" name="robotiq_controller" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py" output="screen"/>
 </launch>

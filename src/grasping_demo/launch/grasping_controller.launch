@@ -1,0 +1,3 @@
+<launch>
+    <node ns="grasping_demo" name="kuka_controller" pkg="grasping_demo" type="kuka_controller.py" output="screen"/>
+</launch>
