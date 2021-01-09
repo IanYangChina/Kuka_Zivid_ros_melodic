@@ -1,4 +1,4 @@
-### Calibration, Registration-based automatic grasping project
+### Calibration, Registration-based automatic grasping with Zivid Camera
 
 ##### Robotics and Autonomous Systems Lab
 ##### Robot Perception And Learning (RoPAL) - Cardiff University
