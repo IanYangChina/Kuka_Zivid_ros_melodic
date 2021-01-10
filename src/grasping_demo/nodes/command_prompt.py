@@ -44,7 +44,7 @@ class CaptureHelper:
 
 
 if __name__ == '__main__':
-    print('Starting ros communication system..')
+    print('[INFO] Starting ros communication system...')
     script_path = os.path.dirname(os.path.realpath(__file__))
     uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
     roslaunch.configure_logging(uuid)
@@ -67,12 +67,13 @@ if __name__ == '__main__':
             rospy.loginfo('Exiting the program...')
             exit()
 
+    print('[INFO] Starting kuka controller...')
     launch_controller = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(script_path, '..', 'launch', 'grasping_controller.launch')])
     launch_controller.start()
     rospy.sleep(5)
 
     rospy.loginfo('Ros communication system has been properly setup')
-    while True:
+    while not rospy.is_shutdown():
         rospy.loginfo('Start a new grasping attempt')
         raw_input('[USER INPUT] Place the object within the workspace and press [enter]')
         rospy.loginfo('Capture and processing point cloud...')
@@ -86,12 +87,14 @@ if __name__ == '__main__':
         if ans == 'y':
             continue
         else:
-            close_smart_servo = False
-            while not close_smart_servo:
-                if not ('/iiwa/iiwa_subscriber' in rosnode.get_node_names()):
-                    close_smart_servo = True
-                else:
-                    rospy.loginfo("Please **now** shutdown the SmartServo application on Sunrise Cabinet")
-                    rospy.sleep(5)
-            rospy.loginfo('Exiting the program...')
-            exit()
+            break
+
+    close_smart_servo = False
+    while not close_smart_servo:
+        if not ('/iiwa/iiwa_subscriber' in rosnode.get_node_names()):
+            close_smart_servo = True
+        else:
+            print('[INFO]Please **now** shutdown the SmartServo application on Sunrise Cabinet')
+            rospy.sleep(5)
+    print('[INFO] Exiting the program...')
+    exit()

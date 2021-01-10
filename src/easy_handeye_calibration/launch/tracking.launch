@@ -1,11 +1,8 @@
 <launch>
-    <arg name="tracking_base_frame" value="zivid_optical_frame" />
-    <arg name="tracking_marker_frame" value="camera_marker" />
-
     <arg name="marker_size" doc="Size of the ArUco marker used, in meters" value="0.1"/>
     <arg name="marker_id" doc="The ID of the ArUco marker used" value="35"/>
 
-    <!-- (start your tracking system's ROS driver) -->
+    <!-- start Zivid camera driver node -->
     <node name="zivid_camera" pkg="zivid_camera" type="zivid_camera_node" output="screen" ns="zivid_camera">
         <param name="frame_id" value="zivid_optical_frame" />
     </node>
@@ -17,11 +14,12 @@
         <param name="image_is_rectified" value="true"/>
         <param name="marker_size"        value="$(arg marker_size)"/>
         <param name="marker_id"          value="$(arg marker_id)"/>
-        <param name="reference_frame"    value="$(arg tracking_base_frame)"/>
+        <param name="reference_frame"    value="zivid_optical_frame"/>
         <param name="camera_frame"       value="zivid_optical_frame"/>
-        <param name="marker_frame"       value="$(arg tracking_marker_frame)"/>
+        <param name="marker_frame"       value="camera_marker"/>
     </node>
 
+    <!-- start the capture node -->
     <node name="capture_2d" pkg="easy_handeye_calibration" type="sample_capture_2d.py">
 
     </node>

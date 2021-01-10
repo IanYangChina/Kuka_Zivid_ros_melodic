@@ -6,8 +6,7 @@ find_package(catkin REQUIRED)
 catkin_package()
 
 catkin_install_python(PROGRAMS
-    scripts/tracking_simulator.py
-    scripts/sample_capture_2d.py
+    nodes/sample_capture_2d.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
