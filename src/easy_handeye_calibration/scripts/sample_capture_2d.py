@@ -3,8 +3,6 @@
 import cv2
 import rospy
 import numpy as np
-import matplotlib.pyplot as plt
-import ros_numpy
 import dynamic_reconfigure.client
 from zivid_camera.srv import *
 from sensor_msgs.msg import Image
@@ -65,13 +63,6 @@ class Sample:
 
         rospy.loginfo("Publish undistorted image")
         self.image_pub.publish(self.bridge.cv2_to_imgmsg(newimg, "rgb8"))
-
-        # fig, (oldimg_ax, newimg_ax) = plt.subplots(1, 2)
-        # oldimg_ax.imshow(cv_image)
-        # oldimg_ax.set_title('Original image')
-        # newimg_ax.imshow(newimg)
-        # newimg_ax.set_title('Unwarped image')
-        # plt.show()
 
         self.capture()
 

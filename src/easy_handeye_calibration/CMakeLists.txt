@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(easy_handeye_demo)
+project(easy_handeye_calibration)
 
 find_package(catkin REQUIRED)
 
@@ -7,12 +7,12 @@ catkin_package()
 
 catkin_install_python(PROGRAMS
     scripts/tracking_simulator.py
+    scripts/sample_capture_2d.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(FILES
-    launch/calibrate.launch
-    launch/check_calibration.launch
-    launch/iiwa_stack_config.rviz
+    launch/my_calibrate.launch
+    launch/tracking.launch
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
