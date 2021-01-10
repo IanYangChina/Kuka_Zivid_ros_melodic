@@ -11,6 +11,7 @@ This package is presented as a catkin workspace source. It has the following mai
 - Kuka iiwa lbr
 - Zivid one camera
 - Robotiq 2f gripper
+- Aruco marker
 
 #### Software
 - Ubuntu 16.04
@@ -19,6 +20,6 @@ This package is presented as a catkin workspace source. It has the following mai
 
 The package has 2 main functions: camera calibration and automatic grasping. The following links point you to the detailed instructions.
 
-1. Camera calibration via iiwa_stack and easy_handeye
+1. [Camera calibration via iiwa_stack and easy_handeye](https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye)
 
 2. [Automatic grasping via fpfh-based fast global registration and icp refinement](https://github.com/IanYangChina/Zivid_project/wiki/Automatic-grasping-via-fpfh-bsed-fast-global-registration-and-icp-refinement)
