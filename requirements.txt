@@ -1,0 +1,6 @@
+pymodbus
+PyYAML
+matplotlib
+quaternion
+open3d==0.9.0
+netifaces

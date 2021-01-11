@@ -1,7 +1,6 @@
 import os
 import numpy as np
-import open3d as o3d  # 0.12.0
-import json
+import open3d as o3d  # 0.9.0
 
 cwd = os.getcwd()
 

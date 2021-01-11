@@ -17,6 +17,7 @@ This package is presented as a catkin workspace source. It has the following mai
 - Ubuntu 16.04
 - ROS Kinetic
 - Python 2.7
+- `python -m pip install -r requirements.txt`
 
 The package has 2 main functions: camera calibration and automatic grasping. They are all implemented
 as command line prompts to be easily accessible. The following links point you to the detailed instructions.

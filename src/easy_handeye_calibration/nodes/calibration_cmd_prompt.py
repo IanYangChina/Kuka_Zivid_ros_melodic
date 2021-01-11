@@ -23,7 +23,6 @@ if __name__ == '__main__':
         ans = raw_input(
             '[USER INPUT] Type [y] and press [enter] if you have started the ROSSMartServo, otherwise exit the program: ')
         if ans == 'y':
-            # todo: add codes to make sure ROSSMartServo has been started on the Sunrise Cabinet
             if '/iiwa/iiwa_subscriber' in rosnode.get_node_names():
                 ROSSMartServo_on = True
             else:
@@ -39,7 +38,7 @@ if __name__ == '__main__':
 
     calibration_result_file = os.path.join(os.getenv('HOME'), '.ros/easy_handeye/my_eye_on_base.yaml')
 
-    # todo: this loop condition is not appropriate, better using ros node info...
+    # todo: this loop condition is not the most appropriate, better using ros node info...
     file_ind = 0
     while rosgraph.is_master_online():
         rospy.sleep(2)
