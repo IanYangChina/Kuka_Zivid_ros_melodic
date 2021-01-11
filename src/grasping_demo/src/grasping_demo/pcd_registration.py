@@ -65,7 +65,7 @@ def refine_registration(source, target, previous_transformation,
 
 
 # load, preprocess target point cloud (one with a reference grasp)
-target = o3d.io.read_point_cloud(os.path.join(script_dir, 'reference_grasp', 'part_reference_merged.ply'))
+target = o3d.io.read_point_cloud(os.path.join(script_dir, 'reference_grasp', 'cropped_pcd_reference_in_world_frame.ply'))
 # into robot frame
 target.transform(transform_cam_to_base_hand_calibrated)
 target.paint_uniform_color([0.6, 0.6, 0.6])

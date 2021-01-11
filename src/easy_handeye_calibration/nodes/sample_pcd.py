@@ -32,9 +32,6 @@ class Sample:
         o3d.visualization.draw_geometries([pcd_raw])
         o3d.io.write_point_cloud(os.path.join(script_path, '..', 'src', 'pcd_reference.ply'), pcd_raw)
         rospy.loginfo("Point cloud \'pcd_reference.ply\' has been saved in ../src/")
-        ans = raw_input("[USER INPUT] Is the point cloud satisfactory? [y/n]")
-        if ans == 'n':
-            self.capture()
 
     def capture_assistant_suggest_settings(self):
         max_capture_time = rospy.Duration.from_sec(1.20)
@@ -59,7 +56,16 @@ if __name__ == '__main__':
     launch_pcd.start()
     rospy.sleep(5)
     sample = Sample()
-    sample.capture()
+    while True:
+        sample.capture()
+        ans = raw_input("[USER INPUT] Is the point cloud satisfactory? [y/n]")
+        if ans == 'n':
+            continue
+        elif ans == 'y':
+            break
+        else:
+            print("Invalid input: ", ans)
+
     rospy.sleep(2)
     rospy.loginfo("Exiting program...")
     launch_pcd.shutdown()
