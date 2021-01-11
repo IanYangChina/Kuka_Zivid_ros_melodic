@@ -2,6 +2,7 @@
 
 import os
 import rospy
+import roslaunch
 import ros_numpy
 import open3d as o3d
 from zivid_camera.srv import *
@@ -52,8 +53,14 @@ class Sample:
 
 
 if __name__ == '__main__':
+    uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+    roslaunch.configure_logging(uuid)
+    launch_pcd = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(script_path, '..', 'launch', 'camera.launch')])
+    launch_pcd.start()
+    rospy.sleep(5)
     sample = Sample()
     sample.capture()
     rospy.sleep(2)
     rospy.loginfo("Exiting program...")
+    launch_pcd.shutdown()
     exit()
