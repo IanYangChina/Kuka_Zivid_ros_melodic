@@ -6,7 +6,10 @@ find_package(catkin REQUIRED)
 catkin_package()
 
 catkin_install_python(PROGRAMS
+    nodes/calibration_cmd_prompt.py
     nodes/sample_capture_2d.py
+    nodes/sample_pcd.py
+    nodes/extrinsic_fine_tuning_prompt.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 
+import os
 import cv2
+import yaml
 import rospy
 import numpy as np
 import dynamic_reconfigure.client
@@ -8,14 +10,31 @@ from zivid_camera.srv import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
+
+script_path = os.path.dirname(os.path.realpath(__file__))
+if not os.path.exists(os.path.join(script_path, '..', 'src', 'Intrinsics.yml')):
+    raise OSError("\nIntrinsics file not found: {}\n"
+                  "Please make sure you have finished intrinsic calibration and copy the .yaml file into .../easy_handeye_calibration/src/\n"
+                  "Zivid camera has an official C++ API to obtain the intrinsics,"
+                  "see https://github.com/zivid/zivid-cpp-samples/blob/master/source/Camera/InfoUtilOther/GetCameraIntrinsics/GetCameraIntrinsics.cpp"
+                  .format(os.path.join(script_path, '..', 'src', 'intrinsics.yml')))
+
+with open(os.path.join(script_path, '..', 'src', 'intrinsics.yml')) as intrinsics_file:
+    intrinsics = yaml.load(intrinsics_file, Loader=yaml.FullLoader)
+
+intrinsics = intrinsics['CameraIntrinsics']
 # zivid build-in camera matrix
 K = np.array([
-    [2768.09082, 0.0, 949.384399],
-    [0.0, 2767.74096, 591.804870],
+    [intrinsics['CameraMatrix']['FX'], 0.0, intrinsics['CameraMatrix']['CX']],
+    [0.0, intrinsics['CameraMatrix']['FY'], intrinsics['CameraMatrix']['CY']],
     [0.0, 0.0, 1.0]
 ])
 
-d = np.array([-0.2714506, 0.42517313, 0.00039262, -0.00094772, -0.5916040])
+d = np.array([intrinsics['Distortion']['K1'],
+              intrinsics['Distortion']['K2'],
+              intrinsics['Distortion']['P1'],
+              intrinsics['Distortion']['P2'],
+              intrinsics['Distortion']['K3']])
 
 
 class Sample:

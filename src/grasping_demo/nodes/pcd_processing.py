@@ -3,7 +3,6 @@
 import rospy
 import ros_numpy
 import open3d as o3d
-from cv_bridge import CvBridge
 from std_msgs.msg import Bool
 from sensor_msgs.msg import PointCloud2
 from geometry_msgs.msg import PoseStamped
@@ -12,7 +11,6 @@ from grasping_demo.pcd_registration import get_target_grasp_pose
 
 class PcdProcessing:
     def __init__(self):
-        self.bridge = CvBridge()
         rospy.init_node("pcd_processing_node", anonymous=True)
         rospy.loginfo("Starting pcd_processing_node")
         rospy.Subscriber("/zivid_camera/points/xyzrgba", PointCloud2, self.on_points, queue_size=2)

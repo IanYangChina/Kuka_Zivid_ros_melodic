@@ -1,11 +1,10 @@
 import os
 import numpy as np
-import open3d as o3d  # 0.12.0
-import json
+import open3d as o3d
 
-cwd = os.getcwd()
+script_path = os.path.dirname(os.path.realpath(__file__))
 
-workspace_bounding_box_array = np.load(os.path.join(cwd, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
+workspace_bounding_box_array = np.load(os.path.join(script_path, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
 workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float64'))
 workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
 workspace_bounding_box.color = (0, 1, 0)
@@ -52,7 +51,7 @@ grip_frame.transform(transform_grip)
 
 # print("Load point cloud")
 # pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_crop.ply'))
-pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference.ply'))
+pcd = o3d.io.read_point_cloud(os.path.join(script_path, '..', 'objects', 'reference_grasp', 'part_reference.ply'))
 pcd = pcd.transform(transformation_cam_inv)
 pcd = pcd.transform(transformation_extra)
 o3d.visualization.draw_geometries([robot_frame, cam_frame, grip_frame, pcd, workspace_bounding_box])

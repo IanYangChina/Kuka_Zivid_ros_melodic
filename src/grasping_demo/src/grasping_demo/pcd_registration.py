@@ -8,8 +8,8 @@ from geometry_msgs.msg import PoseStamped
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 # load hand-calibrated transformation matrices
-transform_base_to_cam_hand_calibrated = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_base_to_cam_hand_calibrated.npy'))
-transform_cam_to_base_hand_calibrated = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_cam_to_base_hand_calibrated.npy'))
+transform_base_to_cam_hand_calibrated = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
+transform_cam_to_base_hand_calibrated = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_cam_to_base_fine_tuned.npy'))
 transform_base_to_reference_grasp = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_base_to_reference_grasp.npy'))
 
 # load and create a bounding box

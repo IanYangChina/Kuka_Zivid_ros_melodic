@@ -3,6 +3,7 @@
 import os
 import rospy
 import rosnode
+import rosgraph
 import roslaunch
 from zivid_camera.srv import *
 from std_msgs.msg import Bool
@@ -65,6 +66,7 @@ if __name__ == '__main__':
                 rospy.loginfo('IIWA topics not detected, check network connection if you have started the SmartServo')
         else:
             rospy.loginfo('Exiting the program...')
+            launch_pcd.shutdown()
             exit()
 
     print('[INFO] Starting kuka controller...')
@@ -73,7 +75,7 @@ if __name__ == '__main__':
     rospy.sleep(5)
 
     rospy.loginfo('Ros communication system has been properly setup')
-    while not rospy.is_shutdown():
+    while True:
         rospy.loginfo('Start a new grasping attempt')
         raw_input('[USER INPUT] Place the object within the workspace and press [enter]')
         rospy.loginfo('Capture and processing point cloud...')
@@ -81,20 +83,25 @@ if __name__ == '__main__':
         capture_helper.attempt_num_passed += 1
         capture_helper.capture()
         while not capture_helper.attempt_finished:
-            pass
+            if not rosgraph.is_master_online():
+                print("[INFO] Master has been shutdown, exiting the program...")
+                launch_pcd.shutdown()
+                launch_controller.shutdown()
+                exit()
+            rospy.sleep(1)
         rospy.loginfo("Attempt finished")
         ans = raw_input('[USER INPUT] Would you like to continue with a new object pose? [y/n]')
         if ans == 'y':
             continue
         else:
-            break
-
-    close_smart_servo = False
-    while not close_smart_servo:
-        if not ('/iiwa/iiwa_subscriber' in rosnode.get_node_names()):
-            close_smart_servo = True
-        else:
-            print('[INFO]Please **now** shutdown the SmartServo application on Sunrise Cabinet')
-            rospy.sleep(5)
-    print('[INFO] Exiting the program...')
-    exit()
+            close_smart_servo = False
+            while not close_smart_servo:
+                if not ('/iiwa/iiwa_subscriber' in rosnode.get_node_names()):
+                    close_smart_servo = True
+                else:
+                    print('[INFO]Please **now** shutdown the SmartServo application on Sunrise Cabinet')
+                    rospy.sleep(5)
+            print('[INFO] Exiting the program...')
+            launch_pcd.shutdown()
+            launch_controller.shutdown()
+            exit()
