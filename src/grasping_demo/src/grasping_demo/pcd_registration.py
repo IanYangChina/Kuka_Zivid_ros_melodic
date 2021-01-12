@@ -81,7 +81,7 @@ pose_msg = PoseStamped()
 def get_target_grasp_pose(source_pcd):
     # copy the source pcd and transform into robot frame
     source_pcd_original = dcp(source_pcd)
-    source_pcd_original.paint_uniform_color([0, 0, 1])
+    # source_pcd_original.paint_uniform_color([0, 0, 1])
     source_pcd_original.transform(transform_cam_to_base_hand_calibrated)
     # copy one to be processed, and crop
     source_pcd_to_process = dcp(source_pcd_original)
@@ -125,5 +125,5 @@ def get_target_grasp_pose(source_pcd):
 
 
 # for i in ['0', '1', '2', '3', '4']:
-#     source_original = o3d.io.read_point_cloud(os.path.join(script_dir, '..', '..', '..', 'camera_test', 'objects', 'pcl_part', 'part_xyz_'+i+'.ply'))
-#     _ = get_target_grasp_pose(source_original)
+#     source_original = o3d.io.read_point_cloud(os.path.join(script_dir, '..', '..', '..', 'test', 'objects', 'pcl_part', 'part_xyz_'+i+'.ply'))
+#     get_target_grasp_pose(source_original)
