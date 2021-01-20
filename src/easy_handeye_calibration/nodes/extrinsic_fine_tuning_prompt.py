@@ -4,12 +4,11 @@ import os
 import yaml
 import numpy as np
 import open3d as o3d
-import quaternion as quat
 from copy import deepcopy as dcp
 
 
 def construct_homogeneous_transform_matrix(translation, orientation):
-    translation = np.array(translation).reshape((3, 1))   # xyz
+    translation = np.array(translation).reshape((3, 1))  # xyz
     if len(orientation) == 4:
         rotation = o3d.geometry.get_rotation_matrix_from_quaternion(np.array(orientation).reshape((4, 1)))  # wxyz
     else:
@@ -23,7 +22,8 @@ def construct_homogeneous_transform_matrix(translation, orientation):
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
-workspace_bounding_box_array = np.load(os.path.join(script_path, '..', 'src', 'workspace_bounding_box_array_in_base.npy'))
+workspace_bounding_box_array = np.load(
+    os.path.join(script_path, '..', 'src', 'workspace_bounding_box_array_in_base.npy'))
 workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float'))
 workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
 workspace_bounding_box.color = (0, 1, 0)
@@ -31,13 +31,14 @@ workspace_bounding_box.color = (0, 1, 0)
 if __name__ == '__main__':
 
     while True:
-        ans = raw_input("This program will walk you through a fine-tuning process of the extrinsics found by easy_handeye calibration.\n"
-                        "You must complete the following 2 steps before starting the fine-tuning process:\n"
-                        "- 1. Finish extrinsic calibration by running \'rosrun easy_handeye_valibration calibration_cmd_prompt.py.\'\n"
-                        "- 2. Capture a point cloud of a reference object and obtain a ground truth grasping pose in the robot base frame.\n"
-                        "For detailed instruction of doing the above mentioned 2 steps, "
-                        "see: https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye\n"
-                        "Have you done these 2 steps? [y/n]: ")
+        ans = raw_input(
+            "This program will walk you through a fine-tuning process of the extrinsics found by easy_handeye calibration.\n"
+            "You must complete the following 2 steps before starting the fine-tuning process:\n"
+            "- 1. Finish extrinsic calibration by running \'rosrun easy_handeye_valibration calibration_cmd_prompt.py.\'\n"
+            "- 2. Capture a point cloud of a reference object and obtain a ground truth grasping pose in the robot base frame.\n"
+            "For detailed instruction of doing the above mentioned 2 steps, "
+            "see: https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye\n"
+            "Have you done these 2 steps? [y/n]: ")
         if ans == 'n':
             print("Exiting the program...")
             exit()
@@ -52,14 +53,15 @@ if __name__ == '__main__':
         raise OSError("File not found: {}\n"
                       "Please make sure you have finished extrinsic calibration and copy the file to .../easy_handeye_calibration/results/\n"
                       "The calibration_cmd_prompt.py node will copy the file and rename it to \'Extrinsics.yaml\' for you."
-                      "see: https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye".format(calibration_result_file))
+                      "see: https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye".format(
+            calibration_result_file))
     calibration_result_file_ = os.path.join(script_path, '..', 'results', 'Extrinsics_1.yaml')
     if os.path.exists(calibration_result_file_):
         print("There seems to exist multiple extrinsic parameter files:\n"
               "{}\n{}\n...".format(calibration_result_file, calibration_result_file_))
         while True:
             ans = raw_input("Input the id of the one you would like to use: [int] ")
-            calibration_result_file = os.path.join(script_path, '..', 'results', 'Extrinsics_'+ans+'.yaml')
+            calibration_result_file = os.path.join(script_path, '..', 'results', 'Extrinsics_' + ans + '.yaml')
             if not os.path.exists(calibration_result_file):
                 print("Calibration result file not found, please input the correct id as a single integer")
             else:
@@ -86,7 +88,8 @@ if __name__ == '__main__':
         raise OSError("File not found: {}\n"
                       "Please make sure you have capture a reference point cloud and copy the file to .../easy_handeye_calibration/src/\n"
                       "The sample_pcd.py node will do that for you."
-                      "see: https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye".format(calibration_result_file))
+                      "see: https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye".format(
+            calibration_result_file))
     original_pcd_reference_in_cam_frame = o3d.io.read_point_cloud(pcd_reference_file)
 
     # The x, y, z axis will be rendered as red, green, and blue arrows respectively.
@@ -118,7 +121,8 @@ if __name__ == '__main__':
     # homogeneous transformation matrix from Robot frame to gripper frame
     # example ref grasping pose: [-0.66257, -0.07707, 0.30143], [-179.00, -1.21, 11.36]
     transform_base_to_reference_grasp = construct_homogeneous_transform_matrix([x, y, z], [c, b, a])
-    np.save(os.path.join(script_path, '..', 'results', 'transform_base_to_reference_grasp'), transform_base_to_reference_grasp)
+    np.save(os.path.join(script_path, '..', 'results', 'transform_base_to_reference_grasp'),
+            transform_base_to_reference_grasp)
     print("Result file \'transform_base_to_reference_grasp.npy\' has been saved in ../results/")
     # Gripper pose in robot frame
     grip_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
@@ -161,7 +165,8 @@ if __name__ == '__main__':
             if not os.path.exists(os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned.npy')):
                 print("Please save the matrix as ../results/transform_cam_to_base_fine_tuned.npy and restart.")
                 exit()
-            loaded_transform_cam_to_base = np.load(os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned.npy'))
+            loaded_transform_cam_to_base = np.load(
+                os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned.npy'))
 
             pcd_reference_in_base_frame = dcp(original_pcd_reference_in_cam_frame)
             pcd_reference_in_base_frame.transform(loaded_transform_cam_to_base)
@@ -170,7 +175,8 @@ if __name__ == '__main__':
             if ans != 'y':
                 print("Exiting the program...")
                 exit()
-            o3d.visualization.draw_geometries([robot_frame, grip_frame, workspace_bounding_box, pcd_reference_in_base_frame])
+            o3d.visualization.draw_geometries(
+                [robot_frame, grip_frame, workspace_bounding_box, pcd_reference_in_base_frame])
             raw_transform_cam_to_base = loaded_transform_cam_to_base.copy()
             break
         elif ans == 'n':
@@ -180,7 +186,8 @@ if __name__ == '__main__':
 
     done_fine_tuning = False
     while not done_fine_tuning:
-        print("Based on the previous visualization, input a translation and an orientation to tune the pose of the point cloud within the world frame:")
+        print(
+            "Based on the previous visualization, input a translation and an orientation to tune the pose of the point cloud within the world frame:")
         x = float(raw_input("X (in meters): "))
         y = float(raw_input("Y (in meters): "))
         z = float(raw_input("Z (in meters): "))
@@ -190,7 +197,7 @@ if __name__ == '__main__':
         translation_extra += np.array([x, y, z])
         orientation_extra += np.array([c, b, a])
         transform_extra_within_base = construct_homogeneous_transform_matrix(translation=translation_extra,
-                                                                                  orientation=orientation_extra)
+                                                                             orientation=orientation_extra)
         fine_tuned_pcd_reference_in_base_frame = dcp(pcd_reference_in_base_frame)
         fine_tuned_pcd_reference_in_base_frame.transform(transform_extra_within_base)
         print("You will now be given a visualization of the raw extrinsics applied to the reference point cloud.")
@@ -200,7 +207,8 @@ if __name__ == '__main__':
             if ans == 'n':
                 done = True
             elif ans == 'y':
-                o3d.visualization.draw_geometries([robot_frame, grip_frame, workspace_bounding_box, fine_tuned_pcd_reference_in_base_frame])
+                o3d.visualization.draw_geometries(
+                    [robot_frame, grip_frame, workspace_bounding_box, fine_tuned_pcd_reference_in_base_frame])
                 done = True
             else:
                 print("Invalid input: ", ans)
@@ -213,8 +221,9 @@ if __name__ == '__main__':
             if ans == 'n':
                 done = False
                 while not done:
-                    ans = raw_input("Reset [r] the point cloud, or Carry [c] on based on the current transformation, or Exit [e]?\n"
-                                    "[r/c/e]: ")
+                    ans = raw_input(
+                        "Reset [r] the point cloud, or Carry [c] on based on the current transformation, or Exit [e]?\n"
+                        "[r/c/e]: ")
                     if ans == 'r':
                         translation_extra = np.array([0.0, 0.0, 0.0])  # XYZ
                         orientation_extra = np.array([0.01, 0.01, 0.01])  # CBA
@@ -246,13 +255,17 @@ if __name__ == '__main__':
                 print("Invalid input: ", ans)
 
     transform_cam_to_base_fine_tuned = np.matmul(transform_extra_within_base, raw_transform_cam_to_base)
-    np.save(os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned'), transform_cam_to_base_fine_tuned)
+    np.save(os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned'),
+            transform_cam_to_base_fine_tuned)
     print("Result file \'transform_cam_to_base_fine_tuned.npy\' has been saved in ../results/")
     transform_base_to_cam_fine_tuned = np.linalg.inv(transform_cam_to_base_fine_tuned)
-    np.save(os.path.join(script_path, '..', 'results', 'transform_base_to_cam_fine_tuned'), transform_base_to_cam_fine_tuned)
+    np.save(os.path.join(script_path, '..', 'results', 'transform_base_to_cam_fine_tuned'),
+            transform_base_to_cam_fine_tuned)
     print("Result file \'transform_base_to_cam_fine_tuned.npy\' has been saved in ../results/")
 
-    o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results', 'pcd_reference_in_world_frame.ply'), fine_tuned_pcd_reference_in_base_frame)
+    o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results', 'pcd_reference_in_world_frame.ply'),
+                             fine_tuned_pcd_reference_in_base_frame)
     print("Result file \'pcd_reference_in_world_frame.ply\' has been saved in ../results/")
-    o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results', 'cropped_pcd_reference_in_world_frame.ply'), cropped)
+    o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results', 'cropped_pcd_reference_in_world_frame.ply'),
+                             cropped)
     print("Result file \'cropped_pcd_reference_in_world_frame.ply\' has been saved in ../results/")

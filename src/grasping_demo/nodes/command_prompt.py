@@ -99,7 +99,7 @@ if __name__ == '__main__':
                     close_smart_servo = True
                 else:
                     print('[INFO]Please **now** shutdown the SmartServo application on Sunrise Cabinet')
-                    rospy.sleep(5)
+                    rospy.sleep(2)
             print('[INFO] Exiting the program...')
             launch_pcd.shutdown()
             launch_controller.shutdown()

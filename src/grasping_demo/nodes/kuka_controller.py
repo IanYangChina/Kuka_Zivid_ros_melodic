@@ -6,25 +6,34 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_output as outputMsg
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inputMsg
+# import quaternion as quat
 
+# radians = quat.as_euler_angles(quat.from_float_array([3.70581696043e-05, 0.0349802761548, 0.999387979507, -4.21177018663e-05]))
+# print(np.rad2deg(radians))
+#
+# q = quat.from_euler_angles(np.deg2rad([45, 180, -45]))
+# print(q)
+# exit()
 
 waiting_pose = PoseStamped()
 waiting_pose.pose.position.x = -0.0
 waiting_pose.pose.position.y = -0.5
 waiting_pose.pose.position.z = 0.5
-waiting_pose.pose.orientation.w = 0.0336096899518
-waiting_pose.pose.orientation.x = 0.735908389091
-waiting_pose.pose.orientation.y = 0.675506496761
-waiting_pose.pose.orientation.z = -0.0316258919216
+# in euler: [-90, 180, 0]
+waiting_pose.pose.orientation.w = 0.0000
+waiting_pose.pose.orientation.x = -0.7071067811
+waiting_pose.pose.orientation.y = 0.7071067811
+waiting_pose.pose.orientation.z = 0.0000
 
 pre_grasping_pose = PoseStamped()
 pre_grasping_pose.pose.position.x = -0.5
 pre_grasping_pose.pose.position.y = -0.0
 pre_grasping_pose.pose.position.z = 0.5
-pre_grasping_pose.pose.orientation.w = 0.0336096899518
-pre_grasping_pose.pose.orientation.x = 0.735908389091
-pre_grasping_pose.pose.orientation.y = 0.675506496761
-pre_grasping_pose.pose.orientation.z = -0.0316258919216
+# in euler: [-90, 180, 0]
+pre_grasping_pose.pose.orientation.w = 0.0000
+pre_grasping_pose.pose.orientation.x = 0.0000
+pre_grasping_pose.pose.orientation.y = 1.0000
+pre_grasping_pose.pose.orientation.z = 0.0000
 
 DISTANCE_THRESHOLD = 0.001
 
@@ -80,6 +89,7 @@ class Controller:
 
     def current_pose_callback(self, data):
         self.current_pose_msg = data
+        # print(data)
         self.current_xyz = np.array([
             data.pose.position.x,
             data.pose.position.y,
