@@ -6,14 +6,7 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_output as outputMsg
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inputMsg
-# import quaternion as quat
 
-# radians = quat.as_euler_angles(quat.from_float_array([3.70581696043e-05, 0.0349802761548, 0.999387979507, -4.21177018663e-05]))
-# print(np.rad2deg(radians))
-#
-# q = quat.from_euler_angles(np.deg2rad([45, 180, -45]))
-# print(q)
-# exit()
 
 waiting_pose = PoseStamped()
 waiting_pose.pose.position.x = -0.0
@@ -89,7 +82,6 @@ class Controller:
 
     def current_pose_callback(self, data):
         self.current_pose_msg = data
-        # print(data)
         self.current_xyz = np.array([
             data.pose.position.x,
             data.pose.position.y,
