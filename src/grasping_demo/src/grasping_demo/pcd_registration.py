@@ -28,9 +28,11 @@ cam_frame.transform(transform_cam_to_base_hand_calibrated)
 # default registration parameters unit: meter
 VOXEL_SIZE = 0.005
 RADIUS_NORMAL = 0.005
-RADIUS_FEATURE = 0.03
+RADIUS_FEATURE = 0.05
 GLOBAL_DISTANCE_THRESHOLD = 0.2
 ICP_REFINE_DISTANCE_THRESHOLD = 0.002
+GLOBAL_REGISTRATION_MAX_ITER = 50
+GLOBAL_REGISTRATION_RMSE_THRESHOLD = 0.008
 
 
 def preprocess_point_cloud(pcd, voxel_size=VOXEL_SIZE, radius_normal=RADIUS_NORMAL, radius_feature=RADIUS_FEATURE):
@@ -45,14 +47,28 @@ def preprocess_point_cloud(pcd, voxel_size=VOXEL_SIZE, radius_normal=RADIUS_NORM
 def execute_fast_global_registration(source_down, target_down, source_fpfh, target_fpfh,
                                      distance_threshold=GLOBAL_DISTANCE_THRESHOLD):
     print("[INFO] Fast global registration with fpfh features")
-    result = o3d.registration.registration_fast_based_on_feature_matching(
-        source=source_down,
-        target=target_down,
-        source_feature=source_fpfh,
-        target_feature=target_fpfh,
-        option=o3d.registration.FastGlobalRegistrationOption(maximum_correspondence_distance=distance_threshold)
-    )
-    return result
+    best_result = o3d.registration.registration_fast_based_on_feature_matching(
+            source=source_down,
+            target=target_down,
+            source_feature=source_fpfh,
+            target_feature=target_fpfh,
+            option=o3d.registration.FastGlobalRegistrationOption(maximum_correspondence_distance=distance_threshold)
+        )
+    n = 0
+    while best_result.inlier_rmse > GLOBAL_REGISTRATION_RMSE_THRESHOLD and n < GLOBAL_REGISTRATION_MAX_ITER:
+        n += 1
+        result = o3d.registration.registration_fast_based_on_feature_matching(
+            source=source_down,
+            target=target_down,
+            source_feature=source_fpfh,
+            target_feature=target_fpfh,
+            option=o3d.registration.FastGlobalRegistrationOption(maximum_correspondence_distance=distance_threshold)
+        )
+        if best_result.inlier_rmse > result.inlier_rmse:
+            best_result = dcp(result)
+        else:
+            continue
+    return best_result
 
 
 def refine_registration(source, target, previous_transformation,
@@ -85,19 +101,24 @@ def get_target_grasp_pose(source_pcd):
     source_pcd_original.transform(transform_cam_to_base_hand_calibrated)
     # copy one to be processed, and crop
     source_pcd_to_process = dcp(source_pcd_original)
-    source_pcd_to_process.crop(workspace_bounding_box)
+    source_pcd_to_process = source_pcd_to_process.crop(workspace_bounding_box)
 
     # pre-processing for registration
     # transform the source pcd to an arbitrary pose far away from the target
     source_pcd_to_process.transform(init_transformation_for_global_registration)
     # compute fpfh
     source_down, source_fpfh = preprocess_point_cloud(source_pcd_to_process)
-    # global
+    # global registration
     result_fast = execute_fast_global_registration(source_down, target_down, source_fpfh, target_fpfh)
     # icp refinement
     result_refine = refine_registration(source_down, target_down, result_fast.transformation)
     # final transformation should includes the initial transformation
     transform_source_to_target = np.matmul(result_refine.transformation, init_transformation_for_global_registration)
+
+    # visualizing registration result
+    # source_pcd_to_visualize = dcp(source_pcd_to_process)
+    # source_pcd_to_visualize.transform(result_refine.transformation)
+    # o3d.visualization.draw_geometries([robot_frame, target, source_pcd_to_visualize])
 
     # visualizing result
     new_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)

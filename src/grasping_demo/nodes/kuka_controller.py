@@ -12,19 +12,21 @@ waiting_pose = PoseStamped()
 waiting_pose.pose.position.x = -0.0
 waiting_pose.pose.position.y = -0.5
 waiting_pose.pose.position.z = 0.5
-waiting_pose.pose.orientation.w = 0.0336096899518
-waiting_pose.pose.orientation.x = 0.735908389091
-waiting_pose.pose.orientation.y = 0.675506496761
-waiting_pose.pose.orientation.z = -0.0316258919216
+# in euler: [-90, 180, 0]
+waiting_pose.pose.orientation.w = 0.0000
+waiting_pose.pose.orientation.x = 0.7071067811
+waiting_pose.pose.orientation.y = 0.7071067811
+waiting_pose.pose.orientation.z = -0.0000
 
 pre_grasping_pose = PoseStamped()
 pre_grasping_pose.pose.position.x = -0.5
 pre_grasping_pose.pose.position.y = -0.0
 pre_grasping_pose.pose.position.z = 0.5
-pre_grasping_pose.pose.orientation.w = 0.0336096899518
-pre_grasping_pose.pose.orientation.x = 0.735908389091
-pre_grasping_pose.pose.orientation.y = 0.675506496761
-pre_grasping_pose.pose.orientation.z = -0.0316258919216
+# in euler: [-90, 180, 0]
+pre_grasping_pose.pose.orientation.w = 0.0000
+pre_grasping_pose.pose.orientation.x = 0.7071067811
+pre_grasping_pose.pose.orientation.y = 0.7071067811
+pre_grasping_pose.pose.orientation.z = -0.0000
 
 DISTANCE_THRESHOLD = 0.001
 
