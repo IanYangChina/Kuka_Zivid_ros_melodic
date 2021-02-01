@@ -2,9 +2,35 @@
 
 import os
 import yaml
+import rospy
+import rosnode
+from geometry_msgs.msg import PoseStamped
 import numpy as np
 import open3d as o3d
 from copy import deepcopy as dcp
+
+
+class KukaStateReader(object):
+    def __init__(self):
+        rospy.init_node('reader_node', anonymous=True)
+        rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
+        self.current_pose_msg = PoseStamped()
+        self.current_xyz = np.array([0.0, 0.0, 0.0])
+        self.current_wxyz = np.array([1.0, 0.0, 0.0, 0.0])
+
+    def current_pose_callback(self, data):
+        self.current_pose_msg = data
+        self.current_xyz = np.array([
+            data.pose.position.x,
+            data.pose.position.y,
+            data.pose.position.z
+        ])
+        self.current_wxyz = np.array([
+            data.pose.orientation.w,
+            data.pose.orientation.x,
+            data.pose.orientation.y,
+            data.pose.orientation.z
+        ])
 
 
 def construct_homogeneous_transform_matrix(translation, orientation):
@@ -14,7 +40,7 @@ def construct_homogeneous_transform_matrix(translation, orientation):
     else:
         assert len(orientation) == 3, 'orientation should be a quaternion or 3 axis angles'
         rotation = np.radians(np.array(orientation).astype("float")).reshape((3, 1))  # CBA in radians
-        rotation = o3d.geometry.get_rotation_matrix_from_axis_angle(rotation)
+        rotation = o3d.geometry.get_rotation_matrix_from_zyx(rotation)
     transformation = np.append(rotation, translation, axis=1)
     transformation = np.append(transformation, np.array([[0, 0, 0, 1]]), axis=0)
     return transformation
@@ -68,7 +94,7 @@ if __name__ == '__main__':
                 break
 
     with open(calibration_result_file) as extrinsics_file:
-        extrinsics = yaml.load(extrinsics_file, Loader=yaml.FullLoader)
+        extrinsics = yaml.load(extrinsics_file)
 
     raw_transform_base_to_cam = construct_homogeneous_transform_matrix(
         translation=[extrinsics['transformation']['x'],
@@ -98,55 +124,62 @@ if __name__ == '__main__':
 
     # Camera frame, transformed into Robot frame using raw extrinsics
     raw_cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-    raw_cam_frame.transform(raw_transform_base_to_cam)
+    cam_frame_in_base = raw_cam_frame.transform(raw_transform_base_to_cam)
 
-    print("Please input the ground truth grasping pose relative to the robot base,\n"
-          "     you can obtain it by manually moving the iiwa robot and check the SmartPad info tag:")
-    while True:
-        ans = raw_input("Do you like to continue? [y/n]: ")
-        if ans == 'n':
-            print("Exiting the program...")
+    ROSSMartServo_on = False
+    while not ROSSMartServo_on:
+        rospy.loginfo('Please make sure you have started the ROSSMartServo application on the Sunrise Cabinet')
+        ans = raw_input(
+            '[USER INPUT] Type [y] and press [enter] if you have started the ROSSMartServo, otherwise exit the program: ')
+        if ans == 'y':
+            if '/iiwa/iiwa_subscriber' in rosnode.get_node_names():
+                ROSSMartServo_on = True
+            else:
+                rospy.loginfo('IIWA topics not detected, check network connection if you have started the SmartServo')
+        else:
+            rospy.loginfo('Exiting the program...')
             exit()
-        elif ans == 'y':
+
+    kuka_state_reader = KukaStateReader()
+    while True:
+        print("The current kuka Cartesian state is xyz: {}, wxyz{}".format(kuka_state_reader.current_xyz, kuka_state_reader.current_wxyz))
+        ans = raw_input(
+            'Is the current pose roughly match the real robot state? [y/n]'
+        )
+        if ans == 'y':
             break
         else:
-            print("Invalid input: ", ans)
-    x = raw_input("X (in meters): ")
-    y = raw_input("Y (in meters): ")
-    z = raw_input("Z (in meters): ")
-    a = raw_input("A (in degree): ")
-    b = raw_input("B (in degree): ")
-    c = raw_input("C (in degree): ")
+            print("Read the pose again.")
 
     # homogeneous transformation matrix from Robot frame to gripper frame
-    # example ref grasping pose: [-0.66257, -0.07707, 0.30143], [-179.00, -1.21, 11.36]
-    transform_base_to_reference_grasp = construct_homogeneous_transform_matrix([x, y, z], [c, b, a])
+    transform_base_to_reference_grasp = construct_homogeneous_transform_matrix(kuka_state_reader.current_xyz,
+                                                                               kuka_state_reader.current_wxyz)
     np.save(os.path.join(script_path, '..', 'results', 'transform_base_to_reference_grasp'),
             transform_base_to_reference_grasp)
     print("Result file \'transform_base_to_reference_grasp.npy\' has been saved in ../results/")
     # Gripper pose in robot frame
     grip_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-    grip_frame.transform(transform_base_to_reference_grasp)
+    grip_frame = grip_frame.transform(transform_base_to_reference_grasp)
 
-    print("You will now be given a visualization of the raw extrinsics applied to the reference point cloud.\n"
+    pcd_reference_in_base_frame = dcp(original_pcd_reference_in_cam_frame)
+    pcd_reference_in_base_frame = pcd_reference_in_base_frame.transform(raw_transform_cam_to_base)
+    print("You can view the visualization of the raw extrinsics applied to the reference point cloud.\n"
           "Feel free to use your mouse the rotate and zoom in/out the pcd.\n"
           "If the easy_handeye calibration result is decent, you can expect the robot base and grasp pose frames to"
           "be at the roughly correctly positions, if not exactly so.")
     while True:
         ans = raw_input("View the raw calibration result? [y/n]: ")
         if ans == 'n':
-            print("Exiting the program...")
-            exit()
+            break
         elif ans == 'y':
+            o3d.visualization.draw_geometries(
+                [robot_frame, grip_frame, cam_frame_in_base, workspace_bounding_box, pcd_reference_in_base_frame])
             break
         else:
             print("Invalid input: ", ans)
-    pcd_reference_in_base_frame = dcp(original_pcd_reference_in_cam_frame)
-    pcd_reference_in_base_frame.transform(raw_transform_cam_to_base)
-    o3d.visualization.draw_geometries([robot_frame, grip_frame, workspace_bounding_box, pcd_reference_in_base_frame])
 
     while True:
-        ans = raw_input("Would like to start the fine-tuning process? [y/n]: ")
+        ans = raw_input("Would you like to start the fine-tuning process? [y/n]: ")
         if ans == 'n':
             print("Exiting the program...")
             exit()
@@ -167,17 +200,21 @@ if __name__ == '__main__':
                 exit()
             loaded_transform_cam_to_base = np.load(
                 os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned.npy'))
+            loaded_transfor_base_to_cam = np.load(
+                os.path.join(script_path, '..', 'results', 'transform_base_to_cam_fine_tuned.npy'))
 
             pcd_reference_in_base_frame = dcp(original_pcd_reference_in_cam_frame)
             pcd_reference_in_base_frame.transform(loaded_transform_cam_to_base)
-            print("You will now be given a visualization of the raw extrinsics applied to the reference point cloud.")
-            ans = raw_input("View the loaded transformation result? [y/n]: ")
-            if ans != 'y':
-                print("Exiting the program...")
-                exit()
-            o3d.visualization.draw_geometries(
-                [robot_frame, grip_frame, workspace_bounding_box, pcd_reference_in_base_frame])
+            # Camera frame, transformed into Robot frame using loaded extrinsics
+            raw_cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+            cam_frame_in_base = raw_cam_frame.transform(loaded_transfor_base_to_cam)
+
             raw_transform_cam_to_base = loaded_transform_cam_to_base.copy()
+            print("You can now view the visualization of the raw extrinsics applied to the reference point cloud.")
+            ans = raw_input("View the loaded transformation result? [y/n]: ")
+            if ans == 'y':
+                o3d.visualization.draw_geometries(
+                    [robot_frame, grip_frame, cam_frame_in_base, workspace_bounding_box, pcd_reference_in_base_frame])
             break
         elif ans == 'n':
             break
@@ -200,6 +237,13 @@ if __name__ == '__main__':
                                                                              orientation=orientation_extra)
         fine_tuned_pcd_reference_in_base_frame = dcp(pcd_reference_in_base_frame)
         fine_tuned_pcd_reference_in_base_frame.transform(transform_extra_within_base)
+
+        transform_cam_to_base_fine_tuned = np.matmul(transform_extra_within_base, raw_transform_cam_to_base)
+        transform_base_to_cam_fine_tuned = np.linalg.inv(transform_cam_to_base_fine_tuned)
+        # Camera frame, transformed into Robot frame using loaded extrinsics
+        raw_cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+        cam_frame_in_base = raw_cam_frame.transform(transform_base_to_cam_fine_tuned)
+
         print("You will now be given a visualization of the raw extrinsics applied to the reference point cloud.")
         done = False
         while not done:
@@ -208,7 +252,7 @@ if __name__ == '__main__':
                 done = True
             elif ans == 'y':
                 o3d.visualization.draw_geometries(
-                    [robot_frame, grip_frame, workspace_bounding_box, fine_tuned_pcd_reference_in_base_frame])
+                    [robot_frame, grip_frame, cam_frame_in_base, workspace_bounding_box, fine_tuned_pcd_reference_in_base_frame])
                 done = True
             else:
                 print("Invalid input: ", ans)
@@ -242,7 +286,7 @@ if __name__ == '__main__':
                 while not done_crop:
                     ans = raw_input("Crop and view the point cloud using the green bounding box? [y/n]: ")
                     if ans == 'y':
-                        o3d.visualization.draw_geometries([robot_frame, grip_frame, workspace_bounding_box, cropped])
+                        o3d.visualization.draw_geometries([robot_frame, grip_frame, cam_frame_in_base, workspace_bounding_box, cropped])
                         done_crop = True
                     elif ans == 'n':
                         done_crop = True

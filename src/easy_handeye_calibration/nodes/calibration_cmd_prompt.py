@@ -38,7 +38,6 @@ if __name__ == '__main__':
 
     calibration_result_file = os.path.join(os.getenv('HOME'), '.ros/easy_handeye/my_eye_on_base.yaml')
 
-    # todo: this loop condition is not the most appropriate, better using ros node info...
     file_ind = 0
     while rosgraph.is_master_online():
         rospy.sleep(2)
@@ -47,7 +46,7 @@ if __name__ == '__main__':
         if os.path.exists(calibration_result_file):
             if not os.path.exists(os.path.join(script_path, '..', 'results')):
                 os.mkdir(os.path.join(script_path, '..', 'results'))
-            shutil.move(calibration_result_file, os.path.join(script_path, '..', 'results', 'Extrinsics'+str(file_ind)+'.yaml'))
+            shutil.move(calibration_result_file, os.path.join(script_path, '..', 'results', 'Extrinsics_'+str(file_ind)+'.yaml'))
             file_ind += 1
 
     launch_tracking.shutdown()

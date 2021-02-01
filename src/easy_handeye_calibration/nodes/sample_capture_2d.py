@@ -19,8 +19,8 @@ if not os.path.exists(os.path.join(script_path, '..', 'src', 'Intrinsics.yml')):
                   "see https://github.com/zivid/zivid-cpp-samples/blob/master/source/Camera/InfoUtilOther/GetCameraIntrinsics/GetCameraIntrinsics.cpp"
                   .format(os.path.join(script_path, '..', 'src', 'intrinsics.yml')))
 
-with open(os.path.join(script_path, '..', 'src', 'intrinsics.yml')) as intrinsics_file:
-    intrinsics = yaml.load(intrinsics_file, Loader=yaml.FullLoader)
+with open(os.path.join(script_path, '..', 'src', 'Intrinsics.yml')) as intrinsics_file:
+    intrinsics = yaml.load(intrinsics_file)
 
 intrinsics = intrinsics['CameraIntrinsics']
 # zivid build-in camera matrix
