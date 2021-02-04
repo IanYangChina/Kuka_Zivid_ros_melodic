@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     # Camera frame, transformed into Robot frame using raw extrinsics
     raw_cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-    cam_frame_in_base = raw_cam_frame.transform(raw_transform_base_to_cam)
+    cam_frame_in_base = raw_cam_frame.transform(raw_transform_cam_to_base)
 
     ROSSMartServo_on = False
     while not ROSSMartServo_on:
@@ -200,14 +200,12 @@ if __name__ == '__main__':
                 exit()
             loaded_transform_cam_to_base = np.load(
                 os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned.npy'))
-            loaded_transfor_base_to_cam = np.load(
-                os.path.join(script_path, '..', 'results', 'transform_base_to_cam_fine_tuned.npy'))
 
             pcd_reference_in_base_frame = dcp(original_pcd_reference_in_cam_frame)
             pcd_reference_in_base_frame.transform(loaded_transform_cam_to_base)
             # Camera frame, transformed into Robot frame using loaded extrinsics
             raw_cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-            cam_frame_in_base = raw_cam_frame.transform(loaded_transfor_base_to_cam)
+            cam_frame_in_base = raw_cam_frame.transform(loaded_transform_cam_to_base)
 
             raw_transform_cam_to_base = loaded_transform_cam_to_base.copy()
             print("You can now view the visualization of the raw extrinsics applied to the reference point cloud.")
@@ -239,10 +237,9 @@ if __name__ == '__main__':
         fine_tuned_pcd_reference_in_base_frame.transform(transform_extra_within_base)
 
         transform_cam_to_base_fine_tuned = np.matmul(transform_extra_within_base, raw_transform_cam_to_base)
-        transform_base_to_cam_fine_tuned = np.linalg.inv(transform_cam_to_base_fine_tuned)
         # Camera frame, transformed into Robot frame using loaded extrinsics
         raw_cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-        cam_frame_in_base = raw_cam_frame.transform(transform_base_to_cam_fine_tuned)
+        cam_frame_in_base = raw_cam_frame.transform(raw_transform_cam_to_base)
 
         print("You will now be given a visualization of the raw extrinsics applied to the reference point cloud.")
         done = False

@@ -11,6 +11,12 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 transform_base_to_cam_hand_calibrated = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
 transform_cam_to_base_hand_calibrated = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_cam_to_base_fine_tuned.npy'))
 transform_base_to_reference_grasp = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_base_to_reference_grasp.npy'))
+identity_transform = np.array([
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1],
+])
 
 # load and create a bounding box
 workspace_bounding_box_array = np.load(os.path.join(script_dir, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
@@ -36,7 +42,9 @@ GLOBAL_REGISTRATION_RMSE_THRESHOLD = 0.008
 
 
 def preprocess_point_cloud(pcd, voxel_size=VOXEL_SIZE, radius_normal=RADIUS_NORMAL, radius_feature=RADIUS_FEATURE):
-    pcd_down = pcd.voxel_down_sample(voxel_size)
+    cl, ind = pcd.remove_statistical_outlier(nb_neighbors=20, std_ratio=4.0)
+    pcd_inliners = pcd.select_down_sample(ind)
+    pcd_down = pcd_inliners.voxel_down_sample(voxel_size)
     pcd_down.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=100))
     pcd_fpfh = o3d.registration.compute_fpfh_feature(
         input=pcd_down,
@@ -82,13 +90,13 @@ def refine_registration(source, target, previous_transformation,
 
 # load, preprocess target point cloud (one with a reference grasp)
 target = o3d.io.read_point_cloud(os.path.join(script_dir, 'reference_grasp', 'cropped_pcd_reference_in_world_frame.ply'))
-# into robot frame
-target.transform(transform_cam_to_base_hand_calibrated)
+
 target.paint_uniform_color([0.6, 0.6, 0.6])
 # compute fpfh
 target_down, target_fpfh = preprocess_point_cloud(target)
-# a transformation to move the source pcd away from the target
-init_transformation_for_global_registration = transform_base_to_cam_hand_calibrated.copy()
+
+# use an identity transformation as the initial transform that moves the source pcd away from the target
+init_transformation_for_global_registration = identity_transform.copy()
 
 # PoseStamped msg
 pose_msg = PoseStamped()
@@ -97,8 +105,9 @@ pose_msg = PoseStamped()
 def get_target_grasp_pose(source_pcd):
     # copy the source pcd and transform into robot frame
     source_pcd_original = dcp(source_pcd)
-    # source_pcd_original.paint_uniform_color([0, 0, 1])
     source_pcd_original.transform(transform_cam_to_base_hand_calibrated)
+    # o3d.visualization.draw_geometries([robot_frame, cam_frame, target, workspace_bounding_box, source_pcd_original])
+
     # copy one to be processed, and crop
     source_pcd_to_process = dcp(source_pcd_original)
     source_pcd_to_process = source_pcd_to_process.crop(workspace_bounding_box)
@@ -119,6 +128,13 @@ def get_target_grasp_pose(source_pcd):
     # source_pcd_to_visualize = dcp(source_pcd_to_process)
     # source_pcd_to_visualize.transform(result_refine.transformation)
     # o3d.visualization.draw_geometries([robot_frame, target, source_pcd_to_visualize])
+
+    # raw_target = o3d.io.read_point_cloud(os.path.join(script_dir, 'reference_grasp', 'cropped_pcd_reference_in_world_frame_merged.ply'))
+    # raw_target.paint_uniform_color([0.6, 0.6, 0.6])
+    # raw_source = dcp(source_pcd_original)
+    # raw_source = raw_source.crop(workspace_bounding_box)
+    # raw_source.transform(transform_source_to_target)
+    # o3d.visualization.draw_geometries([robot_frame, raw_target, raw_source])
 
     # visualizing result
     new_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
@@ -145,6 +161,6 @@ def get_target_grasp_pose(source_pcd):
     return pose
 
 
-# for i in ['0', '1', '2', '3', '4']:
-#     source_original = o3d.io.read_point_cloud(os.path.join(script_dir, '..', '..', '..', 'test', 'objects', 'pcl_part', 'part_xyz_'+i+'.ply'))
+# for i in ['0', '1', '2', '3', '4', '5']:
+#     source_original = o3d.io.read_point_cloud(os.path.join(script_dir, '..', '..', '..', 'easy_handeye_calibration', 'src', 'pcd_reference_'+i+'.ply'))
 #     get_target_grasp_pose(source_original)
