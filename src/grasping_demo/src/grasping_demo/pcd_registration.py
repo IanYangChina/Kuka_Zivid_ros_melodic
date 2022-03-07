@@ -20,6 +20,11 @@ identity_transform = np.array([
 
 # load and create a bounding box
 workspace_bounding_box_array = np.load(os.path.join(script_dir, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
+workspace_bounding_box_array[4][-1] += 0.005
+workspace_bounding_box_array[5][-1] += 0.005
+workspace_bounding_box_array[6][-1] += 0.005
+workspace_bounding_box_array[7][-1] += 0.005
+
 workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float64'))
 workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
 workspace_bounding_box.color = (0, 1, 0)
@@ -32,11 +37,11 @@ cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
 cam_frame.transform(transform_cam_to_base_hand_calibrated)
 
 # default registration parameters unit: meter
-VOXEL_SIZE = 0.005
-RADIUS_NORMAL = 0.005
-RADIUS_FEATURE = 0.05
-GLOBAL_DISTANCE_THRESHOLD = 0.2
-ICP_REFINE_DISTANCE_THRESHOLD = 0.002
+VOXEL_SIZE = 0.01
+RADIUS_NORMAL = 0.01
+RADIUS_FEATURE = 0.02
+GLOBAL_DISTANCE_THRESHOLD = 0.5
+ICP_REFINE_DISTANCE_THRESHOLD = 0.005
 GLOBAL_REGISTRATION_MAX_ITER = 50
 GLOBAL_REGISTRATION_RMSE_THRESHOLD = 0.008
 

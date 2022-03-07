@@ -60,8 +60,9 @@ if __name__ == '__main__':
         ans = raw_input(
             "This program will walk you through a fine-tuning process of the extrinsics found by easy_handeye calibration.\n"
             "You must complete the following 2 steps before starting the fine-tuning process:\n"
-            "- 1. Finish extrinsic calibration by running \'rosrun easy_handeye_valibration calibration_cmd_prompt.py.\'\n"
-            "- 2. Capture a point cloud of a reference object and obtain a ground truth grasping pose in the robot base frame.\n"
+            "- 1. Finish extrinsic calibration by running \'rosrun easy_handeye_calibration calibration_cmd_prompt.py.\'\n"
+            "- 2. Capture a point cloud of a reference object by running \'rosrun easy_handeye_calibration sample_pcd.py.\n"
+            "- 3. move the robot arm to a grasping pose w.r.t. the object pcd."
             "For detailed instruction of doing the above mentioned 2 steps, "
             "see: https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye\n"
             "Have you done these 2 steps? [y/n]: ")
@@ -144,7 +145,7 @@ if __name__ == '__main__':
     while True:
         print("The current kuka Cartesian state is xyz: {}, wxyz{}".format(kuka_state_reader.current_xyz, kuka_state_reader.current_wxyz))
         ans = raw_input(
-            'Is the current pose roughly match the real robot state? [y/n]'
+            'Check the Kuka control pad. Is the current grasping pose roughly match the real robot state? [y/n]'
         )
         if ans == 'y':
             break

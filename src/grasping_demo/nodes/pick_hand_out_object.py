@@ -2,10 +2,8 @@
 
 import rospy
 import numpy as np
-from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_output as outputMsg
-from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inputMsg
 
 
 waiting_pose = PoseStamped()
@@ -61,16 +59,7 @@ pressing_pose.pose.orientation.w = 0.00953900605526
 pressing_pose.pose.orientation.x = 0.967279732227
 pressing_pose.pose.orientation.y = -0.0367599970468
 pressing_pose.pose.orientation.z = 0.250853705463
-# pose:
-#   position:
-#     x: 0.705049119727
-#     y: -0.0292547032143
-#     z: 0.272995606656
-#   orientation:
-#     x: 0.967279732227
-#     y: -0.0367599970468
-#     z: 0.250853705463
-#     w: -0.00953900605526
+
 DISTANCE_THRESHOLD = 0.001
 
 gripper_activation = outputMsg.Robotiq2FGripper_robot_output()
@@ -104,11 +93,8 @@ class Controller:
     def __init__(self):
         rospy.init_node('controller_node', anonymous=True)
         rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
-        rospy.Subscriber('TargetGraspPose', PoseStamped, callback=self.target_pose_callback)
-        rospy.Subscriber('Robotiq2FGripperRobotIutput', inputMsg.Robotiq2FGripper_robot_input, callback=self.gripper_msg)
         self.pub_move_cmd = rospy.Publisher('/iiwa/command/CartesianPose', PoseStamped, queue_size=2)
         self.pub_gripper_cmd = rospy.Publisher('Robotiq2FGripperRobotOutput', outputMsg.Robotiq2FGripper_robot_output, queue_size=2)
-        self.pub_attempt_finished = rospy.Publisher('AttemptFinished', Bool, queue_size=2)
         self.current_pose_msg = PoseStamped()
         self.current_xyz = np.array([0.0, 0.0, 0.0])
         self.current_header_seq = 0
@@ -122,13 +108,13 @@ class Controller:
         self.publish_pose(pre_grasping_pose)
         self.publish_pose(picking_1_pose)
         while True:
-            open_grip = raw_input("Close gripper?")
+            open_grip = raw_input("Close gripper? [y/n]")
             if open_grip == 'y':
                 self.publish_grip_cmd(gripper_close)
                 break
         self.publish_pose(handing_out_pose)
         while True:
-            open_grip = raw_input("Open gripper?")
+            open_grip = raw_input("Open gripper? [y/n]")
             if open_grip == 'y':
                 self.publish_grip_cmd(gripper_open)
                 break
@@ -136,20 +122,20 @@ class Controller:
         self.publish_pose(pressing_pose)
 
         while True:
-            open_grip = raw_input("Next pick?")
+            open_grip = raw_input("Next pick? [y/n]")
             if open_grip == 'y':
                 self.publish_grip_cmd(gripper_open)
                 self.publish_pose(pre_grasping_pose)
                 break
         self.publish_pose(picking_2_pose)
         while True:
-            open_grip = raw_input("Close gripper?")
+            open_grip = raw_input("Close gripper? [y/n]")
             if open_grip == 'y':
                 self.publish_grip_cmd(gripper_close)
                 break
         self.publish_pose(handing_out_pose)
         while True:
-            open_grip = raw_input("Open gripper?")
+            open_grip = raw_input("Open gripper? [y/n]")
             if open_grip == 'y':
                 self.publish_grip_cmd(gripper_open)
                 break
@@ -157,15 +143,12 @@ class Controller:
         self.publish_pose(pressing_pose)
 
         while True:
-            open_grip = raw_input("Done?")
+            open_grip = raw_input("Done? [y/n]")
             if open_grip == 'y':
                 self.publish_grip_cmd(gripper_open)
                 self.publish_pose(pre_grasping_pose)
                 break
         self.publish_pose(waiting_pose)
-
-    def gripper_msg(self, data):
-        pass
 
     def current_pose_callback(self, data):
         self.current_pose_msg = data
@@ -175,38 +158,6 @@ class Controller:
             data.pose.position.z
         ])
         self.current_header_seq = data.header.seq
-
-    def target_pose_callback(self, data):
-        # Bool ros msg to inform the prompt program
-        attempt_finished = Bool()
-        attempt_finished.data = False
-        rospy.loginfo('Received a target pose, publishing to the kuka robot...')
-        # move the robot towards the object
-        self.publish_pose(pre_grasping_pose)
-        self.publish_pose(data)
-        # close the gripper
-        self.publish_grip_cmd(gripper_close)
-
-        ans = raw_input("[USER INPUT] Would you like to grasp and lift the object? [y/n]")
-        if ans == 'y':
-
-            # lift the object up for 0.1 meters
-            rospy.loginfo('Lifting the object...')
-            self.publish_pose(pre_grasping_pose)
-
-            # put down the object
-            rospy.loginfo('Placing back the object...')
-            self.publish_pose(data)
-
-        # release the gripper fingers
-        self.publish_grip_cmd(gripper_open)
-
-        rospy.loginfo("Move gripper to waiting pose...")
-        self.publish_pose(pre_grasping_pose)
-        self.publish_pose(waiting_pose)
-        attempt_finished.data = True
-        rospy.sleep(0.5)
-        self.pub_attempt_finished.publish(attempt_finished)
 
     def publish_pose(self, data):
         # record target xyz for distance tracking

@@ -11,6 +11,10 @@ transform_base_to_reference_grasp = np.load(os.path.join(cwd, 'transformation_ma
 
 # load a bounding box and transform it into cam frame
 workspace_bounding_box_array = np.load(os.path.join(cwd, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
+workspace_bounding_box_array[4][-1] += 0.005
+workspace_bounding_box_array[5][-1] += 0.005
+workspace_bounding_box_array[6][-1] += 0.005
+workspace_bounding_box_array[7][-1] += 0.005
 # workspace_bounding_box_array = np.transpose(workspace_bounding_box_array)
 # ones = np.ones(workspace_bounding_box_array.shape[1]).reshape((1, workspace_bounding_box_array.shape[1]))
 # workspace_bounding_box_array = np.append(workspace_bounding_box_array, ones, axis=0)
@@ -33,24 +37,24 @@ reference_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0
 reference_grasp_frame.transform(transform_base_to_reference_grasp)
 # reference_grasp_frame.transform(transform_base_to_cam_fine_tuned)
 
-pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', '..', 'easy_handeye_calibration', 'results_20210201', 'pcd_reference.ply'))
-pcd.transform(transform_cam_to_base_fine_tuned)
-o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, pcd, workspace_bounding_box])
-exit()
+# pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', '..', 'easy_handeye_calibration', 'results', 'pcd_reference.ply'))
+# pcd.transform(transform_cam_to_base_fine_tuned)
+# o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, pcd, workspace_bounding_box])
+# exit()
 
-# for i in ['0', '1', '2', '3', '4']:
-#     pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'part_xyz_'+i+'.ply'))
+# for i in ['1', '2', '3', '4', '5', '6']:
+#     pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'pcd_reference_'+i+'.ply'))
+#     pcd.transform(transform_cam_to_base_fine_tuned)
 #     o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, pcd, workspace_bounding_box])
 #     cropped = pcd.crop(workspace_bounding_box)
 #     o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, cropped, workspace_bounding_box])
-#     o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'part_xyz_'+i+'_crop.ply'), cropped)
-#
-#     pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'part_xyz_'+i+'_crop.ply'))
-#     o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, pcd, workspace_bounding_box])
+#     o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'pcd_reference_'+i+'_crop.ply'), cropped)
 
-# pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference.ply'))
-# o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, pcd, workspace_bounding_box])
-# cropped = pcd.crop(workspace_bounding_box)
-# bounding_box = cropped.get_axis_aligned_bounding_box()
-# o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, cropped, workspace_bounding_box, bounding_box])
-# o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_crop.ply'), cropped)
+pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_merged_inlier.ply'))
+o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, pcd, workspace_bounding_box])
+new_pcd, ind = pcd.remove_statistical_outlier(nb_neighbors=100, std_ratio=0.4)
+# new_pcd, ind = pcd.remove_radius_outlier(nb_points=100, radius=0.05)
+cropped = new_pcd.crop(workspace_bounding_box)
+bounding_box = cropped.get_axis_aligned_bounding_box()
+o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, cropped, workspace_bounding_box, bounding_box])
+o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_merged_inlier.ply'), cropped)

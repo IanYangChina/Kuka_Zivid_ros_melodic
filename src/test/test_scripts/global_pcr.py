@@ -35,11 +35,15 @@ def refine_registration(source, target, previous_transformation, distance_thresh
 
 cwd = os.getcwd()
 # load hand-calibrated transformation matrices
-transform_base_to_cam_hand_calibrated = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_hand_calibrated.npy'))
+transform_base_to_cam_hand_calibrated = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
 transform_base_to_reference_grasp = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_reference_grasp.npy'))
 # create a robot frame and transform into cam frame
 robot_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-robot_frame.transform(transform_base_to_cam_hand_calibrated)
+cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+cam_frame.transform(transform_base_to_cam_hand_calibrated)
+# Robot frame, transformed into gripper frame
+grip_frame_original = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+grip_frame_original.transform(transform_base_to_reference_grasp)
 
 # registration parameters unit: meter
 voxel_size = 0.01
@@ -48,15 +52,16 @@ radius_feature = 0.2
 distance_threshold = 0.5
 
 # load, preprocess target point cloud (one with a reference grasp)
-target = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_merged.ply'))
+target = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_merged_inlier.ply'))
 target.paint_uniform_color([0, 0, 1])
 target_down, target_fpfh = preprocess_point_cloud(target, voxel_size=voxel_size, radius_normal=radius_normal, radius_feature=radius_feature)
 target_down.paint_uniform_color([0, 0, 1])
 
 print(":: Load two point clouds and disturb initial pose.")
-source_original = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'part_xyz_4_crop.ply'))
+index_source_pcd = '4'
+source_original = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'pcd_reference_'+index_source_pcd+'_crop.ply'))
 source_original.paint_uniform_color([1, 0, 0])
-o3d.visualization.draw_geometries([robot_frame, target, source_original])
+o3d.visualization.draw_geometries([robot_frame, grip_frame_original, cam_frame, target, source_original])
 
 source = copy.deepcopy(source_original)
 # transform the source pcd to an arbitrary pose far away from the target
@@ -79,12 +84,10 @@ source_after_icp_refinement = copy.deepcopy(source_original)
 source_after_icp_refinement.transform(result_transform)
 source_after_icp_refinement.paint_uniform_color([1, 0, 1])
 
-# Robot frame, transformed into gripper frame
-grip_frame_original = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-grip_frame_original.transform(transform_base_to_reference_grasp)
-grip_frame_original.transform(transform_base_to_cam_hand_calibrated)
-
 grip_frame = copy.deepcopy(grip_frame_original)
 result_transform_inv = np.linalg.inv(result_transform)
 grip_frame.transform(result_transform_inv)
-o3d.visualization.draw_geometries([robot_frame, grip_frame, grip_frame_original, source_original, target, source_after_icp_refinement])
+
+o3d.visualization.draw_geometries([robot_frame, grip_frame, cam_frame, grip_frame_original, source_original, target, source_after_icp_refinement])
+
+# o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'pcd_reference_'+index_source_pcd+'_crop_registered.ply'), source_after_icp_refinement)

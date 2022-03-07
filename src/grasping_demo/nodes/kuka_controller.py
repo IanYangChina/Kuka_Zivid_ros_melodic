@@ -10,8 +10,8 @@ from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inp
 
 waiting_pose = PoseStamped()
 waiting_pose.pose.position.x = -0.0
-waiting_pose.pose.position.y = -0.5
-waiting_pose.pose.position.z = 0.5
+waiting_pose.pose.position.y = -0.55
+waiting_pose.pose.position.z = 0.6
 # in euler: [-90, 180, 0]
 waiting_pose.pose.orientation.w = 0.0000
 waiting_pose.pose.orientation.x = -0.7071067811
@@ -19,9 +19,9 @@ waiting_pose.pose.orientation.y = 0.7071067811
 waiting_pose.pose.orientation.z = 0.0000
 
 pre_grasping_pose = PoseStamped()
-pre_grasping_pose.pose.position.x = -0.5
+pre_grasping_pose.pose.position.x = -0.55
 pre_grasping_pose.pose.position.y = -0.0
-pre_grasping_pose.pose.position.z = 0.5
+pre_grasping_pose.pose.position.z = 0.6
 # in euler: [-90, 180, 0]
 pre_grasping_pose.pose.orientation.w = 0.0000
 pre_grasping_pose.pose.orientation.x = 0.0000

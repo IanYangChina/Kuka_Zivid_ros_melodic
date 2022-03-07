@@ -49,7 +49,7 @@ class Sample:
 
         rospy.Subscriber("/zivid_camera/color/image_color", Image, self.on_image_color)
 
-        self.image_pub = rospy.Publisher("/zivid_camera/color/undistorted_image_color", Image)
+        self.image_pub = rospy.Publisher("/zivid_camera/color/undistorted_image_color", Image, queue_size=10)
 
         self.capture_2d_service = rospy.ServiceProxy(
             "/zivid_camera/capture_2d", Capture2D
