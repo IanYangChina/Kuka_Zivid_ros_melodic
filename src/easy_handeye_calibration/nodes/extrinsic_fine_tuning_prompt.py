@@ -143,7 +143,8 @@ if __name__ == '__main__':
 
     kuka_state_reader = KukaStateReader()
     while True:
-        print("The current kuka Cartesian state is xyz: {}, wxyz{}".format(kuka_state_reader.current_xyz, kuka_state_reader.current_wxyz))
+        print("The current kuka Cartesian state is xyz: {}, wxyz{}".format(kuka_state_reader.current_xyz,
+                                                                           kuka_state_reader.current_wxyz))
         ans = raw_input(
             'Check the Kuka control pad. Is the current grasping pose roughly match the real robot state? [y/n]'
         )
@@ -250,7 +251,8 @@ if __name__ == '__main__':
                 done = True
             elif ans == 'y':
                 o3d.visualization.draw_geometries(
-                    [robot_frame, grip_frame, cam_frame_in_base, workspace_bounding_box, fine_tuned_pcd_reference_in_base_frame])
+                    [robot_frame, grip_frame, cam_frame_in_base, workspace_bounding_box,
+                     fine_tuned_pcd_reference_in_base_frame])
                 done = True
             else:
                 print("Invalid input: ", ans)
@@ -284,7 +286,8 @@ if __name__ == '__main__':
                 while not done_crop:
                     ans = raw_input("Crop and view the point cloud using the green bounding box? [y/n]: ")
                     if ans == 'y':
-                        o3d.visualization.draw_geometries([robot_frame, grip_frame, cam_frame_in_base, workspace_bounding_box, cropped])
+                        o3d.visualization.draw_geometries(
+                            [robot_frame, grip_frame, cam_frame_in_base, workspace_bounding_box, cropped])
                         done_crop = True
                     elif ans == 'n':
                         done_crop = True
@@ -311,3 +314,13 @@ if __name__ == '__main__':
     o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results', 'cropped_pcd_reference_in_world_frame.ply'),
                              cropped)
     print("Result file \'cropped_pcd_reference_in_world_frame.ply\' has been saved in ../results/")
+
+    close_smart_servo = False
+    while not close_smart_servo:
+        if not ('/iiwa/iiwa_subscriber' in rosnode.get_node_names()):
+            close_smart_servo = True
+        else:
+            print('[INFO]Please **now** shutdown the SmartServo application on Sunrise Cabinet')
+            rospy.sleep(2)
+    print('[INFO] Exiting the program...')
+    exit()

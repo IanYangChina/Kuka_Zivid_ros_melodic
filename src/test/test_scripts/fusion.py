@@ -15,18 +15,18 @@ robot_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
 grip_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
 grip_frame.transform(transform_base_to_reference_grasp)
 
-source = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_merged.ply'))
-# merged_1.transform(transform_cam_to_base_hand_calibrated)
+source = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'sprayer_ref_grasp', 'pcd_reference_merged.ply'))
+# source.transform(transform_cam_to_base_hand_calibrated)
 # source.paint_uniform_color([1, 0, 0])
 
-to_merge = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'pcl_part', 'pcd_reference_4_crop_registered.ply'))
+to_merge = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'sprayer', 'pcd_reference_1_crop_registered.ply'))
 # merged_2.transform(transform_cam_to_base_hand_calibrated)
 # to_merge.paint_uniform_color([0, 1, 1])
 
 o3d.visualization.draw_geometries([robot_frame, grip_frame, source, to_merge])
 
 merged = source + to_merge
-o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_merged.ply'), merged)
+o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', 'sprayer_ref_grasp', 'part_reference_merged.ply'), merged)
 
-pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_merged.ply'))
-o3d.visualization.draw_geometries([robot_frame, grip_frame, pcd])
+# pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'part_reference_merged.ply'))
+# o3d.visualization.draw_geometries([robot_frame, grip_frame, pcd])

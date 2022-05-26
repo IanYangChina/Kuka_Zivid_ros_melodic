@@ -5,7 +5,7 @@ import ros_numpy
 import open3d as o3d
 from std_msgs.msg import Bool
 from sensor_msgs.msg import PointCloud2
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, PoseArray
 from grasping_demo.pcd_registration import get_target_grasp_pose
 
 
@@ -15,6 +15,7 @@ class PcdProcessing:
         rospy.loginfo("Starting pcd_processing_node")
         rospy.Subscriber("/zivid_camera/points/xyzrgba", PointCloud2, self.on_points, queue_size=2)
         self.target_pose_pub = rospy.Publisher('TargetGraspPose', PoseStamped, queue_size=2)
+        self.target_poses_pub = rospy.Publisher('TargetGraspPoses', PoseArray, queue_size=2)
         self.pub_attempt_finished = rospy.Publisher('AttemptFinished', Bool, queue_size=2)
 
     def on_points(self, data):
@@ -29,11 +30,11 @@ class PcdProcessing:
 
         done = False
         while not done:
-            pose = get_target_grasp_pose(pcd_raw)
+            poses = get_target_grasp_pose(pcd_raw)
             ans = raw_input("[USER INPUT] Is the generated grasping pose satisfactory? [y/n]")
             if ans == 'y':
                 rospy.sleep(1)
-                self.target_pose_pub.publish(pose)
+                self.target_poses_pub.publish(poses)
                 rospy.loginfo("Publish the generated grasp pose to be executed by the robot...")
                 done = True
             else:
