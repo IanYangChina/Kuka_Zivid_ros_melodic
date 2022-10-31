@@ -56,7 +56,7 @@ if __name__ == '__main__':
     ROSSMartServo_on = False
     while not ROSSMartServo_on:
         rospy.loginfo('Please make sure you have started the ROSSMartServo application on the Sunrise Cabinet')
-        ans = raw_input(
+        ans = input(
             '[USER INPUT] Type [y] and press [enter] if you have started the ROSSMartServo, otherwise exit the program: ')
         if ans == 'y':
             if '/iiwa/iiwa_subscriber' in rosnode.get_node_names():
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     rospy.loginfo('Ros communication system has been properly setup')
     while True:
         rospy.loginfo('Start a new grasping attempt')
-        raw_input('[USER INPUT] Place the object within the workspace and press [enter]')
+        input('[USER INPUT] Place the object within the workspace and press [enter]')
         rospy.loginfo('Capture and processing point cloud...')
         capture_helper.attempt_finished = False
         capture_helper.attempt_num_passed += 1
@@ -89,7 +89,7 @@ if __name__ == '__main__':
                 exit()
             rospy.sleep(1)
         rospy.loginfo("Attempt finished")
-        ans = raw_input('[USER INPUT] Would you like to continue with a new object pose? [y/n]')
+        ans = input('[USER INPUT] Would you like to continue with a new object pose? [y/n]')
         if ans == 'y':
             continue
         else:
