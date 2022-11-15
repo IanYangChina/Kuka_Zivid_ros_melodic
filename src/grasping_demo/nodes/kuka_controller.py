@@ -31,19 +31,37 @@ pre_grasping_pose.pose.orientation.x = 0.0000
 pre_grasping_pose.pose.orientation.y = 1.0000
 pre_grasping_pose.pose.orientation.z = 0.0000
 
+part_pre_placing_pose = PoseStamped()
+part_pre_placing_pose.pose.position.x = -0.59
+part_pre_placing_pose.pose.position.y = -0.30
+part_pre_placing_pose.pose.position.z = 0.6
+part_pre_placing_pose.pose.orientation.w = -0.0123448805919
+part_pre_placing_pose.pose.orientation.x = -0.691465195872
+part_pre_placing_pose.pose.orientation.y = 0.722219705582
+part_pre_placing_pose.pose.orientation.z = 0.0110529923381
+
 part_placing_pose = PoseStamped()
 part_placing_pose.pose.position.x = -0.59
 part_placing_pose.pose.position.y = -0.30
-part_placing_pose.pose.position.z = 0.325
+part_placing_pose.pose.position.z = 0.305
 part_placing_pose.pose.orientation.w = -0.0123448805919
 part_placing_pose.pose.orientation.x = -0.691465195872
 part_placing_pose.pose.orientation.y = 0.722219705582
 part_placing_pose.pose.orientation.z = 0.0110529923381
 
+sprayer_pre_placing_pose = PoseStamped()
+sprayer_pre_placing_pose.pose.position.x = -0.5
+sprayer_pre_placing_pose.pose.position.y = 0.2775
+sprayer_pre_placing_pose.pose.position.z = 0.6
+sprayer_pre_placing_pose.pose.orientation.w = -0.00509371623762
+sprayer_pre_placing_pose.pose.orientation.x = 0.704621165094
+sprayer_pre_placing_pose.pose.orientation.y = 0.709524989128
+sprayer_pre_placing_pose.pose.orientation.z = 0.00757522078764
+
 sprayer_placing_pose = PoseStamped()
-sprayer_placing_pose.pose.position.x = -0.63
+sprayer_placing_pose.pose.position.x = -0.5
 sprayer_placing_pose.pose.position.y = 0.2775
-sprayer_placing_pose.pose.position.z = 0.29
+sprayer_placing_pose.pose.position.z = 0.27
 sprayer_placing_pose.pose.orientation.w = -0.00509371623762
 sprayer_placing_pose.pose.orientation.x = 0.704621165094
 sprayer_placing_pose.pose.orientation.y = 0.709524989128
@@ -157,6 +175,10 @@ class Controller:
         ans = raw_input("[USER INPUT] Execute part grasping? [y/n]")
         if ans == 'y':
             self.publish_pose(pre_grasping_pose)
+            pre_grasping_pose_local = dcp(pre_grasping_pose)
+            pre_grasping_pose_local.pose.position.x = data.poses[0].position.x
+            pre_grasping_pose_local.pose.position.y = data.poses[0].position.y
+            self.publish_pose(pre_grasping_pose_local)
             pose = dcp(grasping_pose_msg)
             pose.pose = data.poses[0]
             self.publish_pose(pose)
@@ -167,6 +189,9 @@ class Controller:
                 # lift the object up for 0.1 meters
                 rospy.loginfo('Lifting the object...')
                 self.publish_pose(pre_grasping_pose)
+                # move to pre-placing pose
+                rospy.loginfo('Lifting the object...')
+                self.publish_pose(part_pre_placing_pose)
                 # put down the object
                 rospy.loginfo('Placing back the object...')
                 self.publish_pose(part_placing_pose)
@@ -179,6 +204,10 @@ class Controller:
         ans = raw_input("[USER INPUT] Execute sprayer grasping? [y/n]")
         if ans == 'y':
             self.publish_pose(pre_grasping_pose)
+            pre_grasping_pose_local = dcp(pre_grasping_pose)
+            pre_grasping_pose_local.pose.position.x = data.poses[1].position.x
+            pre_grasping_pose_local.pose.position.y = data.poses[1].position.y
+            self.publish_pose(pre_grasping_pose_local)
             pose = dcp(grasping_pose_msg)
             pose.pose = data.poses[1]
             self.publish_pose(pose)
@@ -189,6 +218,9 @@ class Controller:
                 # lift the object up for 0.1 meters
                 rospy.loginfo('Lifting the object...')
                 self.publish_pose(pre_grasping_pose)
+                # move to pre-placing pose
+                rospy.loginfo('Lifting the object...')
+                self.publish_pose(sprayer_pre_placing_pose)
                 # put down the object
                 rospy.loginfo('Placing back the object...')
                 self.publish_pose(sprayer_placing_pose)
