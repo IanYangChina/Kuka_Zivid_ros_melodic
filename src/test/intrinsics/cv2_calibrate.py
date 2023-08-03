@@ -68,14 +68,14 @@ for fname in images:
 #      [0,   0,   1]]
 # d = [[k1, k2, p1, p2, k3]]
 
-# >> Opencv calibration results
+# >> Opencv calibration results_
 # camera_matrix = np.array(
 #     [2798.91908, 0.00, 1050.47733],
 #     [0.00, 2773.69518, 558.006858],
 #     [0.00, 0.00, 1.00])
 # distortion_coef = np.array([-0.24632269, -0.11917342, 0.00425248, 0.00420812, 1.62705478])
 
-# >> Visp calibration results
+# >> Visp calibration results_
 # camera_matrix = np.array([
 #     [2747.785993, 0.0, 1008.464956],
 #     [0.0, 2737.721711, 598.176104],

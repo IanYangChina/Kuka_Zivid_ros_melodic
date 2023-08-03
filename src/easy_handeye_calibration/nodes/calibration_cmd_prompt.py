@@ -23,7 +23,7 @@ if __name__ == '__main__':
         ans = raw_input(
             '[USER INPUT] Type [y] and press [enter] if you have started the ROSSMartServo, otherwise exit the program: ')
         if ans == 'y':
-            if '/iiwa/iiwa_subscriber' in rosnode.get_node_names():
+            if '/iiwa_2/iiwa_subscriber' in rosnode.get_node_names():
                 ROSSMartServo_on = True
             else:
                 rospy.loginfo('IIWA topics not detected, check network connection if you have started the SmartServo')
@@ -36,17 +36,18 @@ if __name__ == '__main__':
     launch_calibration = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(script_path, '..', 'launch', 'my_calibrate.launch')])
     launch_calibration.start()
 
-    calibration_result_file = os.path.join(os.getenv('HOME'), '.ros/easy_handeye/my_eye_on_base.yaml')
+    calibration_result_file = os.path.join(os.getenv('HOME'), '.ros/easy_handeye/my_eye_on_hand.yaml')
 
     file_ind = 0
     while rosgraph.is_master_online():
         rospy.sleep(2)
         # check if the calibration result has been saved
-        # if so, move the file to ../results/
+        # if so, move the file to ../results_/
         if os.path.exists(calibration_result_file):
-            if not os.path.exists(os.path.join(script_path, '..', 'results')):
-                os.mkdir(os.path.join(script_path, '..', 'results'))
-            shutil.move(calibration_result_file, os.path.join(script_path, '..', 'results', 'Extrinsics_'+str(file_ind)+'.yaml'))
+            if not os.path.exists(os.path.join(script_path, '..', 'results_eye_on_hand')):
+                os.mkdir(os.path.join(script_path, '..', 'results_eye_on_hand'))
+            if not os.path.exists(os.path.join(script_path, '..', 'results_eye_on_hand', 'Extrinsics_'+str(file_ind)+'.yaml')):
+                shutil.move(calibration_result_file, os.path.join(script_path, '..', 'results_eye_on_hand', 'Extrinsics_'+str(file_ind)+'.yaml'))
             file_ind += 1
 
     launch_tracking.shutdown()

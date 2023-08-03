@@ -74,21 +74,21 @@ if __name__ == '__main__':
         else:
             print("Invalid input: ", ans)
 
-    calibration_result_file = os.path.join(script_path, '..', 'results', 'Extrinsics_0.yaml')
+    calibration_result_file = os.path.join(script_path, '..', 'results_eye_on_hand', 'Extrinsics_0.yaml')
     if not os.path.exists(calibration_result_file):
         print("Calibration result file not found")
         raise OSError("File not found: {}\n"
-                      "Please make sure you have finished extrinsic calibration and copy the file to .../easy_handeye_calibration/results/\n"
+                      "Please make sure you have finished extrinsic calibration and copy the file to .../easy_handeye_calibration/results_/\n"
                       "The calibration_cmd_prompt.py node will copy the file and rename it to \'Extrinsics.yaml\' for you."
                       "see: https://github.com/IanYangChina/Zivid_project/wiki/Camera-calibration-via-iiwa_stack-and-easy_handeye".format(
             calibration_result_file))
-    calibration_result_file_ = os.path.join(script_path, '..', 'results', 'Extrinsics_1.yaml')
+    calibration_result_file_ = os.path.join(script_path, '..', 'results_eye_on_hand', 'Extrinsics_1.yaml')
     if os.path.exists(calibration_result_file_):
         print("There seems to exist multiple extrinsic parameter files:\n"
               "{}\n{}\n...".format(calibration_result_file, calibration_result_file_))
         while True:
             ans = raw_input("Input the id of the one you would like to use: [int] ")
-            calibration_result_file = os.path.join(script_path, '..', 'results', 'Extrinsics_' + ans + '.yaml')
+            calibration_result_file = os.path.join(script_path, '..', 'results_', 'Extrinsics_' + ans + '.yaml')
             if not os.path.exists(calibration_result_file):
                 print("Calibration result file not found, please input the correct id as a single integer")
             else:
@@ -156,9 +156,9 @@ if __name__ == '__main__':
     # homogeneous transformation matrix from Robot frame to gripper frame
     transform_base_to_reference_grasp = construct_homogeneous_transform_matrix(kuka_state_reader.current_xyz,
                                                                                kuka_state_reader.current_wxyz)
-    np.save(os.path.join(script_path, '..', 'results', 'transform_base_to_reference_grasp'),
+    np.save(os.path.join(script_path, '..', 'results_', 'transform_base_to_reference_grasp'),
             transform_base_to_reference_grasp)
-    print("Result file \'transform_base_to_reference_grasp.npy\' has been saved in ../results/")
+    print("Result file \'transform_base_to_reference_grasp.npy\' has been saved in ../results_/")
     # Gripper pose in robot frame
     grip_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
     grip_frame = grip_frame.transform(transform_base_to_reference_grasp)
@@ -197,11 +197,11 @@ if __name__ == '__main__':
     while True:
         ans = raw_input("Would you like to load a saved transformation matrix and start from it? [y/n]: ")
         if ans == 'y':
-            if not os.path.exists(os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned.npy')):
-                print("Please save the matrix as ../results/transform_cam_to_base_fine_tuned.npy and restart.")
+            if not os.path.exists(os.path.join(script_path, '..', 'results_', 'transform_cam_to_base_fine_tuned.npy')):
+                print("Please save the matrix as ../results_/transform_cam_to_base_fine_tuned.npy and restart.")
                 exit()
             loaded_transform_cam_to_base = np.load(
-                os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned.npy'))
+                os.path.join(script_path, '..', 'results_', 'transform_cam_to_base_fine_tuned.npy'))
 
             pcd_reference_in_base_frame = dcp(original_pcd_reference_in_cam_frame)
             pcd_reference_in_base_frame.transform(loaded_transform_cam_to_base)
@@ -300,20 +300,20 @@ if __name__ == '__main__':
                 print("Invalid input: ", ans)
 
     transform_cam_to_base_fine_tuned = np.matmul(transform_extra_within_base, raw_transform_cam_to_base)
-    np.save(os.path.join(script_path, '..', 'results', 'transform_cam_to_base_fine_tuned'),
+    np.save(os.path.join(script_path, '..', 'results_', 'transform_cam_to_base_fine_tuned'),
             transform_cam_to_base_fine_tuned)
-    print("Result file \'transform_cam_to_base_fine_tuned.npy\' has been saved in ../results/")
+    print("Result file \'transform_cam_to_base_fine_tuned.npy\' has been saved in ../results_/")
     transform_base_to_cam_fine_tuned = np.linalg.inv(transform_cam_to_base_fine_tuned)
-    np.save(os.path.join(script_path, '..', 'results', 'transform_base_to_cam_fine_tuned'),
+    np.save(os.path.join(script_path, '..', 'results_', 'transform_base_to_cam_fine_tuned'),
             transform_base_to_cam_fine_tuned)
-    print("Result file \'transform_base_to_cam_fine_tuned.npy\' has been saved in ../results/")
+    print("Result file \'transform_base_to_cam_fine_tuned.npy\' has been saved in ../results_/")
 
-    o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results', 'pcd_reference_in_world_frame.ply'),
+    o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results_', 'pcd_reference_in_world_frame.ply'),
                              fine_tuned_pcd_reference_in_base_frame)
-    print("Result file \'pcd_reference_in_world_frame.ply\' has been saved in ../results/")
-    o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results', 'cropped_pcd_reference_in_world_frame.ply'),
+    print("Result file \'pcd_reference_in_world_frame.ply\' has been saved in ../results_/")
+    o3d.io.write_point_cloud(os.path.join(script_path, '..', 'results_', 'cropped_pcd_reference_in_world_frame.ply'),
                              cropped)
-    print("Result file \'cropped_pcd_reference_in_world_frame.ply\' has been saved in ../results/")
+    print("Result file \'cropped_pcd_reference_in_world_frame.ply\' has been saved in ../results_/")
 
     close_smart_servo = False
     while not close_smart_servo:

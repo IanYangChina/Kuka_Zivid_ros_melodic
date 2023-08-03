@@ -81,7 +81,9 @@ class Sample:
         newimg = cv2.remap(cv_image, mapx, mapy, cv2.INTER_LINEAR)
 
         rospy.loginfo("Publish undistorted image")
-        self.image_pub.publish(self.bridge.cv2_to_imgmsg(newimg, "rgb8"))
+        img_msg = self.bridge.cv2_to_imgmsg(newimg, "rgb8")
+        img_msg.header = data.header
+        self.image_pub.publish(img_msg)
 
         self.capture()
 

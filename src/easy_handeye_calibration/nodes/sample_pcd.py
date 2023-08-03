@@ -68,7 +68,7 @@ if __name__ == '__main__':
     while True:
         sample.capture()
         rospy.sleep(2)
-        ans = input("[USER INPUT] Is the point cloud satisfactory? [y/n]")
+        ans = raw_input("[USER INPUT] Is the point cloud satisfactory? [y/n]")
         if ans == 'n':
             continue
         elif ans == 'y':

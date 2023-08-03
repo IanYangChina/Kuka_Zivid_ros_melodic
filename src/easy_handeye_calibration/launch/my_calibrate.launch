@@ -1,18 +1,21 @@
 <launch>
     <include file="$(find iiwa_moveit)/launch/moveit_planning_execution.launch">
         <arg name="sim" value="false" />
+        <arg name="robot_name" value="iiwa_2" />
+        <arg name="model" value="iiwa14" />
     </include>
 
     <include file="$(find easy_handeye)/launch/calibrate.launch">
-        <arg name="eye_on_hand" value="false"/>
+        <arg name="eye_on_hand" value="true"/>
         <arg name="namespace_prefix" value="my"/>
         <arg name="start_rviz" value="true"/>
-        <arg name="move_group_namespace" value="/iiwa"/>
+        <arg name="move_group_namespace" value="/iiwa_2"/>
         <arg name="move_group" value="manipulator"/>
+        <arg name="freehand_robot_movement" value="true"/>
 
         <!-- fill in the following parameters according to your robot's published tf frames -->
-        <arg name="robot_base_frame" value="iiwa_link_0"/>
-        <arg name="robot_effector_frame" value="iiwa_link_ee"/>
+        <arg name="robot_base_frame" value="iiwa_2_link_0"/>
+        <arg name="robot_effector_frame" value="iiwa_2_link_ee"/>
 
         <!-- fill in the following parameters according to your tracking system's published tf frames -->
         <arg name="tracking_base_frame" value="zivid_optical_frame"/>

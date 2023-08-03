@@ -21,6 +21,5 @@
 
     <!-- start the capture node -->
     <node name="capture_2d" pkg="easy_handeye_calibration" type="sample_capture_2d.py">
-
     </node>
 </launch>
