@@ -42,15 +42,11 @@ class Sample:
         self.bridge = CvBridge()
 
         rospy.init_node("sample_capture_2d_py", anonymous=True)
-
         rospy.loginfo("Starting sample_capture_2d.py")
-
         rospy.wait_for_service("/zivid_camera/capture_2d", 30.0)
-
         rospy.Subscriber("/zivid_camera/color/image_color", Image, self.on_image_color)
 
         self.image_pub = rospy.Publisher("/zivid_camera/color/undistorted_image_color", Image, queue_size=10)
-
         self.capture_2d_service = rospy.ServiceProxy(
             "/zivid_camera/capture_2d", Capture2D
         )
@@ -66,6 +62,8 @@ class Sample:
             "brightness": 1.0,
         }
         acquisition_0_client.update_configuration(acquisition_0_config)
+
+        self.delay = 0.5
 
     def capture(self):
         rospy.loginfo("Calling capture service")
@@ -86,6 +84,7 @@ class Sample:
         self.image_pub.publish(img_msg)
 
         self.capture()
+        rospy.sleep(self.delay)
 
 
 if __name__ == "__main__":

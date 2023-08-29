@@ -1,5 +1,0 @@
-<launch>
-    <node name="zivid_camera" pkg="zivid_camera" type="zivid_camera_node" output="screen" ns="zivid_camera">
-        <param name="frame_id" value="zivid_optical_frame" />
-    </node>
-</launch>

@@ -10,14 +10,11 @@ catkin_install_python(PROGRAMS
     nodes/sample_capture_2d.py
     nodes/sample_pcd.py
     nodes/extrinsic_fine_tuning_prompt.py
-    nodes/aruco_marker.py
-    nodes/zivid_calibration_controller.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(FILES
     launch/my_calibrate.launch
     launch/tracking.launch
-    launch/zivid_calibration.launch
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

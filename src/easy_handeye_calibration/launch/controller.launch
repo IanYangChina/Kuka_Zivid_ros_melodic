@@ -1,3 +1,0 @@
-<launch>
-    <node ns="zivid_capture_controller" name="zivid_capture_controller" pkg="easy_handeye_calibration" type="zivid_capture_controller.py" output="screen"/>
-</launch>

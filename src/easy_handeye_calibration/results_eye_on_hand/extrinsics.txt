@@ -1,0 +1,56 @@
+[INFO] [1693322036.173359]: OpenCV backend calibrating with algorithm Tsai-Lenz
+[INFO] [1693322036.176292]: Computing from 18 poses...
+[INFO] [1693322036.180700]: Computed calibration:
+[[ 0.73777959 -0.67497911 -0.00919147 -0.0253521 ]
+ [ 0.37080773  0.39385487  0.84105884 -0.22378662]
+ [-0.56407704 -0.62392431  0.54086555  0.73218086]
+ [ 0.          0.          0.          1.        ]]
+[INFO] [1693322047.884997]: Taking a sample...
+[INFO] [1693322048.788085]: Got a sample
+[INFO] [1693322049.628899]: switching to calibration algorithm OpenCV/Park
+[INFO] [1693322051.638596]: OpenCV backend calibrating with algorithm Park
+[INFO] [1693322051.642641]: Computing from 19 poses...
+[INFO] [1693322051.652272]: Computed calibration:
+[[-0.98025325 -0.04872118 -0.19165026  0.08843194]
+ [ 0.04707091 -0.9988049   0.01315701  0.12693636]
+ [-0.19206224  0.00387605  0.98137509  0.05757728]
+ [ 0.          0.          0.          1.        ]]
+[INFO] [1693322064.404567]: switching to calibration algorithm OpenCV/Horaud
+[INFO] [1693322066.548226]: Taking a sample...
+[INFO] [1693322067.651264]: Got a sample
+[INFO] [1693322068.724897]: OpenCV backend calibrating with algorithm Horaud
+[INFO] [1693322068.736950]: Computing from 19 poses...
+[INFO] [1693322068.742819]: Computed calibration:
+[[-0.98015414 -0.0509059  -0.19158928  0.08890082]
+ [ 0.04942863 -0.99869962  0.01248517  0.12680363]
+ [-0.19197571  0.0027674   0.98139578  0.0579286 ]
+ [ 0.          0.          0.          1.        ]]
+[INFO] [1693322074.036362]: switching to calibration algorithm OpenCV/Daniilidis
+[INFO] [1693322077.996004]: Taking a sample...
+[INFO] [1693322079.049202]: Got a sample
+[INFO] [1693322080.203716]: OpenCV backend calibrating with algorithm Daniilidis
+[INFO] [1693322080.206743]: Computing from 19 poses...
+[INFO] [1693322080.211350]: Computed calibration:
+[[-0.97846618 -0.05637969 -0.19855796  0.09249626]
+ [ 0.05556763 -0.99840815  0.00966415  0.12534402]
+ [-0.19878675 -0.00157735  0.9800415   0.05886836]
+ [ 0.          0.          0.          1.        ]]
+[INFO] [1693322084.131842]: Taking a sample...
+[INFO] [1693322084.734752]: Got a sample
+[INFO] [1693322086.365811]: OpenCV backend calibrating with algorithm Daniilidis
+[INFO] [1693322086.370555]: Computing from 19 poses...
+[INFO] [1693322086.380896]: Computed calibration:
+[[-0.97847055 -0.0563554  -0.19854333  0.0924844 ]
+ [ 0.0555429  -0.99840953  0.00966376  0.12533934]
+ [-0.19877216 -0.00157197  0.98004447  0.05885705]
+ [ 0.          0.          0.          1.        ]]
+[INFO] [1693322089.891729]: switching to calibration algorithm OpenCV/Andreff
+[INFO] [1693322091.971606]: Taking a sample...
+[INFO] [1693322092.674892]: Got a sample
+[INFO] [1693322093.299354]: OpenCV backend calibrating with algorithm Andreff
+[INFO] [1693322093.302008]: Computing from 19 poses...
+[INFO] [1693322093.309153]: Computed calibration:
+[[-0.98024847 -0.05161553 -0.19091562  0.06018345]
+ [ 0.05013195 -0.99866317  0.01259594  0.10993344]
+ [-0.19131055  0.00277618  0.98152563  0.13695739]
+ [ 0.          0.          0.          1.        ]]

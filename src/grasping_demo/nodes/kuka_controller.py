@@ -1,15 +1,25 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import rospy
 import numpy as np
+import open3d as o3d
+import quaternion
 from copy import deepcopy as dcp
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, String
 from geometry_msgs.msg import PoseStamped, PoseArray
 from robotiq_3f_gripper_articulated_msgs.msg import Robotiq3FGripperRobotInput as inputMsg
 from robotiq_3f_gripper_articulated_msgs.msg import Robotiq3FGripperRobotOutput as outputMsg
 # from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_output as outputMsg
 # from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inputMsg
 
+waiting_pose_calibration = PoseStamped()
+waiting_pose_calibration.pose.position.x = -0.52
+waiting_pose_calibration.pose.position.y = -0.00
+waiting_pose_calibration.pose.position.z = 0.55
+waiting_pose_calibration.pose.orientation.w = -0.0594
+waiting_pose_calibration.pose.orientation.x = -0.664
+waiting_pose_calibration.pose.orientation.y = 0.745
+waiting_pose_calibration.pose.orientation.z = 0.0054
 
 waiting_pose = PoseStamped()
 waiting_pose.pose.position.x = -0.0
@@ -86,25 +96,74 @@ gripper_reset.rFRA = 0
 
 
 class Controller:
-    def __init__(self):
+    def __init__(self, translation_speed=0.05, rotation_speed=0.1):
         rospy.init_node('controller_node', anonymous=True)
         rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
         rospy.Subscriber('TargetGraspPose', PoseStamped, callback=self.target_pose_callback)
         rospy.Subscriber('TargetGraspPoses', PoseArray, callback=self.target_poses_callback)
         rospy.Subscriber('Robotiq3FGripperRobotIutput', inputMsg, callback=self.gripper_msg, queue_size=2)
+        rospy.Subscriber('/keyboard', String, callback=self.keyboard_callback)
         self.pub_move_cmd = rospy.Publisher('/iiwa/command/CartesianPose', PoseStamped, queue_size=2)
         self.pub_gripper_cmd = rospy.Publisher('Robotiq3FGripperRobotOutput', outputMsg, queue_size=2)
         self.pub_attempt_finished = rospy.Publisher('AttemptFinished', Bool, queue_size=2)
         self.current_pose_msg = PoseStamped()
         self.current_xyz = np.array([0.0, 0.0, 0.0])
         self.current_header_seq = 0
+        self.translation_speed = translation_speed
+        self.rotation_speed = rotation_speed
+
         self.init_robot()
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
-        self.publish_pose(waiting_pose)
+        self.publish_pose(waiting_pose_calibration)
         self.publish_grip_cmd(gripper_reset)
         self.publish_grip_cmd(gripper_activation)
+
+    def keyboard_callback(self, data):
+        key_pressed = data.data
+
+        target_pose = self.current_pose_msg
+        if key_pressed == '1':
+            target_pose.pose.position.x += self.translation_speed
+        elif key_pressed == '2':
+            target_pose.pose.position.x -= self.translation_speed
+        elif key_pressed == '3':
+            target_pose.pose.position.y += self.translation_speed
+        elif key_pressed == '4':
+            target_pose.pose.position.y -= self.translation_speed
+        elif key_pressed == '5':
+            target_pose.pose.position.z += self.translation_speed
+        elif key_pressed == '6':
+            target_pose.pose.position.z -= self.translation_speed
+        else:
+            quat = np.array([target_pose.pose.orientation.w,
+                             target_pose.pose.orientation.x,
+                             target_pose.pose.orientation.y,
+                             target_pose.pose.orientation.z])
+            rotation = o3d.geometry.get_rotation_matrix_from_quaternion(np.array(quat).reshape((4, 1)))
+            if key_pressed == '7':
+                rotation_delta = o3d.geometry.get_rotation_matrix_from_xyz(np.array([0.0, 0.0, self.rotation_speed]))
+            elif key_pressed == '8':
+                rotation_delta = o3d.geometry.get_rotation_matrix_from_xyz(np.array([0.0, 0.0, -self.rotation_speed]))
+            elif key_pressed == '9':
+                rotation_delta = o3d.geometry.get_rotation_matrix_from_xyz(np.array([0.0, self.rotation_speed, 0.0]))
+            elif key_pressed == '0':
+                rotation_delta = o3d.geometry.get_rotation_matrix_from_xyz(np.array([0.0, -self.rotation_speed, 0.0]))
+            elif key_pressed == '-':
+                rotation_delta = o3d.geometry.get_rotation_matrix_from_xyz(np.array([self.rotation_speed, 0.0, 0.0]))
+            elif key_pressed == '=':
+                rotation_delta = o3d.geometry.get_rotation_matrix_from_xyz(np.array([-self.rotation_speed, 0.0, 0.0]))
+            else:
+                rotation_delta = np.eye(3)
+            rotation_new = np.dot(rotation_delta, rotation)
+            quat_new = quaternion.as_float_array(quaternion.from_rotation_matrix(rotation_new))  # w, x, y, z
+            target_pose.pose.orientation.w = quat_new[0]
+            target_pose.pose.orientation.x = quat_new[1]
+            target_pose.pose.orientation.y = quat_new[2]
+            target_pose.pose.orientation.z = quat_new[3]
+
+        self.publish_pose(target_pose)
 
     def gripper_msg(self, data):
         pass

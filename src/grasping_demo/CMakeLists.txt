@@ -10,6 +10,7 @@ catkin_install_python(PROGRAMS
     nodes/pcd_processing.py
     nodes/kuka_controller.py
     nodes/command_prompt.py
+    nodes/keyboard_event_node.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
