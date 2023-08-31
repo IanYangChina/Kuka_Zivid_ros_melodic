@@ -172,6 +172,16 @@ class KukaPcdSampler:
         fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2]
         world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
         o3d.visualization.draw_geometries([world_frame, fused_pcd, workspace_bounding_box])
+        path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_0.ply')
+        i = 0
+        while True:
+            if os.path.exists(path_to_save_pcd):
+                i += 1
+                path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_'+str(i)+'.ply')
+            else:
+                break
+        o3d.io.write_point_cloud(path_to_save_pcd, fused_pcd)
+        rospy.loginfo("Point cloud \'pcd_"+str(i)+".ply\' has been saved in "+path_to_save_pcd)
         return SampleResponse()
 
     def capture_assistant_suggest_settings(self):
@@ -203,15 +213,6 @@ class KukaPcdSampler:
         self.pcd_list.append(pcd_in_world_frame)
         # o3d.visualization.draw_geometries([world_frame, cam_frame, pcd_in_world_frame, workspace_bounding_box])
         # path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_reference_0.ply')
-        # i = 0
-        # while True:
-        #     if os.path.exists(path_to_save_pcd):
-        #         i += 1
-        #         path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_reference_'+str(i)+'.ply')
-        #     else:
-        #         break
-        # o3d.io.write_point_cloud(path_to_save_pcd, pcd_in_world_frame)
-        # rospy.loginfo("Point cloud \'pcd_reference_"+str(i)+".ply\' has been saved in "+path_to_save_pcd)
         self.num_pcd_samples += 1
 
     def current_pose_callback(self, data):
