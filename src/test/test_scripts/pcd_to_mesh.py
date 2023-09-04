@@ -1,10 +1,10 @@
 import os
 import numpy as np
 import open3d as o3d  # >= 0.12.0
-import matplotlib.pyplot as plt
+
 
 script_path = os.path.dirname(os.path.abspath(__file__))
-pcd_path = os.path.join(script_path, '..', '..', 'grasping_demo', 'nodes', 'saved_pcd', 'pcd_0.ply')
+pcd_path = os.path.join(script_path, '..', 'objects', 'pcd_to_mesh', 'pcd_0.ply')
 bounding_box_array = np.load(os.path.join(script_path, 'transformation_matrices', 'reconstruction_bounding_box_array_in_base.npy'))
 
 bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=o3d.utility.Vector3dVector(bounding_box_array))
@@ -15,10 +15,12 @@ pcd = pcd.voxel_down_sample(voxel_size=0.004)
 print(pcd)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.01, max_nn=30))
 pcd.orient_normals_consistent_tangent_plane(200)
+o3d.io.write_point_cloud(os.path.join(script_path, '..', 'objects', 'pcd_to_mesh', 'pcd_0_down.ply'), pcd)
 # o3d.visualization.draw_geometries([world_frame, pcd, bounding_box], width=800, height=800)
 
 alpha = 0.03  # smaller alpha gives more detailed mesh
 mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_alpha_shape(pcd, alpha)
+o3d.io.write_triangle_mesh(os.path.join(script_path, '..', 'objects', 'pcd_to_mesh', 'mesh_0.obj'), mesh)
 
 # radii = [0.005, 0.01, 0.02, 0.04, 0.1, 0.3]
 # mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(

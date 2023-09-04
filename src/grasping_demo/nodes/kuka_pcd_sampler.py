@@ -124,7 +124,7 @@ class KukaPcdSampler:
         rospy.loginfo("Sampling service ready to be called...")
         self.pcd_saving_path = rospy.get_param('/kuka_pcd_sampler/kuka_pcd_sampler/pcd_saving_path')
         if self.pcd_saving_path == 'none':
-            self.pcd_saving_path = os.path.join(script_path, 'saved_pcd')
+            self.pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_mesh')
         os.makedirs(self.pcd_saving_path, exist_ok=True)
         rospy.loginfo("Sampled pcd will be saved in "+str(self.pcd_saving_path))
 
