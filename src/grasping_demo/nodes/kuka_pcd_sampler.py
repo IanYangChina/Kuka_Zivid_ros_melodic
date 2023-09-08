@@ -25,22 +25,22 @@ waiting_pose.pose.orientation.y = 0.745
 waiting_pose.pose.orientation.z = 0.0054
 
 capture_pose_1 = PoseStamped()
-capture_pose_1.pose.position.x = -0.03589
-capture_pose_1.pose.position.y = 0.43977
-capture_pose_1.pose.position.z = 0.48964
-capture_pose_1.pose.orientation.w = -0.35537
-capture_pose_1.pose.orientation.x = -0.46484
-capture_pose_1.pose.orientation.y = 0.78773
-capture_pose_1.pose.orientation.z = -0.19262
+capture_pose_1.pose.position.x = -0.52358
+capture_pose_1.pose.position.y = -0.01965
+capture_pose_1.pose.position.z = 0.60888
+capture_pose_1.pose.orientation.w = 0.16641
+capture_pose_1.pose.orientation.x = -0.67152
+capture_pose_1.pose.orientation.y = 0.69363
+capture_pose_1.pose.orientation.z = -0.20056
 
 capture_pose_2 = PoseStamped()
-capture_pose_2.pose.position.x = -0.63430
-capture_pose_2.pose.position.y = -0.02331
-capture_pose_2.pose.position.z = 0.53348
-capture_pose_2.pose.orientation.w = 0.16983
-capture_pose_2.pose.orientation.x = -0.67129
-capture_pose_2.pose.orientation.y = 0.69609
-capture_pose_2.pose.orientation.z = -0.18964
+capture_pose_2.pose.position.x = -0.44896
+capture_pose_2.pose.position.y = -0.32470
+capture_pose_2.pose.position.z = 0.56047
+capture_pose_2.pose.orientation.w = -0.29034
+capture_pose_2.pose.orientation.x = 0.76764
+capture_pose_2.pose.orientation.y = -0.57110
+capture_pose_2.pose.orientation.z = 0.01619
 
 capture_pose_3 = PoseStamped()
 capture_pose_3.pose.position.x = -0.0334
@@ -51,11 +51,38 @@ capture_pose_3.pose.orientation.x = 0.80210
 capture_pose_3.pose.orientation.y = -0.51920
 capture_pose_3.pose.orientation.z = -0.27996
 
+capture_pose_4 = PoseStamped()
+capture_pose_4.pose.position.x = -0.52880
+capture_pose_4.pose.position.y = 0.14304
+capture_pose_4.pose.position.z = 0.58465
+capture_pose_4.pose.orientation.w = 0.07235
+capture_pose_4.pose.orientation.x = -0.45595
+capture_pose_4.pose.orientation.y = 0.84126
+capture_pose_4.pose.orientation.z = -0.28131
+
+capture_pose_5 = PoseStamped()
+capture_pose_5.pose.position.x = -0.38582
+capture_pose_5.pose.position.y = 0.32856
+capture_pose_5.pose.position.z = 0.54296
+capture_pose_5.pose.orientation.w = -0.06659
+capture_pose_5.pose.orientation.x = -0.47187
+capture_pose_5.pose.orientation.y = 0.81250
+capture_pose_5.pose.orientation.z = -0.33574
+
+capture_pose_6 = PoseStamped()
+capture_pose_6.pose.position.x = -0.05036
+capture_pose_6.pose.position.y = 0.51409
+capture_pose_6.pose.position.z = 0.55562
+capture_pose_6.pose.orientation.w = -0.17963
+capture_pose_6.pose.orientation.x = 0.41851
+capture_pose_6.pose.orientation.y = 0.79119
+capture_pose_6.pose.orientation.z = -0.40829
+
 DISTANCE_THRESHOLD = 0.001
 
 workspace_bounding_box_array = np.load(
-    os.path.join(script_path, '..', 'src', 'grasping_demo',
-                 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
+    os.path.join(script_path, '..', '..', 'test', 'test_scripts',
+                 'transformation_matrices', 'reconstruction_bounding_box_array_in_base.npy'))
 workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float'))
 workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
 workspace_bounding_box.color = (0, 1, 0)
@@ -139,28 +166,25 @@ class KukaPcdSampler:
         self.num_pcd_samples = 0
         self.publish_pose(waiting_pose)
         rospy.sleep(0.1)
+
         self.publish_pose(capture_pose_1)
-        rospy.sleep(1)
+        rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.capture()
         while not self.num_pcd_samples == 1:
             rospy.sleep(0.1)
 
-        self.publish_pose(waiting_pose)
-        rospy.sleep(0.1)
         self.publish_pose(capture_pose_2)
-        rospy.sleep(1)
+        rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.capture()
         while not self.num_pcd_samples == 2:
             rospy.sleep(0.1)
 
-        self.publish_pose(waiting_pose)
-        rospy.sleep(0.1)
         self.publish_pose(capture_pose_3)
-        rospy.sleep(1)
+        rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.capture()
@@ -168,8 +192,37 @@ class KukaPcdSampler:
             rospy.sleep(0.1)
 
         self.publish_pose(waiting_pose)
+        rospy.sleep(0.1)
 
-        fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2]
+        self.publish_pose(capture_pose_4)
+        rospy.sleep(2)
+        self.transform_base_to_ee = construct_homogeneous_transform_matrix(
+            translation=self.current_xyz, orientation=self.current_quat)
+        self.capture()
+        while not self.num_pcd_samples == 4:
+            rospy.sleep(0.1)
+
+        self.publish_pose(capture_pose_5)
+        rospy.sleep(2)
+        self.transform_base_to_ee = construct_homogeneous_transform_matrix(
+            translation=self.current_xyz, orientation=self.current_quat)
+        self.capture()
+        while not self.num_pcd_samples == 5:
+            rospy.sleep(0.1)
+
+        self.publish_pose(capture_pose_6)
+        rospy.sleep(2)
+        self.transform_base_to_ee = construct_homogeneous_transform_matrix(
+            translation=self.current_xyz, orientation=self.current_quat)
+        self.capture()
+        while not self.num_pcd_samples == 6:
+            rospy.sleep(0.1)
+
+        self.publish_pose(waiting_pose)
+        rospy.sleep(0.1)
+
+        fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2] + \
+                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5]
         world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
         o3d.visualization.draw_geometries([world_frame, fused_pcd, workspace_bounding_box])
         path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_0.ply')
@@ -205,14 +258,9 @@ class KukaPcdSampler:
         points = ros_numpy.point_cloud2.get_xyz_points(cloud_array, remove_nans=True)
         pcd = o3d.geometry.PointCloud(points=o3d.utility.Vector3dVector(points))
 
-        world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-        cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
         transform_base_to_cam = np.matmul(self.transform_base_to_ee.copy(), self.transform_ee_to_cam.copy())
-        cam_frame = cam_frame.transform(transform_base_to_cam.copy())
         pcd_in_world_frame = pcd.transform(transform_base_to_cam.copy()).crop(workspace_bounding_box)
         self.pcd_list.append(pcd_in_world_frame)
-        # o3d.visualization.draw_geometries([world_frame, cam_frame, pcd_in_world_frame, workspace_bounding_box])
-        # path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_reference_0.ply')
         self.num_pcd_samples += 1
 
     def current_pose_callback(self, data):
