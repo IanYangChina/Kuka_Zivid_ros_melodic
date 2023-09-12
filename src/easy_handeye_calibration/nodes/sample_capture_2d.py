@@ -63,7 +63,7 @@ class Sample:
         }
         acquisition_0_client.update_configuration(acquisition_0_config)
 
-        self.delay = 0.5
+        self.delay = 0.2
 
     def capture(self):
         rospy.loginfo("Calling capture service")

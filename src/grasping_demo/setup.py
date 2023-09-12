@@ -5,7 +5,7 @@ from catkin_pkg.python_setup import generate_distutils_setup
 
 # fetch values from package.xml
 setup_args = generate_distutils_setup(
-    packages=['grasping_demo'],
+    packages=['grasping_demo', 'utils'],
     package_dir={'': 'src'},
     requires=['open3d', 'numpy-quaternion', 'numba==0.47']
 )

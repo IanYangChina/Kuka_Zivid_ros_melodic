@@ -9,55 +9,9 @@ from std_msgs.msg import Bool, String
 from geometry_msgs.msg import PoseStamped, PoseArray
 from robotiq_3f_gripper_articulated_msgs.msg import Robotiq3FGripperRobotInput as inputMsg
 from robotiq_3f_gripper_articulated_msgs.msg import Robotiq3FGripperRobotOutput as outputMsg
+from utils.kuka_poses import *
 # from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_output as outputMsg
 # from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inputMsg
-
-waiting_pose_calibration = PoseStamped()
-waiting_pose_calibration.pose.position.x = -0.52
-waiting_pose_calibration.pose.position.y = -0.00
-waiting_pose_calibration.pose.position.z = 0.55
-waiting_pose_calibration.pose.orientation.w = -0.0594
-waiting_pose_calibration.pose.orientation.x = -0.664
-waiting_pose_calibration.pose.orientation.y = 0.745
-waiting_pose_calibration.pose.orientation.z = 0.0054
-
-waiting_pose = PoseStamped()
-waiting_pose.pose.position.x = -0.0
-waiting_pose.pose.position.y = -0.55
-waiting_pose.pose.position.z = 0.6
-# in euler: [-90, 180, 0]
-waiting_pose.pose.orientation.w = 0.0000
-waiting_pose.pose.orientation.x = -0.7071067811
-waiting_pose.pose.orientation.y = 0.7071067811
-waiting_pose.pose.orientation.z = 0.0000
-
-pre_grasping_pose = PoseStamped()
-pre_grasping_pose.pose.position.x = -0.55
-pre_grasping_pose.pose.position.y = -0.0
-pre_grasping_pose.pose.position.z = 0.6
-# in euler: [-90, 180, 0]
-pre_grasping_pose.pose.orientation.w = 0.0000
-pre_grasping_pose.pose.orientation.x = 0.0000
-pre_grasping_pose.pose.orientation.y = 1.0000
-pre_grasping_pose.pose.orientation.z = 0.0000
-
-part_placing_pose = PoseStamped()
-part_placing_pose.pose.position.x = -0.59
-part_placing_pose.pose.position.y = -0.30
-part_placing_pose.pose.position.z = 0.325
-part_placing_pose.pose.orientation.w = -0.0123448805919
-part_placing_pose.pose.orientation.x = -0.691465195872
-part_placing_pose.pose.orientation.y = 0.722219705582
-part_placing_pose.pose.orientation.z = 0.0110529923381
-
-sprayer_placing_pose = PoseStamped()
-sprayer_placing_pose.pose.position.x = -0.63
-sprayer_placing_pose.pose.position.y = 0.2775
-sprayer_placing_pose.pose.position.z = 0.29
-sprayer_placing_pose.pose.orientation.w = -0.00509371623762
-sprayer_placing_pose.pose.orientation.x = 0.704621165094
-sprayer_placing_pose.pose.orientation.y = 0.709524989128
-sprayer_placing_pose.pose.orientation.z = 0.00757522078764
 
 grasping_pose_msg = PoseStamped()
 
@@ -103,6 +57,7 @@ class Controller:
         rospy.Subscriber('TargetGraspPoses', PoseArray, callback=self.target_poses_callback)
         rospy.Subscriber('Robotiq3FGripperRobotIutput', inputMsg, callback=self.gripper_msg, queue_size=2)
         rospy.Subscriber('/keyboard', String, callback=self.keyboard_callback)
+        rospy.Subscriber('/PoseToSend', String, callback=self.pose_to_send_callback)
         self.pub_move_cmd = rospy.Publisher('/iiwa/command/CartesianPose', PoseStamped, queue_size=2)
         self.pub_gripper_cmd = rospy.Publisher('Robotiq3FGripperRobotOutput', outputMsg, queue_size=2)
         self.pub_attempt_finished = rospy.Publisher('AttemptFinished', Bool, queue_size=2)
@@ -119,6 +74,23 @@ class Controller:
         self.publish_pose(waiting_pose_calibration)
         self.publish_grip_cmd(gripper_reset)
         self.publish_grip_cmd(gripper_activation)
+
+    def pose_to_send_callback(self, data):
+        pose_to_send = data.data
+        if pose_to_send == '1':
+            self.publish_pose(capture_pose_1)
+        elif pose_to_send == '2':
+            self.publish_pose(capture_pose_2)
+        elif pose_to_send == '3':
+            self.publish_pose(capture_pose_3)
+        elif pose_to_send == '4':
+            self.publish_pose(capture_pose_4)
+        elif pose_to_send == '5':
+            self.publish_pose(capture_pose_5)
+        elif pose_to_send == '6':
+            self.publish_pose(capture_pose_6)
+        else:
+            return
 
     def keyboard_callback(self, data):
         key_pressed = data.data

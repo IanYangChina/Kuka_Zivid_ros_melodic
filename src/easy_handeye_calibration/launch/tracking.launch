@@ -1,6 +1,6 @@
 <launch>
     <arg name="marker_size" doc="Size of the ArUco marker used, in meters" value="0.1"/>
-    <arg name="marker_id" doc="The ID of the ArUco marker used" value="20"/>
+    <arg name="marker_id" doc="The ID of the ArUco marker used" value="10"/>
 
     <!-- start Zivid camera driver node -->
     <node name="zivid_camera" pkg="zivid_camera" type="zivid_camera_node" output="screen" ns="zivid_camera">

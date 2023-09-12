@@ -1,56 +1,62 @@
-[INFO] [1693322036.173359]: OpenCV backend calibrating with algorithm Tsai-Lenz
-[INFO] [1693322036.176292]: Computing from 18 poses...
-[INFO] [1693322036.180700]: Computed calibration:
-[[ 0.73777959 -0.67497911 -0.00919147 -0.0253521 ]
- [ 0.37080773  0.39385487  0.84105884 -0.22378662]
- [-0.56407704 -0.62392431  0.54086555  0.73218086]
+[INFO] [1694511327.186693]: OpenCV backend calibrating with algorithm Tsai-Lenz
+[INFO] [1694511327.198156]: Computed calibration:
+[[ 0.05197603 -0.9985706   0.01245963  0.1380336 ]
+ [ 0.98099311  0.05338882  0.18655337 -0.08342276]
+ [-0.18695192  0.00252651  0.98236582  0.0796273 ]
  [ 0.          0.          0.          1.        ]]
-[INFO] [1693322047.884997]: Taking a sample...
-[INFO] [1693322048.788085]: Got a sample
-[INFO] [1693322049.628899]: switching to calibration algorithm OpenCV/Park
-[INFO] [1693322051.638596]: OpenCV backend calibrating with algorithm Park
-[INFO] [1693322051.642641]: Computing from 19 poses...
-[INFO] [1693322051.652272]: Computed calibration:
-[[-0.98025325 -0.04872118 -0.19165026  0.08843194]
- [ 0.04707091 -0.9988049   0.01315701  0.12693636]
- [-0.19206224  0.00387605  0.98137509  0.05757728]
+[INFO] [1694511340.392745]: switching to calibration algorithm OpenCV/Andreff
+[INFO] [1694511351.363121]: Computed calibration:
+[[-2.87428642e-04 -9.99954700e-01  9.51390989e-03  9.43678279e-02]
+ [ 9.87260185e-01  1.23004174e-03  1.59109440e-01 -8.91854198e-04]
+ [-1.59113935e-01  9.43843705e-03  9.87215109e-01  2.70237056e-01]
+ [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  1.00000000e+00]]
+[INFO] [1694511354.937499]: switching to calibration algorithm OpenCV/Park
+[INFO] [1694511358.930144]: Computed calibration:
+[[ 0.02720626 -0.99954682  0.01288343  0.14193123]
+ [ 0.98477616  0.0290133   0.17138887 -0.07111375]
+ [-0.17168499  0.00802444  0.98511922  0.07800546]
  [ 0.          0.          0.          1.        ]]
-[INFO] [1693322064.404567]: switching to calibration algorithm OpenCV/Horaud
-[INFO] [1693322066.548226]: Taking a sample...
-[INFO] [1693322067.651264]: Got a sample
-[INFO] [1693322068.724897]: OpenCV backend calibrating with algorithm Horaud
-[INFO] [1693322068.736950]: Computing from 19 poses...
-[INFO] [1693322068.742819]: Computed calibration:
-[[-0.98015414 -0.0509059  -0.19158928  0.08890082]
- [ 0.04942863 -0.99869962  0.01248517  0.12680363]
- [-0.19197571  0.0027674   0.98139578  0.0579286 ]
+[INFO] [1694511363.866620]: switching to calibration algorithm OpenCV/Horaud
+[INFO] [1694511367.379308]: Computing from 16 poses...
+[INFO] [1694511367.383445]: Computed calibration:
+[[ 0.02583816 -0.99958781  0.012514    0.14214873]
+ [ 0.98471024  0.02760688  0.17199882 -0.07069426]
+ [-0.1722734   0.00787853  0.98501767  0.07813663]
  [ 0.          0.          0.          1.        ]]
-[INFO] [1693322074.036362]: switching to calibration algorithm OpenCV/Daniilidis
-[INFO] [1693322077.996004]: Taking a sample...
-[INFO] [1693322079.049202]: Got a sample
-[INFO] [1693322080.203716]: OpenCV backend calibrating with algorithm Daniilidis
-[INFO] [1693322080.206743]: Computing from 19 poses...
-[INFO] [1693322080.211350]: Computed calibration:
-[[-0.97846618 -0.05637969 -0.19855796  0.09249626]
- [ 0.05556763 -0.99840815  0.00966415  0.12534402]
- [-0.19878675 -0.00157735  0.9800415   0.05886836]
+[INFO] [1694511384.871607]: switching to calibration algorithm OpenCV/Daniilidis
+[INFO] [1694511387.730334]: Computing from 16 poses...
+[INFO] [1694511387.734468]: Computed calibration:
+[[ 0.02055555 -0.9997352   0.01034433  0.13308326]
+ [ 0.98554231  0.02200199  0.16799482 -0.07354229]
+ [-0.16817793  0.00674155  0.9857336   0.06196139]
  [ 0.          0.          0.          1.        ]]
-[INFO] [1693322084.131842]: Taking a sample...
-[INFO] [1693322084.734752]: Got a sample
-[INFO] [1693322086.365811]: OpenCV backend calibrating with algorithm Daniilidis
-[INFO] [1693322086.370555]: Computing from 19 poses...
-[INFO] [1693322086.380896]: Computed calibration:
-[[-0.97847055 -0.0563554  -0.19854333  0.0924844 ]
- [ 0.0555429  -0.99840953  0.00966376  0.12533934]
- [-0.19877216 -0.00157197  0.98004447  0.05885705]
+
+[INFO] [1694524837.021226]: Computed calibration:
+[[ 0.40050447 -0.91191516  0.08948131  0.04719323]
+ [ 0.87291558  0.40941171  0.26533081 -0.18569757]
+ [-0.27859389 -0.02815655  0.95999617  0.09359513]
  [ 0.          0.          0.          1.        ]]
-[INFO] [1693322089.891729]: switching to calibration algorithm OpenCV/Andreff
-[INFO] [1693322091.971606]: Taking a sample...
-[INFO] [1693322092.674892]: Got a sample
-[INFO] [1693322093.299354]: OpenCV backend calibrating with algorithm Andreff
-[INFO] [1693322093.302008]: Computing from 19 poses...
-[INFO] [1693322093.309153]: Computed calibration:
-[[-0.98024847 -0.05161553 -0.19091562  0.06018345]
- [ 0.05013195 -0.99866317  0.01259594  0.10993344]
- [-0.19131055  0.00277618  0.98152563  0.13695739]
+[INFO] [1694524841.735515]: switching to calibration algorithm OpenCV/Andreff
+[INFO] [1694524846.803668]: Computed calibration:
+[[ 0.0021272  -0.99969473  0.02461529  0.10363037]
+ [ 0.98790438  0.00591745  0.15495132 -0.04755987]
+ [-0.15504968  0.02398794  0.9876154   0.11436577]
+ [ 0.          0.          0.          1.        ]]
+[INFO] [1694524849.446232]: switching to calibration algorithm OpenCV/Daniilidis
+[INFO] [1694524854.693973]: Computed calibration:
+[[-0.28305791 -0.95909143  0.00467343  0.1575741 ]
+ [ 0.95685601 -0.2827248  -0.06703177  0.06134742]
+ [ 0.06561089 -0.01450207  0.9977399   0.03143014]
+ [ 0.          0.          0.          1.        ]]
+[INFO] [1694524857.085768]: switching to calibration algorithm OpenCV/Horaud
+[INFO] [1694524862.829097]: Computed calibration:
+[[-0.00203015 -0.99962305  0.0273795   0.10192082]
+ [ 0.98817573  0.00219223  0.15330989 -0.06601665]
+ [-0.15331213  0.027367    0.98779878  0.02131307]
+ [ 0.          0.          0.          1.        ]]
+[INFO] [1694524866.565381]: switching to calibration algorithm OpenCV/Park
+[INFO] [1694524870.951872]: Computed calibration:
+[[ 0.00421795 -0.99968107  0.02489907  0.10138223]
+ [ 0.98755386  0.00807902  0.15707357 -0.06831654]
+ [-0.15722464  0.02392665  0.98727298  0.02208811]
  [ 0.          0.          0.          1.        ]]

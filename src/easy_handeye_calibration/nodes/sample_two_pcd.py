@@ -12,31 +12,40 @@ from geometry_msgs.msg import PoseStamped, PoseArray
 
 
 waiting_pose = PoseStamped()
-waiting_pose.pose.position.x = -0.52
-waiting_pose.pose.position.y = -0.00
-waiting_pose.pose.position.z = 0.55
-waiting_pose.pose.orientation.w = -0.0594
-waiting_pose.pose.orientation.x = -0.664
-waiting_pose.pose.orientation.y = 0.745
-waiting_pose.pose.orientation.z = 0.0054
+waiting_pose.pose.position.x = -0.47344
+waiting_pose.pose.position.y = -0.02111
+waiting_pose.pose.position.z = 0.60625
+waiting_pose.pose.orientation.w = -0.01690
+waiting_pose.pose.orientation.x = 0.05149
+waiting_pose.pose.orientation.y = 0.99749
+waiting_pose.pose.orientation.z = -0.04539
 
 capture_pose_1 = PoseStamped()
-capture_pose_1.pose.position.x = -0.35817
-capture_pose_1.pose.position.y = 0.19131
-capture_pose_1.pose.position.z = 0.55848
-capture_pose_1.pose.orientation.w = 0.13814
-capture_pose_1.pose.orientation.x = -0.48401
-capture_pose_1.pose.orientation.y = 0.78845
-capture_pose_1.pose.orientation.z = -0.35354
+capture_pose_1.pose.position.x = -0.47544
+capture_pose_1.pose.position.y = -0.16066
+capture_pose_1.pose.position.z = 0.70063
+capture_pose_1.pose.orientation.w = -0.30597
+capture_pose_1.pose.orientation.x = -0.34994
+capture_pose_1.pose.orientation.y = 0.85375
+capture_pose_1.pose.orientation.z = 0.23455
 
 capture_pose_2 = PoseStamped()
-capture_pose_2.pose.position.x = -0.34841
-capture_pose_2.pose.position.y = -0.16340
-capture_pose_2.pose.position.z = 0.52647
-capture_pose_2.pose.orientation.w = -0.29588
-capture_pose_2.pose.orientation.x = 0.78232
-capture_pose_2.pose.orientation.y = -0.49780
-capture_pose_2.pose.orientation.z = 0.22937
+capture_pose_2.pose.position.x = -0.4056036
+capture_pose_2.pose.position.y = -0.02022997
+capture_pose_2.pose.position.z = 0.8205197
+capture_pose_2.pose.orientation.w = -0.38359
+capture_pose_2.pose.orientation.x = -0.078744
+capture_pose_2.pose.orientation.y = 0.91777
+capture_pose_2.pose.orientation.z = -0.06585
+
+capture_pose_3 = PoseStamped()
+capture_pose_3.pose.position.x = -0.39813
+capture_pose_3.pose.position.y = 0.21598803
+capture_pose_3.pose.position.z = 0.800553
+capture_pose_3.pose.orientation.w = -0.33227530
+capture_pose_3.pose.orientation.x = 0.4818123
+capture_pose_3.pose.orientation.y = 0.692790448
+capture_pose_3.pose.orientation.z = -0.42129724
 
 DISTANCE_THRESHOLD = 0.001
 script_path = os.path.dirname(os.path.realpath(__file__))
@@ -73,10 +82,15 @@ class TwoPCDSampler:
         self.capture_service()
         rospy.sleep(3)
 
-        self.publish_pose(waiting_pose)
         self.publish_pose(capture_pose_2)
         rospy.loginfo("Calling capture service")
         rospy.loginfo("Capture PCD 2 at pose (xyz wabc): \n{}, {}".format(self.current_xyz, self.current_quat))
+        self.capture_service()
+        rospy.sleep(3)
+
+        self.publish_pose(capture_pose_3)
+        rospy.loginfo("Calling capture service")
+        rospy.loginfo("Capture PCD 3 at pose (xyz wabc): \n{}, {}".format(self.current_xyz, self.current_quat))
         self.capture_service()
         rospy.sleep(3)
 

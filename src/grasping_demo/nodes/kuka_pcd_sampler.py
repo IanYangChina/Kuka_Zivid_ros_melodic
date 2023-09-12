@@ -11,81 +11,11 @@ from zivid_camera.srv import *
 from sensor_msgs.msg import PointCloud2
 import ros_numpy
 import open3d as o3d
+from utils.kuka_poses import *
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
-waiting_pose = PoseStamped()
-waiting_pose.pose.position.x = -0.5
-waiting_pose.pose.position.y = 0.0
-waiting_pose.pose.position.z = 0.55
-# in euler: [-90, 180, 0]
-waiting_pose.pose.orientation.w = -0.0594
-waiting_pose.pose.orientation.x = -0.664
-waiting_pose.pose.orientation.y = 0.745
-waiting_pose.pose.orientation.z = 0.0054
-
-capture_pose_1 = PoseStamped()
-capture_pose_1.pose.position.x = -0.52358
-capture_pose_1.pose.position.y = -0.01965
-capture_pose_1.pose.position.z = 0.60888
-capture_pose_1.pose.orientation.w = 0.16641
-capture_pose_1.pose.orientation.x = -0.67152
-capture_pose_1.pose.orientation.y = 0.69363
-capture_pose_1.pose.orientation.z = -0.20056
-
-capture_pose_2 = PoseStamped()
-capture_pose_2.pose.position.x = -0.44896
-capture_pose_2.pose.position.y = -0.32470
-capture_pose_2.pose.position.z = 0.56047
-capture_pose_2.pose.orientation.w = -0.29034
-capture_pose_2.pose.orientation.x = 0.76764
-capture_pose_2.pose.orientation.y = -0.57110
-capture_pose_2.pose.orientation.z = 0.01619
-
-capture_pose_3 = PoseStamped()
-capture_pose_3.pose.position.x = -0.0334
-capture_pose_3.pose.position.y = -0.41866
-capture_pose_3.pose.position.z = 0.55560
-capture_pose_3.pose.orientation.w = -0.09314
-capture_pose_3.pose.orientation.x = 0.80210
-capture_pose_3.pose.orientation.y = -0.51920
-capture_pose_3.pose.orientation.z = -0.27996
-
-capture_pose_4 = PoseStamped()
-capture_pose_4.pose.position.x = -0.52880
-capture_pose_4.pose.position.y = 0.14304
-capture_pose_4.pose.position.z = 0.58465
-capture_pose_4.pose.orientation.w = 0.07235
-capture_pose_4.pose.orientation.x = -0.45595
-capture_pose_4.pose.orientation.y = 0.84126
-capture_pose_4.pose.orientation.z = -0.28131
-
-capture_pose_5 = PoseStamped()
-capture_pose_5.pose.position.x = -0.38582
-capture_pose_5.pose.position.y = 0.32856
-capture_pose_5.pose.position.z = 0.54296
-capture_pose_5.pose.orientation.w = -0.06659
-capture_pose_5.pose.orientation.x = -0.47187
-capture_pose_5.pose.orientation.y = 0.81250
-capture_pose_5.pose.orientation.z = -0.33574
-
-capture_pose_6 = PoseStamped()
-capture_pose_6.pose.position.x = -0.05036
-capture_pose_6.pose.position.y = 0.51409
-capture_pose_6.pose.position.z = 0.55562
-capture_pose_6.pose.orientation.w = -0.17963
-capture_pose_6.pose.orientation.x = 0.41851
-capture_pose_6.pose.orientation.y = 0.79119
-capture_pose_6.pose.orientation.z = -0.40829
-
 DISTANCE_THRESHOLD = 0.001
-
-workspace_bounding_box_array = np.load(
-    os.path.join(script_path, '..', '..', 'test', 'test_scripts',
-                 'transformation_matrices', 'reconstruction_bounding_box_array_in_base.npy'))
-workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float'))
-workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
-workspace_bounding_box.color = (0, 1, 0)
 
 
 def construct_homogeneous_transform_matrix(translation, orientation):
@@ -137,6 +67,9 @@ class KukaPcdSampler:
                                                         'transform_ee_to_cam.npy'))
         self.transform_base_to_ee = None
 
+        self.workspace_bounding_box = None
+        self.make_bounding_box()
+
         ROSSMartServo_on = False
         while not ROSSMartServo_on:
             rospy.loginfo('Please start the ROSSMartServo application on the Sunrise Cabinet')
@@ -153,14 +86,29 @@ class KukaPcdSampler:
         if self.pcd_saving_path == 'none':
             self.pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_mesh')
         os.makedirs(self.pcd_saving_path, exist_ok=True)
-        rospy.loginfo("Sampled pcd will be saved in "+str(self.pcd_saving_path))
+        rospy.loginfo("Sampled pcd will be saved in " + str(self.pcd_saving_path))
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
         self.publish_pose(waiting_pose)
         rospy.sleep(0.1)
 
+    def make_bounding_box(self):
+        workspace_bounding_box_array = np.load(
+            os.path.join(script_path, '..', '..', 'test', 'test_scripts',
+                         'transformation_matrices', 'reconstruction_bounding_box_array_in_base.npy'))
+        workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float'))
+        self.workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(
+            points=workspace_bounding_box_array)
+        self.workspace_bounding_box.color = (0, 1, 0)
+
     def sample(self, request):
+        # # update bounding box
+        # self.make_bounding_box()
+        # # update transform_base_to_ee
+        # self.transform_ee_to_cam = np.load(os.path.join(script_path, '..', '..', 'easy_handeye_calibration',
+        #                                                 'results_eye_on_hand',
+        #                                                 'transform_ee_to_cam.npy'))
         rospy.loginfo('Taking PCD samples for reconstruction...')
         self.pcd_list = []
         self.num_pcd_samples = 0
@@ -190,9 +138,6 @@ class KukaPcdSampler:
         self.capture()
         while not self.num_pcd_samples == 3:
             rospy.sleep(0.1)
-
-        self.publish_pose(waiting_pose)
-        rospy.sleep(0.1)
 
         self.publish_pose(capture_pose_4)
         rospy.sleep(2)
@@ -224,17 +169,17 @@ class KukaPcdSampler:
         fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2] + \
                     self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5]
         world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-        o3d.visualization.draw_geometries([world_frame, fused_pcd, workspace_bounding_box])
+        o3d.visualization.draw_geometries([world_frame, fused_pcd, self.workspace_bounding_box])
         path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_0.ply')
         i = 0
         while True:
             if os.path.exists(path_to_save_pcd):
                 i += 1
-                path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_'+str(i)+'.ply')
+                path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_' + str(i) + '.ply')
             else:
                 break
         o3d.io.write_point_cloud(path_to_save_pcd, fused_pcd)
-        rospy.loginfo("Point cloud \'pcd_"+str(i)+".ply\' has been saved in "+path_to_save_pcd)
+        rospy.loginfo("Point cloud \'pcd_" + str(i) + ".ply\' has been saved in " + path_to_save_pcd)
         return SampleResponse()
 
     def capture_assistant_suggest_settings(self):
@@ -259,7 +204,7 @@ class KukaPcdSampler:
         pcd = o3d.geometry.PointCloud(points=o3d.utility.Vector3dVector(points))
 
         transform_base_to_cam = np.matmul(self.transform_base_to_ee.copy(), self.transform_ee_to_cam.copy())
-        pcd_in_world_frame = pcd.transform(transform_base_to_cam.copy()).crop(workspace_bounding_box)
+        pcd_in_world_frame = pcd.transform(transform_base_to_cam.copy()).crop(self.workspace_bounding_box)
         self.pcd_list.append(pcd_in_world_frame)
         self.num_pcd_samples += 1
 

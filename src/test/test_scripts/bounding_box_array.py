@@ -8,10 +8,10 @@ workspace_bounding_box_array = np.array(
      [-0.65, 0.15, 0.25],
      [-0.2, -0.15, 0.25],
      [-0.65, -0.15, 0.25],
-     [-0.2, 0.15, 0.12],
-     [-0.65, 0.15, 0.12],
-     [-0.2, -0.15, 0.12],
-     [-0.65, -0.15, 0.12]]
+     [-0.2, 0.15, 0.01],
+     [-0.65, 0.15, 0.01],
+     [-0.2, -0.15, 0.01],
+     [-0.65, -0.15, 0.01]]
 )
 np.save(os.path.join(script_path, 'transformation_matrices',
                      'reconstruction_bounding_box_array_in_base.npy'),
