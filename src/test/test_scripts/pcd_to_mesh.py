@@ -26,14 +26,11 @@ o3d.visualization.draw_geometries([world_frame, pcd, bounding_box, outliner], wi
 
 radii = [0.005, 0.01, 0.02, 0.04, 0.08, 0.1, 0.2, 0.25]
 mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(pcd, o3d.utility.DoubleVector(radii))
-mesh = o3d.t.geometry.TriangleMesh.from_legacy(mesh).fill_holes()
-mesh_ = o3d.geometry.TriangleMesh()
-mesh_.vertices = mesh.vertex
-mesh_.triangles = mesh.triangle
+mesh = o3d.t.geometry.TriangleMesh.from_legacy(mesh).fill_holes().to_legacy()
 
 # mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth=3)
 print(mesh)
-o3d.visualization.draw_geometries([mesh_],
+o3d.visualization.draw_geometries([pcd, world_frame, mesh, bounding_box],
                                   width=800, height=800,
                                   mesh_show_back_face=True,
                                   mesh_show_wireframe=True)
