@@ -177,6 +177,7 @@ class KukaPcdSampler:
         fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2] + \
                     self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5] + self.pcd_list[6]
         world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+        fused_pcd = fused_pcd.voxel_down_sample(voxel_size=0.0015)
         o3d.visualization.draw_geometries([world_frame, fused_pcd, self.workspace_bounding_box])
         path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_0.ply')
         i = 0
