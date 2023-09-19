@@ -71,7 +71,7 @@ class Controller:
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
-        self.publish_pose(waiting_pose_calibration)
+        self.publish_pose(waiting_pose)
         self.publish_grip_cmd(gripper_reset)
         self.publish_grip_cmd(gripper_activation)
 
@@ -89,6 +89,8 @@ class Controller:
             self.publish_pose(capture_pose_5)
         elif pose_to_send == '6':
             self.publish_pose(capture_pose_6)
+        elif pose_to_send == '7':
+            self.publish_pose(capture_pose_7)
         else:
             return
 
