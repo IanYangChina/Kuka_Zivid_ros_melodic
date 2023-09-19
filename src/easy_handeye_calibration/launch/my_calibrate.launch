@@ -9,7 +9,7 @@
     <include file="$(find easy_handeye)/launch/calibrate.launch">
         <arg name="eye_on_hand" value="true"/>
         <arg name="namespace_prefix" value="my"/>
-        <arg name="start_rviz" value="true"/>
+        <arg name="start_rviz" value="false"/>
         <arg name="move_group_namespace" value="/iiwa"/>
         <arg name="move_group" value="manipulator"/>
         <arg name="freehand_robot_movement" value="true"/>

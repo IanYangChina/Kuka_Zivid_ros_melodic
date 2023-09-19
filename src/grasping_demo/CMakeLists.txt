@@ -20,6 +20,7 @@ catkin_install_python(PROGRAMS
     nodes/keyboard_event_node.py
     nodes/kuka_pcd_sampler.py
     nodes/send_pose_cmd.py
+    nodes/kuka_state_listener.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

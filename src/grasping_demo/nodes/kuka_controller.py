@@ -50,7 +50,7 @@ gripper_reset.rFRA = 0
 
 
 class Controller:
-    def __init__(self, translation_speed=0.05, rotation_speed=0.1):
+    def __init__(self, translation_speed=0.05, rotation_speed=0.05*np.pi):
         rospy.init_node('controller_node', anonymous=True)
         rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
         rospy.Subscriber('TargetGraspPose', PoseStamped, callback=self.target_pose_callback)

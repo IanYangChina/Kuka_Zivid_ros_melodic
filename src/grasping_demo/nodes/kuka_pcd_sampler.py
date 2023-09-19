@@ -12,6 +12,7 @@ from sensor_msgs.msg import PointCloud2
 import ros_numpy
 import open3d as o3d
 from utils.kuka_poses import *
+from copy import deepcopy as dcp
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -79,12 +80,12 @@ class KukaPcdSampler:
                 rospy.sleep(1)
         self.init_robot()
 
+        self.original_pcd_list = []
         self.pcd_list = []
         self.sample_service = rospy.Service('kuka_pcd_sample_service', Sample, self.sample)
         rospy.loginfo("Sampling service ready to be called...")
-        self.pcd_saving_path = rospy.get_param('/kuka_pcd_sampler/kuka_pcd_sampler/pcd_saving_path')
-        if self.pcd_saving_path == 'none':
-            self.pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_mesh')
+        self.pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_mesh')
+        self.original_pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_fuse_testing')
         os.makedirs(self.pcd_saving_path, exist_ok=True)
         rospy.loginfo("Sampled pcd will be saved in " + str(self.pcd_saving_path))
 
@@ -171,11 +172,25 @@ class KukaPcdSampler:
         while not self.num_pcd_samples == 7:
             rospy.sleep(0.1)
 
+        self.publish_pose(capture_pose_8)
+        rospy.sleep(2)
+        self.transform_base_to_ee = construct_homogeneous_transform_matrix(
+            translation=self.current_xyz, orientation=self.current_quat)
+        self.capture()
+        while not self.num_pcd_samples == 8:
+            rospy.sleep(0.1)
+
         self.publish_pose(waiting_pose)
         rospy.sleep(0.1)
 
+        i = 0
+        for original_pcd in self.original_pcd_list:
+            path_to_save_pcd = os.path.join(self.original_pcd_saving_path, 'pcd_' + str(i) + '.ply')
+            o3d.io.write_point_cloud(path_to_save_pcd, original_pcd)
+            i += 1
+
         fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2] + \
-                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5] + self.pcd_list[6]
+                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5] + self.pcd_list[6] + self.pcd_list[7]
         world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
         fused_pcd = fused_pcd.voxel_down_sample(voxel_size=0.0015)
         o3d.visualization.draw_geometries([world_frame, fused_pcd, self.workspace_bounding_box])
@@ -211,7 +226,7 @@ class KukaPcdSampler:
         cloud_array = ros_numpy.point_cloud2.pointcloud2_to_array(data)
         points = ros_numpy.point_cloud2.get_xyz_points(cloud_array, remove_nans=True)
         pcd = o3d.geometry.PointCloud(points=o3d.utility.Vector3dVector(points))
-
+        self.original_pcd_list.append(dcp(pcd))
         transform_base_to_cam = np.matmul(self.transform_base_to_ee.copy(), self.transform_ee_to_cam.copy())
         pcd_in_world_frame = pcd.transform(transform_base_to_cam.copy()).crop(self.workspace_bounding_box)
         self.pcd_list.append(pcd_in_world_frame)
