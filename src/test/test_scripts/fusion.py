@@ -41,7 +41,7 @@ cam_1 = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0
 path_1 = os.path.join(script_path, '..', 'objects', 'pcd_to_fuse_testing', 'pcd_0.ply')
 pcd_1 = o3d.io.read_point_cloud(path_1).voxel_down_sample(voxel_size=0.002)
 o3d.io.write_point_cloud(path_1, pcd_1)
-pcd_1 = pcd_1.transform(base_to_cam_1.copy()).crop(workspace_bounding_box)
+pcd_1 = pcd_1.transform(base_to_cam_1.copy()).crop(workspace_bounding_box).paint_uniform_color([1, 0, 0])
 
 p2 = [-0.33955532155200313, -0.4919240673409368, 0.44322820096677445]
 p2_q = [-0.09543869118016003, -0.34123433590221613, 0.8551217913627625, 0.3784405799265335]
@@ -52,7 +52,7 @@ cam_2 = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0
 path_2 = os.path.join(script_path, '..', 'objects', 'pcd_to_fuse_testing', 'pcd_1.ply')
 pcd_2 = o3d.io.read_point_cloud(path_2).voxel_down_sample(voxel_size=0.002)
 o3d.io.write_point_cloud(path_2, pcd_2)
-pcd_2 = pcd_2.transform(base_to_cam_2.copy()).crop(workspace_bounding_box)
+pcd_2 = pcd_2.transform(base_to_cam_2.copy()).crop(workspace_bounding_box).paint_uniform_color([0, 1, 0])
 
 p3 = [-0.6118599785082319, -0.2651555369743888, 0.4384940804041449]
 p3_q = [0.06499232341504475, -0.15117182322076156, 0.9701617360115051, 0.17807115250318148]
@@ -63,7 +63,7 @@ cam_3 = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0
 path_3 = os.path.join(script_path, '..', 'objects', 'pcd_to_fuse_testing', 'pcd_2.ply')
 pcd_3 = o3d.io.read_point_cloud(path_3).voxel_down_sample(voxel_size=0.002)
 o3d.io.write_point_cloud(path_3, pcd_3)
-pcd_3 = pcd_3.transform(base_to_cam_3.copy()).crop(workspace_bounding_box)
+pcd_3 = pcd_3.transform(base_to_cam_3.copy()).crop(workspace_bounding_box).paint_uniform_color([0, 0, 1])
 
 p4 = [-0.6238490498687387, 0.06191429843213932, 0.6677410608636462]
 p4_q = [0.019115162028591103, 0.013566951526794428, 0.9967168569564819, -0.07749866150190958]
@@ -74,7 +74,7 @@ cam_4 = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0
 path_4 = os.path.join(script_path, '..', 'objects', 'pcd_to_fuse_testing', 'pcd_3.ply')
 pcd_4 = o3d.io.read_point_cloud(path_4).voxel_down_sample(voxel_size=0.002)
 o3d.io.write_point_cloud(path_4, pcd_4)
-pcd_4 = pcd_4.transform(base_to_cam_4.copy()).crop(workspace_bounding_box)
+pcd_4 = pcd_4.transform(base_to_cam_4.copy()).crop(workspace_bounding_box).paint_uniform_color([1, 1, 0])
 
 p5 = [-0.6180526689359269, 0.3675919243464007, 0.30419067214329537]
 p5_q = [0.04657256733135922, -0.053342850612119526, 0.8997739553451538, -0.43057209076882225]
@@ -85,7 +85,7 @@ cam_5 = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0
 path_5 = os.path.join(script_path, '..', 'objects', 'pcd_to_fuse_testing', 'pcd_4.ply')
 pcd_5 = o3d.io.read_point_cloud(path_5).voxel_down_sample(voxel_size=0.002)
 o3d.io.write_point_cloud(path_5, pcd_5)
-pcd_5 = pcd_5.transform(base_to_cam_5.copy()).crop(workspace_bounding_box)
+pcd_5 = pcd_5.transform(base_to_cam_5.copy()).crop(workspace_bounding_box).paint_uniform_color([1, 0, 1])
 
 p6 = [-0.2977190125241298, 0.4572420263707471, 0.2795479430701567]
 p6_q = [-0.14926434756769433, 0.25636200667857995, 0.819904088973999, -0.4896488070420422]
@@ -96,7 +96,7 @@ cam_6 = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0
 path_6 = os.path.join(script_path, '..', 'objects', 'pcd_to_fuse_testing', 'pcd_5.ply')
 pcd_6 = o3d.io.read_point_cloud(path_6).voxel_down_sample(voxel_size=0.002)
 o3d.io.write_point_cloud(path_6, pcd_6)
-pcd_6 = pcd_6.transform(base_to_cam_6.copy()).crop(workspace_bounding_box)
+pcd_6 = pcd_6.transform(base_to_cam_6.copy()).crop(workspace_bounding_box).paint_uniform_color([0, 1, 1])
 
 p7 = [-0.10247700473305638, 0.4572632022505956, 0.31452236331668904]
 p7_q = [0.10310314660490129, 0.8379407525062561, 0.2704636279176586, -0.4626818098029889]
@@ -107,7 +107,7 @@ cam_7 = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0
 path_7 = os.path.join(script_path, '..', 'objects', 'pcd_to_fuse_testing', 'pcd_6.ply')
 pcd_7 = o3d.io.read_point_cloud(path_7).voxel_down_sample(voxel_size=0.002)
 o3d.io.write_point_cloud(path_7, pcd_7)
-pcd_7 = pcd_7.transform(base_to_cam_7.copy()).crop(workspace_bounding_box)
+pcd_7 = pcd_7.transform(base_to_cam_7.copy()).crop(workspace_bounding_box).paint_uniform_color([0.5, 0.5, 0.5])
 
 p8 = [-0.31217047814232096, 0.29355731896807297, 0.5762597186817668]
 p8_q = [0.09861816149797507, 0.9411432147026062, 0.27879016182263155, -0.16370694892710425]
@@ -118,19 +118,27 @@ cam_8 = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0
 path_8 = os.path.join(script_path, '..', 'objects', 'pcd_to_fuse_testing', 'pcd_7.ply')
 pcd_8 = o3d.io.read_point_cloud(path_8).voxel_down_sample(voxel_size=0.002)
 o3d.io.write_point_cloud(path_8, pcd_8)
-pcd_8 = pcd_8.transform(base_to_cam_8.copy()).crop(workspace_bounding_box)
+pcd_8 = pcd_8.transform(base_to_cam_8.copy()).crop(workspace_bounding_box).paint_uniform_color([0.5, 1, 0.5])
 
-fused = pcd_4 + pcd_7
+fused = pcd_1 + pcd_2 + pcd_3 + pcd_4 + pcd_5 + pcd_6 + pcd_7 + pcd_8
 fused = fused.voxel_down_sample(voxel_size=0.0015)
 
 o3d.visualization.draw_geometries([
     world_frame, fused,
-    # ee_1, cam_1,
-    # ee_2, cam_2,
-    # ee_3, cam_3,
-    ee_4, cam_4,
-    # ee_5, cam_5,
-    # ee_6, cam_6,
-    ee_7, cam_7,
-    # ee_8, cam_8,
+    # ee_1,
+    cam_1,
+    # ee_2,
+    cam_2,
+    # ee_3,
+    cam_3,
+    # ee_4,
+    cam_4,
+    # ee_5,
+    cam_5,
+    # ee_6,
+    cam_6,
+    # ee_7,
+    cam_7,
+    # ee_8,
+    cam_8,
 ])
