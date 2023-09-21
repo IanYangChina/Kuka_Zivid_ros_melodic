@@ -10,7 +10,7 @@ waiting_pose_calibration.pose.orientation.y = 0.85134
 waiting_pose_calibration.pose.orientation.z = -0.30311
 
 waiting_pose = PoseStamped()
-waiting_pose.pose.position.x = -0.45
+waiting_pose.pose.position.x = -0.55
 waiting_pose.pose.position.y = -0.0
 waiting_pose.pose.position.z = 0.55
 waiting_pose.pose.orientation.w = 0.0

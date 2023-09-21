@@ -21,11 +21,15 @@ catkin_install_python(PROGRAMS
     nodes/kuka_pcd_sampler.py
     nodes/send_pose_cmd.py
     nodes/kuka_state_listener.py
+    nodes/kuka_controller_moveit.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(FILES
     launch/grasping_pcd_processing.launch
     launch/grasping_controller.launch
+    launch/kuka_moveit_controller.launch
+    launch/kuka_pcd_sampler.launch
+    launch/camera.launch
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

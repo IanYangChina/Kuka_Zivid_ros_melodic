@@ -1,0 +1,10 @@
+<launch>
+    <include file="$(find iiwa_moveit)/launch/moveit_planning_execution.launch">
+        <arg name="sim" value="false" />
+        <arg name="robot_name" value="iiwa" />
+        <arg name="model" value="iiwa14" />
+        <arg name="rviz" value="false" />
+    </include>
+
+    <node ns="iiwa" name="kuka_controller_moveit" pkg="grasping_demo" type="kuka_controller_moveit.py" output="screen"/>
+</launch>
