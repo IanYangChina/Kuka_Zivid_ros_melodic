@@ -207,18 +207,17 @@ class KukaPcdSampler:
         return SampleResponse()
 
     def capture_assistant_suggest_settings(self):
-        max_capture_time = rospy.Duration.from_sec(1.20)
+        max_capture_time = rospy.Duration.from_sec(1)
         rospy.loginfo(
             "Calling capture assistant service with max capture time = %.2f sec",
             max_capture_time.to_sec(),
         )
         self.capture_assistant_service(
-            max_capture_time=max_capture_time,
-            ambient_light_frequency=CaptureAssistantSuggestSettingsRequest.AMBIENT_LIGHT_FREQUENCY_NONE,
-        )
+            max_capture_time=max_capture_time)
 
     def capture(self):
         rospy.loginfo("Calling capture service")
+        self.capture_assistant_suggest_settings()
         self.capture_service()
 
     def on_points(self, data):
@@ -229,6 +228,7 @@ class KukaPcdSampler:
         self.original_pcd_list.append(dcp(pcd))
         transform_base_to_cam = np.matmul(self.transform_base_to_ee.copy(), self.transform_ee_to_cam.copy())
         pcd_in_world_frame = pcd.transform(transform_base_to_cam.copy()).crop(self.workspace_bounding_box)
+        o3d.visualization.draw_geometries([pcd_in_world_frame, self.workspace_bounding_box])
         self.pcd_list.append(pcd_in_world_frame)
         self.num_pcd_samples += 1
 
