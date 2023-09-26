@@ -6,7 +6,7 @@ import open3d as o3d
 from std_msgs.msg import Bool
 from sensor_msgs.msg import PointCloud2
 from geometry_msgs.msg import PoseStamped, PoseArray
-from grasping_demo.pcd_registration import get_target_grasp_pose
+from pcd_processing.pcd_registration import get_target_grasp_pose
 
 
 class PcdProcessing:

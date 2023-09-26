@@ -32,9 +32,6 @@ def construct_homogeneous_transform_matrix(translation, orientation):
     return transformation.copy()
 
 
-# todo: test velocity configuration on RosSmartServo
-# https://github.com/IFL-CAMP/iiwa_stack/wiki/configuresmartservo
-# https://github.com/IFL-CAMP/iiwa_stack/issues/78
 class KukaPcdSampler:
     def __init__(self):
         rospy.init_node('kuka_pcd_sampler_node', anonymous=True)
@@ -112,7 +109,7 @@ class KukaPcdSampler:
             points=workspace_bounding_box_array)
         self.workspace_bounding_box.color = (0, 1, 0)
 
-    def sample(self, request):
+    def sample(self, req):
         rospy.loginfo('Taking PCD samples for reconstruction...')
         self.pcd_list = []
         self.num_pcd_samples = 0
@@ -227,7 +224,7 @@ class KukaPcdSampler:
         pcd_in_world_frame = pcd_in_world_frame.crop(self.workspace_bounding_box)
         pcd_in_world_frame.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.001, max_nn=30))
         pcd_in_world_frame.orient_normals_towards_camera_location(camera_location=transform_base_to_cam.copy()[:-1, -1])
-        o3d.visualization.draw_geometries([pcd_in_world_frame, self.workspace_bounding_box])
+        # o3d.visualization.draw_geometries([pcd_in_world_frame, self.workspace_bounding_box])
         self.pcd_list.append(pcd_in_world_frame)
         self.num_pcd_samples += 1
 

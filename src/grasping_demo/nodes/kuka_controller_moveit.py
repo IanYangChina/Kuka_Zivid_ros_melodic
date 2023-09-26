@@ -2,12 +2,13 @@
 
 import copy
 import sys
-import rospy
+import rospy, rosnode
 import numpy as np
-from geometry_msgs.msg import PoseStamped, PoseArray
+from geometry_msgs.msg import PoseStamped
 from utils.kuka_poses import *
 import moveit_commander
 from scipy.spatial.transform import Rotation
+from grasping_demo.srv import TargetPose, TargetPoseResponse, Reset, ResetResponse, MoveDistance, MoveDistanceResponse
 
 DISTANCE_THRESHOLD = 0.001
 
@@ -38,100 +39,122 @@ class Controller:
         self.moveit_group = moveit_commander.MoveGroupCommander("manipulator", robot_description="robot_description")
         self.moveit_group_eelink = self.moveit_group.get_end_effector_link()
 
-        self.v = 1.0  # m/s, this is an approximation
-        self.w = 180  # deg/s, this is an approximation
-        self.dt = 0.0002  # matching the simulation dt
+        self.delta_position = 0.0002  # meter per waypoint
+        self.delta_angle = 0.036  # angle per waypoint
 
+        ROSSMartServo_on = False
+        while not ROSSMartServo_on:
+            rospy.loginfo('Please start the ROSSMartServo application on the Sunrise Cabinet')
+            if '/iiwa/iiwa_subscriber' in rosnode.get_node_names():
+                ROSSMartServo_on = True
+            else:
+                rospy.sleep(1)
         self.init_robot()
+
+        self.sample_service = rospy.Service('move_to_target', TargetPose, self.move_target)
+        self.reset_service = rospy.Service('reset', Reset, self.reset)
+        self.move_service = rospy.Service('move_distance', MoveDistance, self.move_distance)
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
         self.publish_pose(waiting_pose)
         rospy.sleep(2)
 
-        self.move_distance([0.1, 0.0, -0.2, 0, 0, 90])
+        # self.move_distance([0.1, 0.0, -0.2, 0, 0, 90])
 
-    def move_distance(self, dp):
+    def move_distance(self, req):
+        rospy.loginfo("Received moving request, generating plan...")
         waypoints = []
+
         p = self.moveit_group.get_current_pose().pose
-        rospy.loginfo("Current pose: {}".format(p))
         tar_p = copy.deepcopy(p)
-        tar_p.position.x += dp[0]
-        tar_p.position.y += dp[1]
-        tar_p.position.z += dp[2]
-        delta_quat_xyzw = Rotation.from_euler('xyz', dp[3:], degrees=True).as_quat()
+        tar_p.position.x += req.x
+        tar_p.position.y += req.y
+        tar_p.position.z += req.z
+        delta_quat_xyzw = Rotation.from_euler('xyz', np.array([req.a, req.b, req.c]), degrees=True).as_quat()
         delta_quat_wxyz = [delta_quat_xyzw[1], delta_quat_xyzw[2], delta_quat_xyzw[3], delta_quat_xyzw[0]]
         tar_quat = qmul([p.orientation.w, p.orientation.x, p.orientation.y, p.orientation.z], delta_quat_wxyz)
         tar_p.orientation.w = tar_quat[0]
         tar_p.orientation.x = tar_quat[1]
         tar_p.orientation.y = tar_quat[2]
         tar_p.orientation.z = tar_quat[3]
-        rospy.loginfo("Target pose: {}".format(tar_p))
 
         dx = tar_p.position.x - p.position.x
-        vx = self.v if dx > 0 else -self.v
+        delta_x = self.delta_position if dx > 0 else -self.delta_position
         abs_dx = np.abs(dx)
         dy = tar_p.position.y - p.position.y
-        vy = self.v if dy > 0 else -self.v
+        delta_y = self.delta_position if dy > 0 else -self.delta_position
         abs_dy = np.abs(dy)
         dz = tar_p.position.z - p.position.z
-        vz = self.v if dz > 0 else -self.v
+        delta_z = self.delta_position if dz > 0 else -self.delta_position
         abs_dz = np.abs(dz)
 
         current_euler = Rotation.from_quat([p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]).as_euler('xyz', degrees=True)
-        rospy.loginfo("Current euler: {}".format(current_euler))
-        da = dp[3]
-        va = self.w if da > 0 else -self.w
+        da = req.a
+        delta_a = self.delta_angle if da > 0 else -self.delta_angle
         abs_da = np.abs(da)
-        db = dp[4]
-        vb = self.w if db > 0 else -self.w
+        db = req.b
+        delta_b = self.delta_angle if db > 0 else -self.delta_angle
         abs_db = np.abs(db)
-        dc = dp[5]
-        vc = self.w if dc > 0 else -self.w
+        dc = req.c
+        delta_c = self.delta_angle if dc > 0 else -self.delta_angle
         abs_dc = np.abs(dc)
         tar_euler = current_euler + np.array([da, db, dc])
-        rospy.loginfo("Target euler: {}".format(tar_euler))
 
-        n_t = max(int(np.max([abs_dx, abs_dy, abs_dz]) / (self.v * self.dt)),
-                  int(np.max([abs_da, abs_db, abs_dc]) / (self.w * self.dt)))
+        n_t = max(int(np.max([abs_dx, abs_dy, abs_dz]) / self.delta_position),
+                  int(np.max([abs_da, abs_db, abs_dc]) / self.delta_angle))
 
         for _ in range(n_t):
             if np.abs(p.position.x - tar_p.position.x) <= 0.0002:
-                vx = 0
+                delta_x = 0
             if np.abs(p.position.y - tar_p.position.y) <= 0.0002:
-                vy = 0
+                delta_y = 0
             if np.abs(p.position.z - tar_p.position.z) <= 0.0002:
-                vz = 0
+                delta_z = 0
             if np.abs(current_euler[0] - tar_euler[0]) <= 0.009:
-                va = 0
+                delta_a = 0
             if np.abs(current_euler[1] - tar_euler[1]) <= 0.009:
-                vb = 0
+                delta_b = 0
             if np.abs(current_euler[2] - tar_euler[2]) <= 0.009:
-                vc = 0
-            p.position.x += vx * self.dt
-            p.position.y += vy * self.dt
-            p.position.z += vz * self.dt
-            current_euler[0] += va * self.dt
-            current_euler[1] += vb * self.dt
-            current_euler[2] += vc * self.dt
-            quat_xyzw = Rotation.from_euler('xyz', current_euler, degrees=True).as_quat()
-            p.orientation.w = quat_xyzw[3]
+                delta_c = 0
+            p.position.x += delta_x
+            p.position.y += delta_y
+            p.position.z += delta_z
+            current_euler[0] += delta_a
+            current_euler[1] += delta_b
+            current_euler[2] += delta_c
+            quat_xyzw = Rotation.from_euler('xyz', current_euler.copy(), degrees=True).as_quat()
             p.orientation.x = quat_xyzw[0]
             p.orientation.y = quat_xyzw[1]
             p.orientation.z = quat_xyzw[2]
+            p.orientation.w = quat_xyzw[3]
             waypoints.append(copy.deepcopy(p))
 
         (plan, fraction) = self.moveit_group.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
-                                   0.0001,        # eef_step
+                                   0.0001,      # eef_step
                                    0.0)         # jump_threshold
-        rospy.loginfo("Executing plan with fraction: {}".format(fraction))
+        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
+        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
+            plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
+
         self.moveit_group.execute(plan, wait=True)
-        rospy.loginfo("Done executing plan")
-        p = self.moveit_group.get_current_pose().pose
-        rospy.loginfo("Current pose: {}".format(p))
-        reached_euler = Rotation.from_quat([p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]).as_euler('xyz', degrees=True)
-        rospy.loginfo("Current euler: {}".format(reached_euler))
+        dt = plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        rospy.loginfo("Time spent: "+str(dt)+" secs")
+
+        return MoveDistanceResponse()
+
+    def reset(self, req):
+        self.publish_pose(waiting_pose)
+        return ResetResponse()
+
+    def move_target(self, req):
+        p = copy.deepcopy(waiting_pose)
+        p.pose.position.x = req.x
+        p.pose.position.y = req.y
+        p.pose.position.z = req.z
+        self.publish_pose(p)
+        return TargetPoseResponse()
 
     def current_pose_callback(self, data):
         self.current_pose_msg = data
