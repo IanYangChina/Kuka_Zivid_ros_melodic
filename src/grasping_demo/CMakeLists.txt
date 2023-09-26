@@ -10,6 +10,7 @@ add_service_files(FILES
     TargetPose.srv
     Reset.srv
     MoveDistance.srv
+    TrajectoryOne.srv
 )
 
 generate_messages(DEPENDENCIES std_msgs)
