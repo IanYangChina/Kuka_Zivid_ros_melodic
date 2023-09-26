@@ -1,7 +1,10 @@
 <launch>
     <node ns="zivid_camera" name="zivid_camera" pkg="zivid_camera" type="zivid_camera_node" output="screen"></node>
 
-    <node ns="kuka_pcd_sampler" name="kuka_pcd_sampler" pkg="grasping_demo" type="kuka_pcd_sampler.py" output="screen">
-        <param name="pcd_saving_path" value="none" type="str"/>
+    <arg name="pcd_saving_path" default="none"/>
+    <arg name="save_original_pcd" default="false"/>
+    <node ns="iiwa" name="kuka_pcd_sampler" pkg="grasping_demo" type="kuka_pcd_sampler.py" output="screen">
+        <param name="pcd_saving_path" value="$(arg pcd_saving_path)" type="str"/>
+        <param name="save_original_pcd" value="$(arg save_original_pcd)" type="bool"/>
     </node>
 </launch>

@@ -71,6 +71,21 @@ class KukaPcdSampler:
         self.workspace_bounding_box = None
         self.make_bounding_box()
 
+        self.original_pcd_list = []
+        self.pcd_list = []
+        pcd_saving_path = str(rospy.get_param('/iiwa/kuka_pcd_sampler/pcd_saving_path'))
+        if pcd_saving_path == 'none':
+            self.pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_mesh')
+        else:
+            self.pcd_saving_path = pcd_saving_path + '/pcd_to_mesh'
+        self.save_original_pcd = rospy.get_param('/iiwa/kuka_pcd_sampler/save_original_pcd')
+        os.makedirs(self.pcd_saving_path, exist_ok=True)
+        rospy.loginfo("Fused pcd will be saved in " + str(self.pcd_saving_path))
+        if self.save_original_pcd:
+            self.original_pcd_saving_path = self.pcd_saving_path.replace('/pcd_to_mesh', '/pcd_to_fuse_testing')
+            os.makedirs(self.original_pcd_saving_path, exist_ok=True)
+            rospy.loginfo("Original pcd will be saved in " + str(self.original_pcd_saving_path))
+
         ROSSMartServo_on = False
         while not ROSSMartServo_on:
             rospy.loginfo('Please start the ROSSMartServo application on the Sunrise Cabinet')
@@ -80,14 +95,8 @@ class KukaPcdSampler:
                 rospy.sleep(1)
         self.init_robot()
 
-        self.original_pcd_list = []
-        self.pcd_list = []
         self.sample_service = rospy.Service('kuka_pcd_sample_service', Sample, self.sample)
         rospy.loginfo("Sampling service ready to be called...")
-        self.pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_mesh')
-        self.original_pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_fuse_testing')
-        os.makedirs(self.pcd_saving_path, exist_ok=True)
-        rospy.loginfo("Sampled pcd will be saved in " + str(self.pcd_saving_path))
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
@@ -99,17 +108,11 @@ class KukaPcdSampler:
             os.path.join(script_path, '..', '..', 'test', 'test_scripts',
                          'transformation_matrices', 'reconstruction_bounding_box_array_in_base.npy'))
         workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float'))
-        self.workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(
+        self.workspace_bounding_box = o3d.geometry.AxisAlignedBoundingBox.create_from_points(
             points=workspace_bounding_box_array)
         self.workspace_bounding_box.color = (0, 1, 0)
 
     def sample(self, request):
-        # update bounding box
-        self.make_bounding_box()
-        # # update transform_base_to_ee
-        # self.transform_ee_to_cam = np.load(os.path.join(script_path, '..', '..', 'easy_handeye_calibration',
-        #                                                 'results_eye_on_hand',
-        #                                                 'transform_ee_to_cam.npy'))
         rospy.loginfo('Taking PCD samples for reconstruction...')
         self.pcd_list = []
         self.num_pcd_samples = 0
@@ -172,27 +175,20 @@ class KukaPcdSampler:
         while not self.num_pcd_samples == 7:
             rospy.sleep(0.1)
 
-        self.publish_pose(capture_pose_8)
-        rospy.sleep(2)
-        self.transform_base_to_ee = construct_homogeneous_transform_matrix(
-            translation=self.current_xyz, orientation=self.current_quat)
-        self.capture()
-        while not self.num_pcd_samples == 8:
-            rospy.sleep(0.1)
-
         self.publish_pose(waiting_pose)
         rospy.sleep(0.1)
 
-        i = 0
-        for original_pcd in self.original_pcd_list:
-            path_to_save_pcd = os.path.join(self.original_pcd_saving_path, 'pcd_' + str(i) + '.ply')
-            o3d.io.write_point_cloud(path_to_save_pcd, original_pcd)
-            i += 1
+        if self.save_original_pcd:
+            i = 0
+            for original_pcd in self.original_pcd_list:
+                path_to_save_pcd = os.path.join(self.original_pcd_saving_path, 'pcd_' + str(i) + '.ply')
+                o3d.io.write_point_cloud(path_to_save_pcd, original_pcd)
+                i += 1
 
         fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2] + \
-                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5] + self.pcd_list[6] + self.pcd_list[7]
+                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5] + self.pcd_list[6]
         world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-        fused_pcd = fused_pcd.voxel_down_sample(voxel_size=0.0015)
+        fused_pcd = fused_pcd.voxel_down_sample(voxel_size=0.0001)
         o3d.visualization.draw_geometries([world_frame, fused_pcd, self.workspace_bounding_box])
         path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_0.ply')
         i = 0
@@ -224,10 +220,13 @@ class KukaPcdSampler:
         rospy.loginfo("PointCloud received")
         cloud_array = ros_numpy.point_cloud2.pointcloud2_to_array(data)
         points = ros_numpy.point_cloud2.get_xyz_points(cloud_array, remove_nans=True)
-        pcd = o3d.geometry.PointCloud(points=o3d.utility.Vector3dVector(points))
+        pcd = o3d.geometry.PointCloud(points=o3d.utility.Vector3dVector(points)).voxel_down_sample(voxel_size=0.0001)
         self.original_pcd_list.append(dcp(pcd))
         transform_base_to_cam = np.matmul(self.transform_base_to_ee.copy(), self.transform_ee_to_cam.copy())
-        pcd_in_world_frame = pcd.transform(transform_base_to_cam.copy()).crop(self.workspace_bounding_box)
+        pcd_in_world_frame = pcd.transform(transform_base_to_cam.copy())
+        pcd_in_world_frame = pcd_in_world_frame.crop(self.workspace_bounding_box)
+        pcd_in_world_frame.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.001, max_nn=30))
+        pcd_in_world_frame.orient_normals_towards_camera_location(camera_location=transform_base_to_cam.copy()[:-1, -1])
         o3d.visualization.draw_geometries([pcd_in_world_frame, self.workspace_bounding_box])
         self.pcd_list.append(pcd_in_world_frame)
         self.num_pcd_samples += 1
