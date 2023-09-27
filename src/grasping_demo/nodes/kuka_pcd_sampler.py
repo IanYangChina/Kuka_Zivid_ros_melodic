@@ -164,13 +164,13 @@ class KukaPcdSampler:
         while not self.num_pcd_samples == 6:
             rospy.sleep(0.1)
 
-        self.publish_pose(capture_pose_7)
-        rospy.sleep(2)
-        self.transform_base_to_ee = construct_homogeneous_transform_matrix(
-            translation=self.current_xyz, orientation=self.current_quat)
-        self.capture()
-        while not self.num_pcd_samples == 7:
-            rospy.sleep(0.1)
+        # self.publish_pose(capture_pose_7)
+        # rospy.sleep(2)
+        # self.transform_base_to_ee = construct_homogeneous_transform_matrix(
+        #     translation=self.current_xyz, orientation=self.current_quat)
+        # self.capture()
+        # while not self.num_pcd_samples == 7:
+        #     rospy.sleep(0.1)
 
         self.publish_pose(waiting_pose)
         rospy.sleep(0.1)
@@ -183,7 +183,7 @@ class KukaPcdSampler:
                 i += 1
 
         fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2] + \
-                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5] + self.pcd_list[6]
+                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5]
         world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
         fused_pcd = fused_pcd.voxel_down_sample(voxel_size=0.0001)
         o3d.visualization.draw_geometries([world_frame, fused_pcd, self.workspace_bounding_box])

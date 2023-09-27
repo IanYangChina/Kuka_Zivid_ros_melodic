@@ -148,7 +148,9 @@ class Controller:
 
     def trajectory_1(self, req):
         rospy.loginfo("Executing trajectory 1...")
-        down_d = 0.02
+        # This trajectory takes approximately 0.03 seconds to complete
+        # 0.015 seconds down, 0.03 seconds up
+        down_d = 0.015
         up_d = 0.03
         waypoints = []
         p = self.moveit_group.get_current_pose().pose
@@ -177,7 +179,7 @@ class Controller:
         dt = plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
-        return
+        return TrajectoryOneResponse()
 
     def reset(self, req):
         self.publish_pose(waiting_pose)
