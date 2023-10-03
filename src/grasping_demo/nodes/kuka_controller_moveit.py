@@ -149,7 +149,7 @@ class Controller:
     def trajectory_1(self, req):
         rospy.loginfo("Executing trajectory 1...")
         # This trajectory takes approximately 0.03 seconds to complete
-        # 0.015 seconds down, 0.03 seconds up
+        # 0.015 m down, 0.03 m up
         down_d = 0.015
         up_d = 0.03
         waypoints = []
@@ -189,6 +189,9 @@ class Controller:
         p = copy.deepcopy(waiting_pose)
         p.pose.position.x = req.x
         p.pose.position.y = req.y
+        p.pose.position.z = req.z + 0.01
+        self.publish_pose(p)
+
         p.pose.position.z = req.z
         self.publish_pose(p)
         return TargetPoseResponse()
