@@ -11,6 +11,7 @@ add_service_files(FILES
     Reset.srv
     MoveDistance.srv
     TrajectoryOne.srv
+    TrajectoryTwo.srv
 )
 
 generate_messages(DEPENDENCIES std_msgs)

@@ -9,7 +9,7 @@ from utils.kuka_poses import *
 import moveit_commander
 from scipy.spatial.transform import Rotation
 from grasping_demo.srv import TargetPose, TargetPoseResponse, Reset, ResetResponse, MoveDistance, MoveDistanceResponse
-from grasping_demo.srv import TrajectoryOne, TrajectoryOneResponse
+from grasping_demo.srv import TrajectoryOne, TrajectoryOneResponse, TrajectoryTwo, TrajectoryTwoResponse
 
 DISTANCE_THRESHOLD = 0.001
 
@@ -56,6 +56,7 @@ class Controller:
         self.reset_service = rospy.Service('reset', Reset, self.reset)
         self.move_service = rospy.Service('move_distance', MoveDistance, self.move_distance)
         self.tr1_service = rospy.Service('trajectory_1', TrajectoryOne, self.trajectory_1)
+        self.tr2_service = rospy.Service('trajectory_2', TrajectoryTwo, self.trajectory_2)
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
@@ -180,6 +181,41 @@ class Controller:
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryOneResponse()
+
+    def trajectory_2(self, req):
+        rospy.loginfo("Executing trajectory 1...")
+        # This trajectory takes approximately 0.045 seconds to complete
+        # 0.02 m down, 0.03 m up
+        down_d = 0.02
+        up_d = 0.03
+        waypoints = []
+        p = self.moveit_group.get_current_pose().pose
+        z_0 = p.position.z
+        n_t = int(down_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= down_d:
+                break
+        n_t = int(up_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= up_d:
+                break
+        (plan, fraction) = self.moveit_group.compute_cartesian_path(
+                                   waypoints,   # waypoints to follow
+                                   0.0001,      # eef_step
+                                   0.0)         # jump_threshold
+        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
+        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
+            plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
+
+        self.moveit_group.execute(plan, wait=True)
+        dt = plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        rospy.loginfo("Time spent: "+str(dt)+" secs")
+
+        return TrajectoryTwoResponse()
 
     def reset(self, req):
         self.publish_pose(waiting_pose)
