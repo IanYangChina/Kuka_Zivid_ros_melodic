@@ -5,3 +5,10 @@
 /logs
 /.catkin_workspace
 /.catkin_tools
+/src/grasping_demo/src/pcd_processing/__init__.pyc
+/src/grasping_demo/src/pcd_processing/__pycache__
+/src/grasping_demo/src/utils/__pycache__
+/src/grasping_demo/src/utils/kuka_poses.pyc
+/src/robotiq_3f_gripper_control/src/robotiq_3f_gripper_control/__pycache__/
+/src/robotiq_3f_gripper_control/src/robotiq_3f_gripper_control/baseRobotiq3FGripper.pyc
+/src/robotiq_modbus_rtu/src/robotiq_modbus_rtu/comModbusRtu.pyc
