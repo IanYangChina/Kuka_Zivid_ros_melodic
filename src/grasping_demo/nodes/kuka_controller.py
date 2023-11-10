@@ -92,6 +92,12 @@ class Controller:
             self.publish_pose(capture_pose_6)
         elif pose_to_send == '7':
             self.publish_pose(capture_pose_7)
+        elif pose_to_send == 'q':
+            self.publish_pose(new_capture_pose_1)
+        elif pose_to_send == 'w':
+            self.publish_pose(new_capture_pose_2)
+        elif pose_to_send == 'e':
+            self.publish_pose(new_capture_pose_3)
         else:
             return
 

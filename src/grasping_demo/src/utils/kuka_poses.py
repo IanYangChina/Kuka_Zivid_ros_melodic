@@ -81,6 +81,43 @@ capture_pose_7.pose.orientation.x = 0.9411432147026062
 capture_pose_7.pose.orientation.y = 0.27879016182263155
 capture_pose_7.pose.orientation.z = -0.16370694892710425
 
+new_capture_pose_1 = PoseStamped()
+new_capture_pose_1.pose.position.x = -0.2935377899274985
+new_capture_pose_1.pose.position.y = -0.36916836882101806
+new_capture_pose_1.pose.position.z = 0.6355876774795156
+new_capture_pose_1.pose.orientation.w = -0.034467968619369765
+new_capture_pose_1.pose.orientation.x = -0.4858898712548182
+new_capture_pose_1.pose.orientation.y = 0.829987108707428
+new_capture_pose_1.pose.orientation.z = 0.2717433312003845
+
+new_capture_pose_2 = PoseStamped()
+new_capture_pose_2.pose.position.x = -0.2106977191917742
+new_capture_pose_2.pose.position.y = 0.4266307875589973
+new_capture_pose_2.pose.position.z = 0.5151213301603919
+new_capture_pose_2.pose.orientation.w = -0.1352017517135618
+new_capture_pose_2.pose.orientation.x = 0.43021342774639487
+new_capture_pose_2.pose.orientation.y = 0.7914294600486755
+new_capture_pose_2.pose.orientation.z = -0.412645484528154
+
+new_capture_pose_3 = PoseStamped()
+new_capture_pose_3.pose.position.x = -0.4504307320126488
+new_capture_pose_3.pose.position.y = 0.487273953283306
+new_capture_pose_3.pose.position.z = 0.2877615882884661
+new_capture_pose_3.pose.orientation.w = 0.33423575584399423
+new_capture_pose_3.pose.orientation.x = 0.6512413024902344
+new_capture_pose_3.pose.orientation.y = 0.5514962247253425
+new_capture_pose_3.pose.orientation.z = -0.4000289048238309
+
+new_capture_pose_4 = PoseStamped()
+new_capture_pose_4.pose.position.x = -0.6377687841966507
+new_capture_pose_4.pose.position.y = -0.22773638419311637
+new_capture_pose_4.pose.position.z = 0.5595289497610775
+new_capture_pose_4.pose.orientation.w = 0.07528299726908026
+new_capture_pose_4.pose.orientation.x = 0.04239197487957916
+new_capture_pose_4.pose.orientation.y = 0.9884285926818848
+new_capture_pose_4.pose.orientation.z = 0.12467662341429372
+
+
 pre_grasping_pose = PoseStamped()
 pre_grasping_pose.pose.position.x = -0.55
 pre_grasping_pose.pose.position.y = -0.0
