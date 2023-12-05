@@ -1,7 +1,9 @@
 #!/usr/bin/env python2
 
+import os
 import copy
 import sys
+import math
 import rospy, rosnode
 import numpy as np
 from geometry_msgs.msg import PoseStamped
@@ -9,7 +11,8 @@ from utils.kuka_poses import *
 import moveit_commander
 from scipy.spatial.transform import Rotation
 from grasping_demo.srv import TargetPose, TargetPoseResponse, Reset, ResetResponse, MoveDistance, MoveDistanceResponse
-from grasping_demo.srv import TrajectoryOne, TrajectoryOneResponse, TrajectoryTwo, TrajectoryTwoResponse
+from grasping_demo.srv import TrajectoryOne, TrajectoryOneResponse, TrajectoryTwo, TrajectoryTwoResponse, TrajectoryThree, TrajectoryThreeResponse
+import matplotlib.pyplot as plt
 
 DISTANCE_THRESHOLD = 0.001
 
@@ -57,6 +60,7 @@ class Controller:
         self.move_service = rospy.Service('move_distance', MoveDistance, self.move_distance)
         self.tr1_service = rospy.Service('trajectory_1', TrajectoryOne, self.trajectory_1)
         self.tr2_service = rospy.Service('trajectory_2', TrajectoryTwo, self.trajectory_2)
+        self.tr3_service = rospy.Service('trajectory_3', TrajectoryThree, self.trajectory_3)
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
@@ -142,14 +146,14 @@ class Controller:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
 
         self.moveit_group.execute(plan, wait=True)
-        dt = plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return MoveDistanceResponse()
 
     def trajectory_1(self, req):
         rospy.loginfo("Executing trajectory 1...")
-        # This trajectory takes approximately 0.03 seconds to complete
+        # This trajectory takes approximately 1.03 seconds to complete
         # 0.015 m down, 0.03 m up
         down_d = 0.015
         up_d = 0.03
@@ -172,19 +176,20 @@ class Controller:
                                    waypoints,   # waypoints to follow
                                    0.0001,      # eef_step
                                    0.0)         # jump_threshold
+        self.plot_eef_v(plan, True)
         # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
         if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
 
         self.moveit_group.execute(plan, wait=True)
-        dt = plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryOneResponse()
 
     def trajectory_2(self, req):
-        rospy.loginfo("Executing trajectory 1...")
-        # This trajectory takes approximately 0.045 seconds to complete
+        rospy.loginfo("Executing trajectory 2...")
+        # This trajectory takes approximately 1.04 seconds to complete
         # 0.02 m down, 0.03 m up
         down_d = 0.02
         up_d = 0.03
@@ -207,15 +212,54 @@ class Controller:
                                    waypoints,   # waypoints to follow
                                    0.0001,      # eef_step
                                    0.0)         # jump_threshold
+        self.plot_eef_v(plan, True)
         # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
         if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
 
         self.moveit_group.execute(plan, wait=True)
-        dt = plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryTwoResponse()
+
+    def trajectory_3(self, req):
+        rospy.loginfo("Executing trajectory 3...")
+        # This trajectory takes approximately 1.04 seconds to complete
+        # 0.02 m down, 0.03 m up
+        d_in = 0.03
+        d_out = 0.03
+        waypoints = []
+        p = self.moveit_group.get_current_pose().pose
+        z_0 = p.position.z
+        n_t = int(d_in / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position * math.cos(math.pi / 4)
+            p.position.y += self.delta_position * math.sin(math.pi / 4)
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= d_in:
+                break
+        n_t = int(d_out / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position * math.cos(math.pi / 4)
+            p.position.y -= self.delta_position * math.sin(math.pi / 4)
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= d_out:
+                break
+        (plan, fraction) = self.moveit_group.compute_cartesian_path(
+                                   waypoints,   # waypoints to follow
+                                   0.0001,      # eef_step
+                                   0.0)         # jump_threshold
+        self.plot_eef_v(plan, True)
+        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
+        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
+            plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
+
+        self.moveit_group.execute(plan, wait=True)
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        rospy.loginfo("Time spent: "+str(dt)+" secs")
+
+        return TrajectoryThreeResponse()
 
     def reset(self, req):
         self.publish_pose(waiting_pose)
@@ -259,6 +303,32 @@ class Controller:
             if d < DISTANCE_THRESHOLD:
                 rospy.loginfo("Movement finished")
                 done = True
+
+    def plot_eef_v(self, plan, save=False):
+        cartesian_velocities = []
+        time_frames = []
+        for i in range(len(plan.joint_trajectory.points)-1):
+            position = plan.joint_trajectory.points[i].positions
+            velocity = plan.joint_trajectory.points[i].velocities
+            jacobian = self.moveit_group.get_jacobian_matrix(list(position))
+            cartesian_velocity = np.dot(jacobian, np.array(velocity))
+            cartesian_velocities.append(cartesian_velocity)
+            time_frames.append(plan.joint_trajectory.points[i].time_from_start.secs + plan.joint_trajectory.points[i].time_from_start.nsecs / 10e9)
+
+        if save:
+            script_dir = os.path.dirname(__file__)
+            data_dir = os.path.join(script_dir, '..', '..', 'test', 'cartesian_velocities')
+            n = 0
+            while os.path.exists(os.path.join(data_dir, 'eef_v_'+str(n)+'.npy')):
+                n += 1
+            np.save(os.path.join(data_dir, 'eef_v_{}.npy'.format(n)), np.array(cartesian_velocities))
+            np.save(os.path.join(data_dir, 'time_frames_{}.npy'.format(n)), np.array(time_frames))
+
+        plt.plot(cartesian_velocities)
+        plt.xlabel('Time')
+        plt.ylabel('Velocity')
+        plt.title('End-effector velocity')
+        plt.show()
 
 
 if __name__ == '__main__':
