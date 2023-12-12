@@ -260,7 +260,7 @@ class Controller:
                                    waypoints,   # waypoints to follow
                                    self.delta_position,      # eef_step
                                    0.0)         # jump_threshold
-        # self.plot_eef_v(plan, True)
+        self.plot_eef_v(plan, False)
         # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
         if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
@@ -306,7 +306,7 @@ class Controller:
                                    waypoints,   # waypoints to follow
                                    self.delta_position,      # eef_step
                                    0.0)         # jump_threshold
-        # self.plot_eef_v(plan, True)
+        self.plot_eef_v(plan, False)
         # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
         if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
