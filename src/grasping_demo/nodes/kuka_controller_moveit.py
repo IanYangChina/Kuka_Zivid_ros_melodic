@@ -12,6 +12,7 @@ import moveit_commander
 from scipy.spatial.transform import Rotation
 from grasping_demo.srv import TargetPose, TargetPoseResponse, Reset, ResetResponse, MoveDistance, MoveDistanceResponse
 from grasping_demo.srv import TrajectoryOne, TrajectoryOneResponse, TrajectoryTwo, TrajectoryTwoResponse, TrajectoryThree, TrajectoryThreeResponse
+from grasping_demo.srv import TrajectoryFour, TrajectoryFourResponse  #, TrajectoryFive, TrajectoryFiveResponse, TrajectorySix, TrajectorySixResponse
 import matplotlib.pyplot as plt
 
 DISTANCE_THRESHOLD = 0.001
@@ -43,7 +44,7 @@ class Controller:
         self.moveit_group = moveit_commander.MoveGroupCommander("manipulator", robot_description="robot_description")
         self.moveit_group_eelink = self.moveit_group.get_end_effector_link()
 
-        self.delta_position = 0.0002  # meter per waypoint
+        self.delta_position = 0.001  # meter per waypoint
         self.delta_angle = 0.036  # angle per waypoint
 
         ROSSMartServo_on = False
@@ -61,6 +62,7 @@ class Controller:
         self.tr1_service = rospy.Service('trajectory_1', TrajectoryOne, self.trajectory_1)
         self.tr2_service = rospy.Service('trajectory_2', TrajectoryTwo, self.trajectory_2)
         self.tr3_service = rospy.Service('trajectory_3', TrajectoryThree, self.trajectory_3)
+        self.tr4_service = rospy.Service('trajectory_4', TrajectoryFour, self.trajectory_4)
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
@@ -139,7 +141,7 @@ class Controller:
 
         (plan, fraction) = self.moveit_group.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
-                                   0.0001,      # eef_step
+                                   self.delta_position,      # eef_step
                                    0.0)         # jump_threshold
         # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
         if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
@@ -153,7 +155,7 @@ class Controller:
 
     def trajectory_1(self, req):
         rospy.loginfo("Executing trajectory 1...")
-        # This trajectory takes approximately 1.03 seconds to complete
+        # This trajectory takes approximately 1.0 seconds to complete
         # 0.015 m down, 0.03 m up
         down_d = 0.015
         up_d = 0.03
@@ -174,9 +176,9 @@ class Controller:
                 break
         (plan, fraction) = self.moveit_group.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
-                                   0.0001,      # eef_step
+                                   self.delta_position,      # eef_step
                                    0.0)         # jump_threshold
-        self.plot_eef_v(plan, True)
+        # self.plot_eef_v(plan, False)
         # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
         if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
@@ -189,7 +191,7 @@ class Controller:
 
     def trajectory_2(self, req):
         rospy.loginfo("Executing trajectory 2...")
-        # This trajectory takes approximately 1.04 seconds to complete
+        # This trajectory takes approximately 1.0 seconds to complete
         # 0.02 m down, 0.03 m up
         down_d = 0.02
         up_d = 0.03
@@ -210,9 +212,9 @@ class Controller:
                 break
         (plan, fraction) = self.moveit_group.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
-                                   0.0001,      # eef_step
+                                   self.delta_position,      # eef_step
                                    0.0)         # jump_threshold
-        self.plot_eef_v(plan, True)
+        # self.plot_eef_v(plan, False)
         # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
         if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
@@ -225,32 +227,40 @@ class Controller:
 
     def trajectory_3(self, req):
         rospy.loginfo("Executing trajectory 3...")
-        # This trajectory takes approximately 1.04 seconds to complete
-        # 0.02 m down, 0.03 m up
-        d_in = 0.03
-        d_out = 0.03
+        # This trajectory takes approximately 1.06 seconds to complete
+        # 0.02 m down, 0.03 m right, 0.03 m up
+        down_d = 0.02
+        right_d = 0.03
+        up_d = 0.03
         waypoints = []
         p = self.moveit_group.get_current_pose().pose
         z_0 = p.position.z
-        n_t = int(d_in / self.delta_position)
+        n_t = int(down_d / self.delta_position)
         for _ in range(n_t):
-            p.position.z -= self.delta_position * math.cos(math.pi / 4)
-            p.position.y += self.delta_position * math.sin(math.pi / 4)
+            p.position.z -= self.delta_position
             waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_0) >= d_in:
+            if np.abs(p.position.z - z_0) >= down_d:
                 break
-        n_t = int(d_out / self.delta_position)
+        x_1 = p.position.x
+        n_t = int(right_d / self.delta_position)
         for _ in range(n_t):
-            p.position.z += self.delta_position * math.cos(math.pi / 4)
-            p.position.y -= self.delta_position * math.sin(math.pi / 4)
+            p.position.x -= self.delta_position
             waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_0) >= d_out:
+            if np.abs(p.position.x - x_1) >= right_d:
                 break
+        z_1 = p.position.z
+        n_t = int(up_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_1) >= up_d:
+                break
+
         (plan, fraction) = self.moveit_group.compute_cartesian_path(
                                    waypoints,   # waypoints to follow
-                                   0.0001,      # eef_step
+                                   self.delta_position,      # eef_step
                                    0.0)         # jump_threshold
-        self.plot_eef_v(plan, True)
+        # self.plot_eef_v(plan, True)
         # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
         if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
@@ -260,6 +270,52 @@ class Controller:
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryThreeResponse()
+
+    def trajectory_4(self, req):
+        rospy.loginfo("Executing trajectory 4...")
+        # This trajectory takes approximately 1.06 seconds to complete
+        # 0.02 m down, 0.03 m left, 0.03 m up
+        down_d = 0.02
+        left_d = 0.03
+        up_d = 0.03
+        waypoints = []
+        p = self.moveit_group.get_current_pose().pose
+        z_0 = p.position.z
+        n_t = int(down_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= down_d:
+                break
+        x_1 = p.position.x
+        n_t = int(left_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.x += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_1) >= left_d:
+                break
+        z_1 = p.position.z
+        n_t = int(up_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_1) >= up_d:
+                break
+
+        (plan, fraction) = self.moveit_group.compute_cartesian_path(
+                                   waypoints,   # waypoints to follow
+                                   self.delta_position,      # eef_step
+                                   0.0)         # jump_threshold
+        # self.plot_eef_v(plan, True)
+        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
+        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
+            plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
+
+        self.moveit_group.execute(plan, wait=True)
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        rospy.loginfo("Time spent: "+str(dt)+" secs")
+
+        return TrajectoryFourResponse()
 
     def reset(self, req):
         self.publish_pose(waiting_pose)

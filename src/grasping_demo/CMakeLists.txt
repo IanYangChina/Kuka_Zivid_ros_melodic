@@ -13,6 +13,7 @@ add_service_files(FILES
     TrajectoryOne.srv
     TrajectoryTwo.srv
     TrajectoryThree.srv
+    TrajectoryFour.srv
 )
 
 generate_messages(DEPENDENCIES std_msgs)
