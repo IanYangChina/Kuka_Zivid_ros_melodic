@@ -148,10 +148,24 @@ class Controller:
             plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
 
         self.moveit_group.execute(plan, wait=True)
-        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return MoveDistanceResponse()
+
+    def plan_and_show(self, waypoints, show=False, save_tr=False, tr_name='tr'):
+        (plan, fraction) = self.moveit_group.compute_cartesian_path(
+                                   waypoints,   # waypoints to follow
+                                   self.delta_position,      # eef_step
+                                   0.0)         # jump_threshold
+
+        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
+        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
+            plan.joint_trajectory.points[-1].time_from_start.nsecs += 1000
+
+        if show:
+            self.plot_eef_v(plan, save_tr, tr_name)
+        return plan
 
     def trajectory_1(self, req):
         rospy.loginfo("Executing trajectory 1...")
@@ -174,17 +188,11 @@ class Controller:
             waypoints.append(copy.deepcopy(p))
             if np.abs(p.position.z - z_0) >= up_d:
                 break
-        (plan, fraction) = self.moveit_group.compute_cartesian_path(
-                                   waypoints,   # waypoints to follow
-                                   self.delta_position,      # eef_step
-                                   0.0)         # jump_threshold
-        # self.plot_eef_v(plan, False)
-        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
-        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
-            plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
+
+        plan = self.plan_and_show(waypoints, True, True, 'tr1')
 
         self.moveit_group.execute(plan, wait=True)
-        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryOneResponse()
@@ -210,17 +218,11 @@ class Controller:
             waypoints.append(copy.deepcopy(p))
             if np.abs(p.position.z - z_0) >= up_d:
                 break
-        (plan, fraction) = self.moveit_group.compute_cartesian_path(
-                                   waypoints,   # waypoints to follow
-                                   self.delta_position,      # eef_step
-                                   0.0)         # jump_threshold
-        # self.plot_eef_v(plan, False)
-        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
-        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
-            plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
+
+        plan = self.plan_and_show(waypoints, True, True, 'tr2')
 
         self.moveit_group.execute(plan, wait=True)
-        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryTwoResponse()
@@ -256,17 +258,10 @@ class Controller:
             if np.abs(p.position.z - z_1) >= up_d:
                 break
 
-        (plan, fraction) = self.moveit_group.compute_cartesian_path(
-                                   waypoints,   # waypoints to follow
-                                   self.delta_position,      # eef_step
-                                   0.0)         # jump_threshold
-        self.plot_eef_v(plan, False)
-        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
-        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
-            plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
+        plan = self.plan_and_show(waypoints, True, True, 'tr3')
 
         self.moveit_group.execute(plan, wait=True)
-        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryThreeResponse()
@@ -302,17 +297,10 @@ class Controller:
             if np.abs(p.position.z - z_1) >= up_d:
                 break
 
-        (plan, fraction) = self.moveit_group.compute_cartesian_path(
-                                   waypoints,   # waypoints to follow
-                                   self.delta_position,      # eef_step
-                                   0.0)         # jump_threshold
-        self.plot_eef_v(plan, False)
-        # moveit sometimes uses the same time value for the last two trajectory points, causing failure execution
-        if plan.joint_trajectory.points[-2].time_from_start.nsecs == plan.joint_trajectory.points[-1].time_from_start.nsecs:
-            plan.joint_trajectory.points[-1].time_from_start.nsecs += 10000
+        plan = self.plan_and_show(waypoints, True, True, 'tr4')
 
         self.moveit_group.execute(plan, wait=True)
-        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 10e9
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryFourResponse()
@@ -360,30 +348,57 @@ class Controller:
                 rospy.loginfo("Movement finished")
                 done = True
 
-    def plot_eef_v(self, plan, save=False):
+    def plot_eef_v(self, plan, save=False, tr_name='tr'):
+        cartesian_positions = []
         cartesian_velocities = []
         time_frames = []
+        time_difference = [0.0]
         for i in range(len(plan.joint_trajectory.points)-1):
             position = plan.joint_trajectory.points[i].positions
             velocity = plan.joint_trajectory.points[i].velocities
             jacobian = self.moveit_group.get_jacobian_matrix(list(position))
+            cartesian_position = np.dot(jacobian, np.array(position))
+            cartesian_positions.append(cartesian_position)
             cartesian_velocity = np.dot(jacobian, np.array(velocity))
             cartesian_velocities.append(cartesian_velocity)
-            time_frames.append(plan.joint_trajectory.points[i].time_from_start.secs + plan.joint_trajectory.points[i].time_from_start.nsecs / 10e9)
+            time_frames.append(plan.joint_trajectory.points[i].time_from_start.secs + plan.joint_trajectory.points[i].time_from_start.nsecs / 1e9)
+            if i > 0:
+                time_difference.append(time_frames[-1] - time_frames[-2])
+            print('Timestamp: {}'.format(time_frames[-1]))
+            print('Time difference: {}'.format(time_difference[-1]))
+            print('Cartesian velocity: {}'.format(cartesian_velocity))
 
         if save:
             script_dir = os.path.dirname(__file__)
             data_dir = os.path.join(script_dir, '..', '..', 'test', 'cartesian_velocities')
             n = 0
-            while os.path.exists(os.path.join(data_dir, 'eef_v_'+str(n)+'.npy')):
+            while os.path.exists(os.path.join(data_dir, tr_name+'_eef_v_'+str(n)+'.npy')):
                 n += 1
-            np.save(os.path.join(data_dir, 'eef_v_{}.npy'.format(n)), np.array(cartesian_velocities))
-            np.save(os.path.join(data_dir, 'time_frames_{}.npy'.format(n)), np.array(time_frames))
+            np.save(os.path.join(data_dir, tr_name+'_eef_v_'+str(n)+'.npy'), np.array(cartesian_velocities))
+            np.save(os.path.join(data_dir, tr_name+'_timestamps_'+str(n)+'.npy'), np.array(time_frames))
 
         plt.plot(cartesian_velocities)
-        plt.xlabel('Time')
+        plt.xlabel('Horizon')
         plt.ylabel('Velocity')
         plt.title('End-effector velocity')
+        plt.show()
+
+        plt.plot(cartesian_positions)
+        plt.xlabel('Horizon')
+        plt.ylabel('Pose')
+        plt.title('End-effector velocity')
+        plt.show()
+
+        plt.plot(time_frames)
+        plt.xlabel('Horizon')
+        plt.ylabel('Timestamps')
+        plt.title('Trajectory timestamps')
+        plt.show()
+
+        plt.plot(time_difference)
+        plt.xlabel('Horizon')
+        plt.ylabel('Time difference')
+        plt.title('Trajectory difference')
         plt.show()
 
 
