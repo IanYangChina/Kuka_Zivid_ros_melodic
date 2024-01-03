@@ -12,7 +12,8 @@ import moveit_commander
 from scipy.spatial.transform import Rotation
 from grasping_demo.srv import TargetPose, TargetPoseResponse, Reset, ResetResponse, MoveDistance, MoveDistanceResponse
 from grasping_demo.srv import TrajectoryOne, TrajectoryOneResponse, TrajectoryTwo, TrajectoryTwoResponse, TrajectoryThree, TrajectoryThreeResponse
-from grasping_demo.srv import TrajectoryFour, TrajectoryFourResponse  #, TrajectoryFive, TrajectoryFiveResponse, TrajectorySix, TrajectorySixResponse
+from grasping_demo.srv import TrajectoryFour, TrajectoryFourResponse
+from grasping_demo.srv import TrajectoryRecValid, TrajectoryRoundValid, TrajectoryCyldrValid, TrajectoryRecValidResponse, TrajectoryRoundValidResponse, TrajectoryCyldrValidResponse
 import matplotlib.pyplot as plt
 
 DISTANCE_THRESHOLD = 0.001
@@ -63,6 +64,10 @@ class Controller:
         self.tr2_service = rospy.Service('trajectory_2', TrajectoryTwo, self.trajectory_2)
         self.tr3_service = rospy.Service('trajectory_3', TrajectoryThree, self.trajectory_3)
         self.tr4_service = rospy.Service('trajectory_4', TrajectoryFour, self.trajectory_4)
+
+        self.tr_rec_valid_service = rospy.Service('trajectory_rec_valid', TrajectoryRecValid, self.trajectory_rec_valid)
+        self.tr_round_valid_service = rospy.Service('trajectory_round_valid', TrajectoryRoundValid, self.trajectory_round_valid)
+        self.tr_cyldr_valid_service = rospy.Service('trajectory_cyldr_valid', TrajectoryCyldrValid, self.trajectory_cyldr_valid)
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
@@ -169,7 +174,6 @@ class Controller:
 
     def trajectory_1(self, req):
         rospy.loginfo("Executing trajectory 1...")
-        # This trajectory takes approximately 1.0 seconds to complete
         # 0.015 m down, 0.03 m up
         down_d = 0.015
         up_d = 0.03
@@ -189,7 +193,7 @@ class Controller:
             if np.abs(p.position.z - z_0) >= up_d:
                 break
 
-        plan = self.plan_and_show(waypoints, True, True, 'tr1')
+        plan = self.plan_and_show(waypoints, False, False, 'tr1')
 
         self.moveit_group.execute(plan, wait=True)
         dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
@@ -199,7 +203,6 @@ class Controller:
 
     def trajectory_2(self, req):
         rospy.loginfo("Executing trajectory 2...")
-        # This trajectory takes approximately 1.0 seconds to complete
         # 0.02 m down, 0.03 m up
         down_d = 0.02
         up_d = 0.03
@@ -219,7 +222,7 @@ class Controller:
             if np.abs(p.position.z - z_0) >= up_d:
                 break
 
-        plan = self.plan_and_show(waypoints, True, True, 'tr2')
+        plan = self.plan_and_show(waypoints, False, False, 'tr2')
 
         self.moveit_group.execute(plan, wait=True)
         dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
@@ -229,7 +232,6 @@ class Controller:
 
     def trajectory_3(self, req):
         rospy.loginfo("Executing trajectory 3...")
-        # This trajectory takes approximately 1.06 seconds to complete
         # 0.02 m down, 0.03 m right, 0.03 m up
         down_d = 0.02
         right_d = 0.03
@@ -258,7 +260,7 @@ class Controller:
             if np.abs(p.position.z - z_1) >= up_d:
                 break
 
-        plan = self.plan_and_show(waypoints, True, True, 'tr3')
+        plan = self.plan_and_show(waypoints, False, False, 'tr3')
 
         self.moveit_group.execute(plan, wait=True)
         dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
@@ -268,7 +270,6 @@ class Controller:
 
     def trajectory_4(self, req):
         rospy.loginfo("Executing trajectory 4...")
-        # This trajectory takes approximately 1.06 seconds to complete
         # 0.02 m down, 0.03 m left, 0.03 m up
         down_d = 0.02
         left_d = 0.03
@@ -297,13 +298,250 @@ class Controller:
             if np.abs(p.position.z - z_1) >= up_d:
                 break
 
-        plan = self.plan_and_show(waypoints, True, True, 'tr4')
+        plan = self.plan_and_show(waypoints, False, False, 'tr4')
 
         self.moveit_group.execute(plan, wait=True)
         dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
         rospy.loginfo("Time spent: "+str(dt)+" secs")
 
         return TrajectoryFourResponse()
+
+    def trajectory_round_valid(self, req):
+        rospy.loginfo("Executing validation trajectory for round eef...")
+        # 0.02 m down, 0.03 m left, 0.03 m up
+        waypoints = []
+        p = self.moveit_group.get_current_pose().pose
+        down_d = 0.01
+        z_0 = p.position.z
+        n_t = int(down_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= down_d:
+                break
+
+        left_d = 0.025
+        x_0 = p.position.x
+        n_t = int(left_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.x += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_0) >= left_d:
+                break
+
+        right_d = 0.05
+        x_1 = p.position.x
+        n_t = int(right_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.x -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_1) >= right_d:
+                break
+
+        left_d = 0.025
+        x_2 = p.position.x
+        n_t = int(left_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.x += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_2) >= left_d:
+                break
+
+        forth_d = 0.025
+        y_0 = p.position.y
+        n_t = int(forth_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.y += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.y - y_0) >= forth_d:
+                break
+
+        back_d = 0.05
+        y_1 = p.position.y
+        n_t = int(back_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.y -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.y - y_1) >= back_d:
+                break
+
+        up_d = 0.01
+        z_1 = p.position.z
+        n_t = int(up_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_1) >= up_d:
+                break
+
+        plan = self.plan_and_show(waypoints, False, False, 'tr_round_valid')
+
+        self.moveit_group.execute(plan, wait=True)
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
+        rospy.loginfo("Time spent: "+str(dt)+" secs")
+
+        return TrajectoryRoundValidResponse()
+
+    def trajectory_rec_valid(self, req):
+        rospy.loginfo("Executing validation trajectory for rectangle eef...")
+        # 0.025 m down, 0.025 m up, 0.025 m left, 0.025 m down, 0.025 m up, 0.045 m right, 0.025 m down, 0.025 m up
+        waypoints = []
+        p = self.moveit_group.get_current_pose().pose
+        down_d = 0.025
+        z_0 = p.position.z
+        n_t = int(down_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= down_d:
+                break
+
+        up_d = 0.025
+        z_1 = p.position.z
+        n_t = int(up_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_1) >= up_d:
+                break
+
+        left_d = 0.025
+        x_0 = p.position.x
+        n_t = int(left_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.x += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_0) >= left_d:
+                break
+
+        down_d_2 = 0.025
+        z_2 = p.position.z
+        n_t = int(down_d_2 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_2) >= down_d_2:
+                break
+
+        up_d_2 = 0.025
+        z_3 = p.position.z
+        n_t = int(up_d_2 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_3) >= up_d_2:
+                break
+
+        right_d = 0.045
+        x_1 = p.position.x
+        n_t = int(right_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.x -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_1) >= right_d:
+                break
+
+        down_d_3 = 0.025
+        z_4 = p.position.z
+        n_t = int(down_d_3 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_4) >= down_d_3:
+                break
+
+        up_d_3 = 0.025
+        z_5 = p.position.z
+        n_t = int(up_d_3 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_5) >= up_d_3:
+                break
+
+        plan = self.plan_and_show(waypoints, False, False, 'tr_rec_valid')
+
+        self.moveit_group.execute(plan, wait=True)
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
+        rospy.loginfo("Time spent: "+str(dt)+" secs")
+
+        return TrajectoryRecValidResponse()
+
+    def trajectory_cyldr_valid(self, req):
+        rospy.loginfo("Executing validation trajectory for cylinder eef...")
+        # 0.025 m down, 0.025 m left, 0.025 m up, 0.025 m right, 0.025 m down, 0.025 m right, 0.025 m up
+        waypoints = []
+        p = self.moveit_group.get_current_pose().pose
+        down_d = 0.025
+        z_0 = p.position.z
+        n_t = int(down_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= down_d:
+                break
+
+        left_d = 0.025
+        x_0 = p.position.x
+        n_t = int(left_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.x += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_0) >= left_d:
+                break
+
+        up_d = 0.025
+        z_1 = p.position.z
+        n_t = int(up_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_1) >= up_d:
+                break
+
+        right_d = 0.025
+        x_1 = p.position.x
+        n_t = int(right_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.x -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_1) >= right_d:
+                break
+
+        down_d_2 = 0.025
+        z_2 = p.position.z
+        n_t = int(down_d_2 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_2) >= down_d_2:
+                break
+
+        right_d_2 = 0.025
+        x_2 = p.position.x
+        n_t = int(right_d_2 / self.delta_position)
+        for _ in range(n_t):
+            p.position.x -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.x - x_2) >= right_d_2:
+                break
+
+        up_d_2 = 0.025
+        z_3 = p.position.z
+        n_t = int(up_d_2 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_3) >= up_d_2:
+                break
+
+        plan = self.plan_and_show(waypoints, False, False, 'tr_cyldr_valid')
+
+        self.moveit_group.execute(plan, wait=True)
+        dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
+        rospy.loginfo("Time spent: "+str(dt)+" secs")
+
+        return TrajectoryCyldrValidResponse()
 
     def reset(self, req):
         self.publish_pose(waiting_pose)
@@ -386,7 +624,7 @@ class Controller:
         plt.plot(cartesian_positions)
         plt.xlabel('Horizon')
         plt.ylabel('Pose')
-        plt.title('End-effector velocity')
+        plt.title('End-effector pose')
         plt.show()
 
         plt.plot(time_frames)
@@ -398,7 +636,7 @@ class Controller:
         plt.plot(time_difference)
         plt.xlabel('Horizon')
         plt.ylabel('Time difference')
-        plt.title('Trajectory difference')
+        plt.title('Trajectory waypoint time difference')
         plt.show()
 
 

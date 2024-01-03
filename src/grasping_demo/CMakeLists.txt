@@ -14,6 +14,9 @@ add_service_files(FILES
     TrajectoryTwo.srv
     TrajectoryThree.srv
     TrajectoryFour.srv
+    TrajectoryRecValid.srv
+    TrajectoryRoundValid.srv
+    TrajectoryCyldrValid.srv
 )
 
 generate_messages(DEPENDENCIES std_msgs)
