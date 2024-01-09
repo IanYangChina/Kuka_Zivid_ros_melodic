@@ -43,10 +43,9 @@ class Controller:
         self.moveit_robot = moveit_commander.RobotCommander(robot_description="robot_description")
         self.moveit_scene = moveit_commander.PlanningSceneInterface()
         self.moveit_group = moveit_commander.MoveGroupCommander("manipulator", robot_description="robot_description")
-        self.moveit_group_eelink = self.moveit_group.get_end_effector_link()
 
-        self.delta_position = 0.001  # meter per waypoint
-        self.delta_angle = 0.036  # angle per waypoint
+        self.delta_position = 0.002  # meter per waypoint
+        self.delta_angle = 5  # angle per waypoint
 
         ROSSMartServo_on = False
         while not ROSSMartServo_on:
@@ -311,42 +310,6 @@ class Controller:
         # 0.02 m down, 0.03 m left, 0.03 m up
         waypoints = []
         p = self.moveit_group.get_current_pose().pose
-        down_d = 0.01
-        z_0 = p.position.z
-        n_t = int(down_d / self.delta_position)
-        for _ in range(n_t):
-            p.position.z -= self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_0) >= down_d:
-                break
-
-        left_d = 0.025
-        x_0 = p.position.x
-        n_t = int(left_d / self.delta_position)
-        for _ in range(n_t):
-            p.position.x += self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.x - x_0) >= left_d:
-                break
-
-        right_d = 0.05
-        x_1 = p.position.x
-        n_t = int(right_d / self.delta_position)
-        for _ in range(n_t):
-            p.position.x -= self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.x - x_1) >= right_d:
-                break
-
-        left_d = 0.025
-        x_2 = p.position.x
-        n_t = int(left_d / self.delta_position)
-        for _ in range(n_t):
-            p.position.x += self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.x - x_2) >= left_d:
-                break
-
         forth_d = 0.025
         y_0 = p.position.y
         n_t = int(forth_d / self.delta_position)
@@ -356,7 +319,25 @@ class Controller:
             if np.abs(p.position.y - y_0) >= forth_d:
                 break
 
-        back_d = 0.05
+        down_d = 0.025
+        z_0 = p.position.z
+        n_t = int(down_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_0) >= down_d:
+                break
+
+        up_d = 0.025
+        z_1 = p.position.z
+        n_t = int(up_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_1) >= up_d:
+                break
+
+        back_d = 0.025
         y_1 = p.position.y
         n_t = int(back_d / self.delta_position)
         for _ in range(n_t):
@@ -365,13 +346,49 @@ class Controller:
             if np.abs(p.position.y - y_1) >= back_d:
                 break
 
-        up_d = 0.01
-        z_1 = p.position.z
-        n_t = int(up_d / self.delta_position)
+        down_d_2 = 0.025
+        z_2 = p.position.z
+        n_t = int(down_d_2 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_2) >= down_d_2:
+                break
+
+        up_d_2 = 0.025
+        z_3 = p.position.z
+        n_t = int(up_d_2 / self.delta_position)
         for _ in range(n_t):
             p.position.z += self.delta_position
             waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_1) >= up_d:
+            if np.abs(p.position.z - z_3) >= up_d_2:
+                break
+
+        back_d = 0.025
+        y_2 = p.position.y
+        n_t = int(back_d / self.delta_position)
+        for _ in range(n_t):
+            p.position.y -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.y - y_2) >= back_d:
+                break
+
+        down_d_3 = 0.025
+        z_4 = p.position.z
+        n_t = int(down_d_3 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z -= self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_4) >= down_d_3:
+                break
+
+        up_d_3 = 0.025
+        z_5 = p.position.z
+        n_t = int(up_d_3 / self.delta_position)
+        for _ in range(n_t):
+            p.position.z += self.delta_position
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(p.position.z - z_5) >= up_d_3:
                 break
 
         plan = self.plan_and_show(waypoints, False, False, 'tr_round_valid')
@@ -396,70 +413,30 @@ class Controller:
             if np.abs(p.position.z - z_0) >= down_d:
                 break
 
+        current_euler = Rotation.from_quat([p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]).as_euler('xyz', degrees=True)
+        c_0 = current_euler[2]
+        n_t = int(180 / self.delta_angle)
+        for _ in range(n_t):
+            current_euler[2] -= self.delta_angle
+            quat_xyzw = Rotation.from_euler('xyz', current_euler.copy(), degrees=True).as_quat()
+            p.orientation.x = quat_xyzw[0]
+            p.orientation.y = quat_xyzw[1]
+            p.orientation.z = quat_xyzw[2]
+            p.orientation.w = quat_xyzw[3]
+            waypoints.append(copy.deepcopy(p))
+            if np.abs(current_euler[2] - c_0) >= 180:
+                break
+
         up_d = 0.025
-        z_1 = p.position.z
+        z_0 = p.position.z
         n_t = int(up_d / self.delta_position)
         for _ in range(n_t):
             p.position.z += self.delta_position
             waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_1) >= up_d:
+            if np.abs(p.position.z - z_0) >= up_d:
                 break
 
-        left_d = 0.025
-        x_0 = p.position.x
-        n_t = int(left_d / self.delta_position)
-        for _ in range(n_t):
-            p.position.x += self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.x - x_0) >= left_d:
-                break
-
-        down_d_2 = 0.025
-        z_2 = p.position.z
-        n_t = int(down_d_2 / self.delta_position)
-        for _ in range(n_t):
-            p.position.z -= self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_2) >= down_d_2:
-                break
-
-        up_d_2 = 0.025
-        z_3 = p.position.z
-        n_t = int(up_d_2 / self.delta_position)
-        for _ in range(n_t):
-            p.position.z += self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_3) >= up_d_2:
-                break
-
-        right_d = 0.045
-        x_1 = p.position.x
-        n_t = int(right_d / self.delta_position)
-        for _ in range(n_t):
-            p.position.x -= self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.x - x_1) >= right_d:
-                break
-
-        down_d_3 = 0.025
-        z_4 = p.position.z
-        n_t = int(down_d_3 / self.delta_position)
-        for _ in range(n_t):
-            p.position.z -= self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_4) >= down_d_3:
-                break
-
-        up_d_3 = 0.025
-        z_5 = p.position.z
-        n_t = int(up_d_3 / self.delta_position)
-        for _ in range(n_t):
-            p.position.z += self.delta_position
-            waypoints.append(copy.deepcopy(p))
-            if np.abs(p.position.z - z_5) >= up_d_3:
-                break
-
-        plan = self.plan_and_show(waypoints, False, False, 'tr_rec_valid')
+        plan = self.plan_and_show(waypoints, True, True, 'tr_rec_valid')
 
         self.moveit_group.execute(plan, wait=True)
         dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
@@ -602,9 +579,9 @@ class Controller:
             time_frames.append(plan.joint_trajectory.points[i].time_from_start.secs + plan.joint_trajectory.points[i].time_from_start.nsecs / 1e9)
             if i > 0:
                 time_difference.append(time_frames[-1] - time_frames[-2])
-            print('Timestamp: {}'.format(time_frames[-1]))
-            print('Time difference: {}'.format(time_difference[-1]))
-            print('Cartesian velocity: {}'.format(cartesian_velocity))
+            # print('Timestamp: {}'.format(time_frames[-1]))
+            # print('Time difference: {}'.format(time_difference[-1]))
+            # print('Cartesian velocity: {}'.format(cartesian_velocity))
 
         if save:
             script_dir = os.path.dirname(__file__)
