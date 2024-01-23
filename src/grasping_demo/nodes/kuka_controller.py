@@ -101,7 +101,7 @@ class Controller:
         else:
             return
 
-    def keyboard_callback(self, data):
+    def keyboard_callback_old(self, data):
         key_pressed = data.data
 
         target_pose = self.current_pose_msg
@@ -145,6 +145,24 @@ class Controller:
             target_pose.pose.orientation.z = quat_new[3]
 
         self.publish_pose(target_pose)
+
+    def keyboard_callback(self, data):
+        key_pressed = data.data
+
+        if key_pressed == '1':
+            self.publish_pose(waiting_pose)
+        elif key_pressed == '2':
+            self.publish_pose(qingmeng_demo_pose_1)
+        elif key_pressed == '3':
+            self.publish_pose(qingmeng_demo_pose_2)
+        elif key_pressed == '4':
+            self.publish_pose(qingmeng_demo_pose_3)
+        elif key_pressed == '5':
+            self.publish_grip_cmd(gripper_close)
+        elif key_pressed == '6':
+            self.publish_pose(qingmeng_demo_pose_4)
+        elif key_pressed == '7':
+            self.publish_grip_cmd(gripper_open)
 
     def gripper_msg(self, data):
         pass

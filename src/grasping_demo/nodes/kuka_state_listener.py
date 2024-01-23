@@ -18,13 +18,13 @@ class StateListener:
         self.current_xyz = np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z])
         self.current_header_seq = msg.header.seq
         print("New pose")
-        print("capture_pose_.pose.position.x = " + str(msg.pose.position.x))
-        print("capture_pose_.pose.position.y = " + str(msg.pose.position.y))
-        print("capture_pose_.pose.position.z = " + str(msg.pose.position.z))
-        print("capture_pose_.pose.orientation.w = " + str(msg.pose.orientation.w))
-        print("capture_pose_.pose.orientation.x = " + str(msg.pose.orientation.x))
-        print("capture_pose_.pose.orientation.y = " + str(msg.pose.orientation.y))
-        print("capture_pose_.pose.orientation.z = " + str(msg.pose.orientation.z))
+        print("X.pose.position.x = " + str(msg.pose.position.x))
+        print("X.pose.position.y = " + str(msg.pose.position.y))
+        print("X.pose.position.z = " + str(msg.pose.position.z))
+        print("X.pose.orientation.w = " + str(msg.pose.orientation.w))
+        print("X.pose.orientation.x = " + str(msg.pose.orientation.x))
+        print("X.pose.orientation.y = " + str(msg.pose.orientation.y))
+        print("X.pose.orientation.z = " + str(msg.pose.orientation.z))
 
 
 if __name__ == "__main__":
