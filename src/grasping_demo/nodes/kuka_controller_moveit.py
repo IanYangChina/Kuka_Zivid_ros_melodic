@@ -14,6 +14,7 @@ from grasping_demo.srv import TargetPose, TargetPoseResponse, Reset, ResetRespon
 from grasping_demo.srv import TrajectoryOne, TrajectoryOneResponse, TrajectoryTwo, TrajectoryTwoResponse, TrajectoryThree, TrajectoryThreeResponse
 from grasping_demo.srv import TrajectoryFour, TrajectoryFourResponse
 from grasping_demo.srv import TrajectoryRecValid, TrajectoryRoundValid, TrajectoryCyldrValid, TrajectoryRecValidResponse, TrajectoryRoundValidResponse, TrajectoryCyldrValidResponse
+from grasping_demo.srv import TrajectorySpoon, TrajectorySpoonResponse
 import matplotlib.pyplot as plt
 
 DISTANCE_THRESHOLD = 0.001
@@ -44,7 +45,7 @@ class Controller:
         self.moveit_scene = moveit_commander.PlanningSceneInterface()
         self.moveit_group = moveit_commander.MoveGroupCommander("manipulator", robot_description="robot_description")
 
-        self.delta_position = 0.002  # meter per waypoint
+        self.delta_position = 0.005  # meter per waypoint
         self.delta_angle = 5  # angle per waypoint
 
         ROSSMartServo_on = False
@@ -68,9 +69,11 @@ class Controller:
         self.tr_round_valid_service = rospy.Service('trajectory_round_valid', TrajectoryRoundValid, self.trajectory_round_valid)
         self.tr_cyldr_valid_service = rospy.Service('trajectory_cyldr_valid', TrajectoryCyldrValid, self.trajectory_cyldr_valid)
 
+        self.tr_spoon_service = rospy.Service('trajectory_spoon', TrajectorySpoon, self.trajectory_spoon)
+
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
-        self.publish_pose(waiting_pose)
+        self.publish_pose(minglun_demo_init_pose)
         rospy.sleep(2)
 
         # self.move_distance([0.1, 0.0, -0.2, 0, 0, 90])
@@ -520,6 +523,37 @@ class Controller:
 
         return TrajectoryCyldrValidResponse()
 
+    def trajectory_spoon(self, rep):
+        self.publish_pose(minglun_demo_init_pose)
+        rospy.sleep(2)
+        delta_p = np.load(os.path.join(os.path.dirname(__file__), '..', 'src', 'delta_p.npy'))
+        delta_rot = np.load(os.path.join(os.path.dirname(__file__), '..', 'src', 'rot_diff.npy'))
+        p = self.moveit_group.get_current_pose().pose
+        current_euler = Rotation.from_quat([p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]).as_euler('xyz', degrees=True)
+        for n in range(7):
+            waypoints = []
+            for i in range(300):
+                if n*300 + i >= delta_p.shape[0]:
+                    break
+                p.position.x += delta_p[n*300 + i, 0]
+                p.position.y += delta_p[n*300 + i, 1]
+                p.position.z += delta_p[n*300 + i, 2]
+                current_euler[1] -= delta_rot[n*300 + i, 0]
+                new_quat_xyzw = Rotation.from_euler('xyz', current_euler.copy(), degrees=True).as_quat()
+                p.orientation.x = new_quat_xyzw[0]
+                p.orientation.y = new_quat_xyzw[1]
+                p.orientation.z = new_quat_xyzw[2]
+                p.orientation.w = new_quat_xyzw[3]
+
+                waypoints.append(copy.deepcopy(p))
+
+            plan = self.plan_and_show(waypoints, True, False, 'tr_spoon')
+            self.moveit_group.execute(plan, wait=True)
+            dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
+            rospy.loginfo("Time spent: "+str(dt)+" secs")
+
+        return TrajectorySpoonResponse()
+
     def reset(self, req):
         self.publish_pose(waiting_pose)
         return ResetResponse()
@@ -592,13 +626,16 @@ class Controller:
             np.save(os.path.join(data_dir, tr_name+'_eef_v_'+str(n)+'.npy'), np.array(cartesian_velocities))
             np.save(os.path.join(data_dir, tr_name+'_timestamps_'+str(n)+'.npy'), np.array(time_frames))
 
+        legends = ['x', 'y', 'z', 'rx', 'ry', 'rz']
         plt.plot(cartesian_velocities)
+        plt.legend(legends)
         plt.xlabel('Horizon')
         plt.ylabel('Velocity')
         plt.title('End-effector velocity')
         plt.show()
 
         plt.plot(cartesian_positions)
+        plt.legend(legends)
         plt.xlabel('Horizon')
         plt.ylabel('Pose')
         plt.title('End-effector pose')

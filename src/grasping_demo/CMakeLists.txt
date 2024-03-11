@@ -17,6 +17,7 @@ add_service_files(FILES
     TrajectoryRecValid.srv
     TrajectoryRoundValid.srv
     TrajectoryCyldrValid.srv
+    TrajectorySpoon.srv
 )
 
 generate_messages(DEPENDENCIES std_msgs)
