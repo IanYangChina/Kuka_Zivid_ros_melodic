@@ -73,7 +73,7 @@ class Controller:
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
-        self.publish_pose(minglun_demo_init_pose)
+        self.publish_pose(waiting_pose)
         rospy.sleep(2)
 
         # self.move_distance([0.1, 0.0, -0.2, 0, 0, 90])
@@ -526,19 +526,22 @@ class Controller:
     def trajectory_spoon(self, rep):
         self.publish_pose(minglun_demo_init_pose)
         rospy.sleep(2)
-        delta_p = np.load(os.path.join(os.path.dirname(__file__), '..', 'src', 'delta_p.npy'))
-        delta_rot = np.load(os.path.join(os.path.dirname(__file__), '..', 'src', 'rot_diff.npy'))
-        p = self.moveit_group.get_current_pose().pose
-        current_euler = Rotation.from_quat([p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]).as_euler('xyz', degrees=True)
-        for n in range(7):
+        p_in = copy.deepcopy(minglun_demo_init_pose)
+        p_in.pose.position.z -= 0.09
+        self.publish_pose(p_in)
+        rospy.sleep(2)
+        for n in range(3):
+            n_str = str(n+1)
+            delta_p = np.load(os.path.join(os.path.dirname(__file__), '..', 'src', 'minglun_demo_trajectories', 'delta_p_'+n_str+'.npy'))
+            delta_rot = np.load(os.path.join(os.path.dirname(__file__), '..', 'src', 'minglun_demo_trajectories', 'delta_rot_'+n_str+'.npy'))
+            p = self.moveit_group.get_current_pose().pose
+            current_euler = Rotation.from_quat([p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]).as_euler('xyz', degrees=True)
             waypoints = []
-            for i in range(300):
-                if n*300 + i >= delta_p.shape[0]:
-                    break
-                p.position.x += delta_p[n*300 + i, 0]
-                p.position.y += delta_p[n*300 + i, 1]
-                p.position.z += delta_p[n*300 + i, 2]
-                current_euler[1] -= delta_rot[n*300 + i, 0]
+            for i in range(delta_p.shape[0]):
+                p.position.x += delta_p[i, 0]
+                p.position.y += delta_p[i, 1]
+                p.position.z += delta_p[i, 2]
+                current_euler[1] -= delta_rot[i, 0]
                 new_quat_xyzw = Rotation.from_euler('xyz', current_euler.copy(), degrees=True).as_quat()
                 p.orientation.x = new_quat_xyzw[0]
                 p.orientation.y = new_quat_xyzw[1]
@@ -547,10 +550,11 @@ class Controller:
 
                 waypoints.append(copy.deepcopy(p))
 
-            plan = self.plan_and_show(waypoints, True, False, 'tr_spoon')
+            plan = self.plan_and_show(waypoints, False, False, 'tr_spoon')
             self.moveit_group.execute(plan, wait=True)
             dt = plan.joint_trajectory.points[-1].time_from_start.secs + plan.joint_trajectory.points[-1].time_from_start.nsecs / 1e9
             rospy.loginfo("Time spent: "+str(dt)+" secs")
+            rospy.sleep(2)
 
         return TrajectorySpoonResponse()
 

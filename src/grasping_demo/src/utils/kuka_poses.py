@@ -182,10 +182,10 @@ qingmeng_demo_pose_4.pose.orientation.y = 0.680124819278717
 qingmeng_demo_pose_4.pose.orientation.z = -0.6189839123386641
 
 minglun_demo_init_pose = PoseStamped()
-minglun_demo_init_pose.pose.position.x = -0.6016283130715632
-minglun_demo_init_pose.pose.position.y = -0.43176089838427395
-minglun_demo_init_pose.pose.position.z = 0.1892802491144074
-minglun_demo_init_pose.pose.orientation.w = 0.70108962059021
-minglun_demo_init_pose.pose.orientation.x = -0.026058649221857733
-minglun_demo_init_pose.pose.orientation.y = -0.7105638843048838
-minglun_demo_init_pose.pose.orientation.z = 0.05378914837740892
+minglun_demo_init_pose.pose.position.x = -0.55
+minglun_demo_init_pose.pose.position.y = -0.2
+minglun_demo_init_pose.pose.position.z = 0.2
+minglun_demo_init_pose.pose.orientation.w = 0.7090792059898376
+minglun_demo_init_pose.pose.orientation.x = -0.09327360673373983
+minglun_demo_init_pose.pose.orientation.y = -0.6917185040204186
+minglun_demo_init_pose.pose.orientation.z = 0.10016080507920941
