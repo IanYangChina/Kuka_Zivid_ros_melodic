@@ -12,6 +12,7 @@ transform_base_to_cam_hand_calibrated = np.load(os.path.join(script_dir, 'transf
 transform_cam_to_base_hand_calibrated = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_cam_to_base_fine_tuned.npy'))
 transform_base_to_part_reference_grasp = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_base_to_part_reference_grasp.npy'))
 transform_base_to_sprayer_reference_grasp = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_base_to_sprayer_reference_grasp.npy'))
+transform_base_to_brash_reference_grasp = np.load(os.path.join(script_dir, 'transformation_matrices', 'transform_base_to_brash_reference_grasp.npy'))
 identity_transform = np.array([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
@@ -97,12 +98,15 @@ def refine_registration(source, target, previous_transformation,
 # load, preprocess target point cloud (one with a reference grasp)
 part_target = o3d.io.read_point_cloud(os.path.join(script_dir, 'reference_grasp', 'cropped_part_pcd_in_world_frame.ply'))
 sprayer_target = o3d.io.read_point_cloud(os.path.join(script_dir, 'reference_grasp', 'cropped_sprayer_pcd_in_world_frame.ply'))
+brash_target = o3d.io.read_point_cloud(os.path.join(script_dir, 'reference_grasp', 'cropped_brash_pcd_in_world_frame.ply'))
 
 part_target.paint_uniform_color([0.6, 0.6, 0.6])
 sprayer_target.paint_uniform_color([0.1, 0.3, 0.3])
+brash_target.paint_uniform_color([0.3, 0.3, 0.3])
 # compute fpfh
 part_target_down, part_target_fpfh = preprocess_point_cloud(part_target)
 sprayer_target_down, sprayer_target_fpfh = preprocess_point_cloud(sprayer_target)
+brash_target_down, brash_target_fpfh = preprocess_point_cloud(brash_target)
 
 # use an identity transformation as the initial transform that moves the source pcd away from the target
 init_transformation_for_global_registration = identity_transform.copy()
@@ -131,31 +135,39 @@ def get_target_grasp_pose(source_pcd):
     # global registration
     result_part_fast = execute_fast_global_registration(source_down, part_target_down, source_fpfh, part_target_fpfh)
     result_sprayer_fast = execute_fast_global_registration(source_down, sprayer_target_down, source_fpfh, sprayer_target_fpfh)
+    result_brash_fast = execute_fast_global_registration(source_down, brash_target_down, source_fpfh, brash_target_fpfh)
     # icp refinement
     result_part_refine = refine_registration(source_down, part_target_down, result_part_fast.transformation)
     result_sprayer_refine = refine_registration(source_down, sprayer_target_down, result_sprayer_fast.transformation)
+    result_brash_refine = refine_registration(source_down, brash_target_down, result_brash_fast.transformation)
     # final transformation should includes the initial transformation
     transform_source_to_part_target = np.matmul(result_part_refine.transformation, init_transformation_for_global_registration)
     transform_source_to_sprayer_target = np.matmul(result_sprayer_refine.transformation, init_transformation_for_global_registration)
+    transform_source_to_brash_target = np.matmul(result_brash_refine.transformation, init_transformation_for_global_registration)
 
     # visualizing result
     part_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
     sprayer_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+    brash_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
     transform_part_target_to_source = np.linalg.inv(transform_source_to_part_target)
     transform_sprayer_target_to_source = np.linalg.inv(transform_source_to_sprayer_target)
+    transform_brash_target_to_source = np.linalg.inv(transform_source_to_brash_target)
     transform_part_target_grasp = np.matmul(transform_part_target_to_source, transform_base_to_part_reference_grasp)
     transform_sprayer_target_grasp = np.matmul(transform_sprayer_target_to_source, transform_base_to_sprayer_reference_grasp)
+    transform_brash_target_grasp = np.matmul(transform_brash_target_to_source, transform_base_to_brash_reference_grasp)
     part_grasp_frame.transform(transform_part_target_grasp)
     sprayer_grasp_frame.transform(transform_sprayer_target_grasp)
+    brash_grasp_frame.transform(transform_brash_target_grasp)
     print('[INFO] Visualizing the found grasping pose')
-    o3d.visualization.draw_geometries([robot_frame, part_grasp_frame, sprayer_grasp_frame,
-                                       source_pcd_original, part_target, sprayer_target],
+    o3d.visualization.draw_geometries([robot_frame, part_grasp_frame, sprayer_grasp_frame, brash_grasp_frame,
+                                       source_pcd_original, part_target, sprayer_target, brash_target],
                                       window_name='Grasping pose proposal', width=1200, height=960)
 
     part_pose_msg = get_pose_msg(transform_part_target_grasp)
     sprayer_pose_msg = get_pose_msg(transform_sprayer_target_grasp)
+    brash_pose_msg = get_pose_msg(transform_brash_target_grasp)
     poses_msg_to_go = dcp(poses_msg)
-    poses_msg_to_go.poses = [part_pose_msg.pose, sprayer_pose_msg.pose]
+    poses_msg_to_go.poses = [part_pose_msg.pose, sprayer_pose_msg.pose, brash_pose_msg.pose]
 
     return poses_msg_to_go
 

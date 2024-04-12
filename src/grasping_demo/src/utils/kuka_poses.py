@@ -9,6 +9,16 @@ waiting_pose_calibration.pose.orientation.x = 0.35445
 waiting_pose_calibration.pose.orientation.y = 0.85134
 waiting_pose_calibration.pose.orientation.z = -0.30311
 
+waiting_pose_away = PoseStamped()
+waiting_pose_away.pose.position.x = 0.0
+waiting_pose_away.pose.position.y = -0.55
+waiting_pose_away.pose.position.z = 0.6
+waiting_pose_away.pose.orientation.w = -0.00011712055935420784
+waiting_pose_away.pose.orientation.x = -0.7022300705536323
+waiting_pose_away.pose.orientation.y = 0.7119500637054443
+waiting_pose_away.pose.orientation.z = -7.08482120089869e-05
+
+
 waiting_pose = PoseStamped()
 waiting_pose.pose.position.x = -0.55
 waiting_pose.pose.position.y = -0.0
@@ -17,6 +27,7 @@ waiting_pose.pose.orientation.w = 0.0
 waiting_pose.pose.orientation.x = 0.0
 waiting_pose.pose.orientation.y = 1.0
 waiting_pose.pose.orientation.z = 0.0
+
 
 capture_pose_1 = PoseStamped()
 capture_pose_1.pose.position.x = -0.33955532155200313

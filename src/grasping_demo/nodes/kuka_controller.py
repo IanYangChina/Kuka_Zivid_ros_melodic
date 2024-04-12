@@ -72,7 +72,7 @@ class Controller:
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
-        self.publish_pose(waiting_pose)
+        self.publish_pose(waiting_pose_away)
         self.publish_grip_cmd(gripper_reset)
         self.publish_grip_cmd(gripper_activation)
 
@@ -239,6 +239,27 @@ class Controller:
             self.publish_pose(pre_grasping_pose)
             pose = dcp(grasping_pose_msg)
             pose.pose = data.poses[1]
+            self.publish_pose(pose)
+
+            self.publish_grip_cmd(gripper_close)
+            ans = raw_input("[USER INPUT] Would you like to place the object? [y/n]")
+            if ans == 'y':
+                # lift the object up for 0.1 meters
+                rospy.loginfo('Lifting the object...')
+                self.publish_pose(pre_grasping_pose)
+                # put down the object
+                rospy.loginfo('Placing back the object...')
+                self.publish_pose(sprayer_placing_pose)
+            # release the gripper fingers
+            self.publish_grip_cmd(gripper_open)
+            rospy.loginfo("Move gripper to waiting pose...")
+            self.publish_pose(pre_grasping_pose)
+
+        ans = raw_input("[USER INPUT] Execute brash grasping? [y/n]")
+        if ans == 'y':
+            self.publish_pose(pre_grasping_pose)
+            pose = dcp(grasping_pose_msg)
+            pose.pose = data.poses[2]
             self.publish_pose(pose)
 
             self.publish_grip_cmd(gripper_close)
