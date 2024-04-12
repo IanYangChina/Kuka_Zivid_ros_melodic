@@ -109,7 +109,7 @@ if __name__ == '__main__':
     # inverse
     raw_transform_cam_to_base = np.linalg.inv(raw_transform_base_to_cam)
 
-    pcd_reference_file = os.path.join(script_path, '..', 'src', 'pcd_reference_0.ply')
+    pcd_reference_file = os.path.join(script_path, '..', 'src', 'pcd_reference.ply')
     if not os.path.exists(pcd_reference_file):
         print("Reference point cloud file not found")
         raise OSError("File not found: {}\n"

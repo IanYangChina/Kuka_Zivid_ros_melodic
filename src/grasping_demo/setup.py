@@ -5,7 +5,7 @@ from catkin_pkg.python_setup import generate_distutils_setup
 
 # fetch values from package.xml-DPYTHON_VERSION=2.7
 setup_args = generate_distutils_setup(
-    packages=['pcd_processing', 'utils'],
+    packages=['utils'],
     package_dir={'': 'src'},
     requires=['open3d', 'numpy-quaternion', 'numba==0.47']
 )

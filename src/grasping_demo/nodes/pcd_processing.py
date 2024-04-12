@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import rospy
 import ros_numpy
@@ -6,7 +6,7 @@ import open3d as o3d
 from std_msgs.msg import Bool
 from sensor_msgs.msg import PointCloud2
 from geometry_msgs.msg import PoseStamped, PoseArray
-from pcd_processing.pcd_registration import get_target_grasp_pose
+from utils.pcd_registration import get_target_grasp_pose
 
 
 class PcdProcessing:
@@ -31,14 +31,14 @@ class PcdProcessing:
         done = False
         while not done:
             poses = get_target_grasp_pose(pcd_raw)
-            ans = raw_input("[USER INPUT] Is the generated grasping pose satisfactory? [y/n]")
+            ans = input("[USER INPUT] Is the generated grasping pose satisfactory? [y/n]")
             if ans == 'y':
                 rospy.sleep(1)
                 self.target_poses_pub.publish(poses)
                 rospy.loginfo("Publish the generated grasp pose to be executed by the robot...")
                 done = True
             else:
-                ans = raw_input('[USER INPUT] Would you like to rerun the registration algorithm? [y/n]')
+                ans = input('[USER INPUT] Would you like to rerun the registration algorithm? [y/n]')
                 if ans == 'y':
                     continue
                 else:
