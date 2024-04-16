@@ -3,7 +3,7 @@ import numpy as np
 import open3d as o3d  # 0.9.0
 
 cwd = os.getcwd()
-object = 'cam_mount'
+object = 'part'
 
 # load hand-calibrated transformation matrices
 transform_base_to_cam_fine_tuned = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))

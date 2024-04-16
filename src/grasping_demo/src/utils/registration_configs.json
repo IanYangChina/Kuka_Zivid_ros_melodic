@@ -1,0 +1,14 @@
+{
+  "part": {
+    "VOXEL_SIZE": 0.005,
+    "RADIUS_NORMAL": 0.01,
+    "RADIUS_FEATURE": 0.05,
+    "GLOBAL_DISTANCE_THRESHOLD": 0.05
+  },
+  "brash": {
+    "VOXEL_SIZE": 0.005,
+    "RADIUS_NORMAL": 0.01,
+    "RADIUS_FEATURE": 0.03,
+    "GLOBAL_DISTANCE_THRESHOLD": 0.005
+  }
+}

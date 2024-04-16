@@ -34,7 +34,7 @@ def refine_registration(source, target, previous_transformation, distance_thresh
 
 
 cwd = os.getcwd()
-object_name = 'brash'
+object_name = 'part'
 # load hand-calibrated transformation matrices
 transform_base_to_cam_hand_calibrated = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
 transform_base_to_reference_grasp = np.load(os.path.join(cwd, 'transformation_matrices', f'transform_base_to_reference_grasp_{object_name}.npy'))
@@ -59,7 +59,7 @@ target_down, target_fpfh = preprocess_point_cloud(target, voxel_size=voxel_size,
 target_down.paint_uniform_color([0, 0, 1])
 
 print(":: Load two point clouds and disturb initial pose.")
-index_source_pcd = '1'
+index_source_pcd = '4'
 # source_original = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'cropped_pcd_reference_in_world_frame.ply'))
 source_original = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', 'pcd_reference_'+index_source_pcd+'_crop.ply'))
 source_original.paint_uniform_color([1, 0, 0])

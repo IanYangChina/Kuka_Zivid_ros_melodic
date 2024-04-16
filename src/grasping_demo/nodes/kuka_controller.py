@@ -271,13 +271,13 @@ class Controller:
                 self.publish_pose(pre_grasping_pose)
                 # put down the object
                 rospy.loginfo('Placing back the object...')
-                self.publish_pose(part_placing_pose)
+                self.publish_pose(right_placing_pose)
             # release the gripper fingers
             self.publish_grip_cmd(gripper_open)
             rospy.loginfo("Move gripper to waiting pose...")
             self.publish_pose(pre_grasping_pose)
 
-        ans = input("[USER INPUT] Execute cam mount grasping? [y/n]")
+        ans = input("[USER INPUT] Execute part grasping? [y/n]")
         if ans == 'y':
             self.publish_pose(pre_grasping_pose)
             pose = dcp(grasping_pose_msg)
@@ -293,13 +293,13 @@ class Controller:
                 self.publish_pose(pre_grasping_pose)
                 # put down the object
                 rospy.loginfo('Placing back the object...')
-                self.publish_pose(sprayer_placing_pose)
+                self.publish_pose(left_placing_pose)
             # release the gripper fingers
             self.publish_grip_cmd(gripper_open)
             rospy.loginfo("Move gripper to waiting pose...")
             self.publish_pose(pre_grasping_pose)
 
-        self.publish_pose(waiting_pose)
+        self.publish_pose(waiting_pose_away)
         attempt_finished.data = True
         rospy.sleep(0.5)
         self.pub_attempt_finished.publish(attempt_finished)
