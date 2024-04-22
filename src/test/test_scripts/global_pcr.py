@@ -6,6 +6,8 @@ import copy
 
 def preprocess_point_cloud(pcd, voxel_size, radius_normal, radius_feature):
     pcd_down = pcd.voxel_down_sample(voxel_size)
+    cl, ind = pcd_down.remove_statistical_outlier(nb_neighbors=20, std_ratio=2.0)
+    pcd_down = pcd_down.select_down_sample(ind)
     pcd_down.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=100))
     pcd_fpfh = o3d.registration.compute_fpfh_feature(
         input=pcd_down,
@@ -47,9 +49,9 @@ grip_frame_original = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2
 grip_frame_original.transform(transform_base_to_reference_grasp)
 
 # registration parameters unit: meter
-voxel_size = 0.005
+voxel_size = 0.007
 radius_normal = 0.01
-radius_feature = 0.02
+radius_feature = 0.015
 distance_threshold = 0.005
 
 # load, preprocess target point cloud (one with a reference grasp)
@@ -59,11 +61,11 @@ target_down, target_fpfh = preprocess_point_cloud(target, voxel_size=voxel_size,
 target_down.paint_uniform_color([0, 0, 1])
 
 print(":: Load two point clouds and disturb initial pose.")
-index_source_pcd = '4'
+index_source_pcd = '2'
 # source_original = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'cropped_pcd_reference_in_world_frame.ply'))
 source_original = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', 'pcd_reference_'+index_source_pcd+'_crop.ply'))
 source_original.paint_uniform_color([1, 0, 0])
-o3d.visualization.draw_geometries([robot_frame, grip_frame_original, cam_frame, target, source_original])
+# o3d.visualization.draw_geometries([robot_frame, grip_frame_original, cam_frame, target, source_original])
 
 source = copy.deepcopy(source_original)
 # transform the source pcd to an arbitrary pose far away from the target
@@ -94,4 +96,4 @@ o3d.visualization.draw_geometries([robot_frame, grip_frame, cam_frame, grip_fram
                                    # source_original,
                                    target, source_after_icp_refinement])
 
-# o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', 'pcd_reference_'+index_source_pcd+'_crop_registered.ply'), source_after_icp_refinement)
+o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', 'pcd_reference_'+index_source_pcd+'_crop_registered.ply'), source_after_icp_refinement)

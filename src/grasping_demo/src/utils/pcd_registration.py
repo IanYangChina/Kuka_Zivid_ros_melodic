@@ -13,9 +13,9 @@ transform_base_to_cam_hand_calibrated = np.load(
 transform_cam_to_base_hand_calibrated = np.load(
     os.path.join(script_dir, '../transformation_matrices', 'transform_cam_to_base_fine_tuned.npy'))
 transform_base_to_part_reference_grasp = np.load(
-    os.path.join(script_dir, '../transformation_matrices', 'transform_base_to_part_reference_grasp.npy'))
+    os.path.join(script_dir, '../transformation_matrices', 'transform_base_to_reference_grasp_part.npy'))
 transform_base_to_brash_reference_grasp = np.load(
-    os.path.join(script_dir, '../transformation_matrices', 'transform_base_to_brash_reference_grasp.npy'))
+    os.path.join(script_dir, '../transformation_matrices', 'transform_base_to_reference_grasp_brash.npy'))
 identity_transform = np.array([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
@@ -26,10 +26,10 @@ identity_transform = np.array([
 # load and create a bounding box
 workspace_bounding_box_array = np.load(
     os.path.join(script_dir, '../transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
-workspace_bounding_box_array[4][-1] += 0.005
-workspace_bounding_box_array[5][-1] += 0.005
-workspace_bounding_box_array[6][-1] += 0.005
-workspace_bounding_box_array[7][-1] += 0.005
+# workspace_bounding_box_array[4][-1] += 0.005
+# workspace_bounding_box_array[5][-1] += 0.005
+# workspace_bounding_box_array[6][-1] += 0.005
+# workspace_bounding_box_array[7][-1] += 0.005
 
 workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float64'))
 workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
@@ -99,9 +99,9 @@ def refine_registration(source, target, previous_transformation,
 
 # load, preprocess target point cloud (one with a reference grasp)
 part_target = o3d.io.read_point_cloud(
-    os.path.join(script_dir, '../reference_grasp', 'cropped_part_pcd_in_world_frame.ply'))
+    os.path.join(script_dir, '../reference_grasp', 'pcd_reference_part.ply'))
 brash_target = o3d.io.read_point_cloud(
-    os.path.join(script_dir, '../reference_grasp', 'cropped_brash_pcd_in_world_frame.ply'))
+    os.path.join(script_dir, '../reference_grasp', 'pcd_reference_brash.ply'))
 
 part_target.paint_uniform_color([0.6, 0.6, 0.6])
 brash_target.paint_uniform_color([0.3, 0.6, 0.3])
@@ -180,8 +180,11 @@ def get_target_grasp_pose(source_pcd):
     print('[INFO] Visualizing the found grasping pose')
     o3d.visualization.draw_geometries([robot_frame,
                                        part_grasp_frame,
+                                       source_pcd_original, part_target],
+                                      window_name='Grasping pose proposal', width=1200, height=960)
+    o3d.visualization.draw_geometries([robot_frame,
                                        brash_grasp_frame,
-                                       source_pcd_original, brash_target, part_target],
+                                       source_pcd_original, brash_target],
                                       window_name='Grasping pose proposal', width=1200, height=960)
 
     part_pose_msg = get_pose_msg(transform_part_target_grasp)

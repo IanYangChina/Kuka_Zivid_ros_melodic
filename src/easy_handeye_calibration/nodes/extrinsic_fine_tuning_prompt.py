@@ -13,7 +13,7 @@ from copy import deepcopy as dcp
 class KukaStateReader(object):
     def __init__(self):
         rospy.init_node('reader_node', anonymous=True)
-        rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
+        rospy.Subscriber('/iiwa_2/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
         self.current_pose_msg = PoseStamped()
         self.current_xyz = np.array([0.0, 0.0, 0.0])
         self.current_wxyz = np.array([1.0, 0.0, 0.0, 0.0])
@@ -55,7 +55,6 @@ workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(poi
 workspace_bounding_box.color = (0, 1, 0)
 
 if __name__ == '__main__':
-
     while True:
         ans = raw_input(
             "This program will walk you through a fine-tuning process of the extrinsics found by easy_handeye calibration.\n"
@@ -133,7 +132,7 @@ if __name__ == '__main__':
         ans = raw_input(
             '[USER INPUT] Type [y] and press [enter] if you have started the ROSSMartServo, otherwise exit the program: ')
         if ans == 'y':
-            if '/iiwa/iiwa_subscriber' in rosnode.get_node_names():
+            if '/iiwa_2/iiwa_subscriber' in rosnode.get_node_names():
                 ROSSMartServo_on = True
             else:
                 rospy.loginfo('IIWA topics not detected, check network connection if you have started the SmartServo')
@@ -241,7 +240,7 @@ if __name__ == '__main__':
         transform_cam_to_base_fine_tuned = np.matmul(transform_extra_within_base, raw_transform_cam_to_base)
         # Camera frame, transformed into Robot frame using loaded extrinsics
         raw_cam_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
-        cam_frame_in_base = raw_cam_frame.transform(raw_transform_cam_to_base)
+        cam_frame_in_base = raw_cam_frame.transform(transform_cam_to_base_fine_tuned)
 
         print("You will now be given a visualization of the raw extrinsics applied to the reference point cloud.")
         done = False
@@ -317,7 +316,7 @@ if __name__ == '__main__':
 
     close_smart_servo = False
     while not close_smart_servo:
-        if not ('/iiwa/iiwa_subscriber' in rosnode.get_node_names()):
+        if not ('/iiwa_2/iiwa_subscriber' in rosnode.get_node_names()):
             close_smart_servo = True
         else:
             print('[INFO]Please **now** shutdown the SmartServo application on Sunrise Cabinet')

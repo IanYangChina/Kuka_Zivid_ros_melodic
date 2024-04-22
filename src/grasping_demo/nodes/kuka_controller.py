@@ -51,15 +51,15 @@ gripper_reset.rFRA = 0
 
 
 class Controller:
-    def __init__(self, translation_speed=0.05, rotation_speed=0.05*np.pi):
+    def __init__(self, translation_speed=0.05, rotation_speed=0.05*np.pi, robot_name='iiwa_2'):
         rospy.init_node('controller_node', anonymous=True)
-        rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
+        rospy.Subscriber(f'/{robot_name}/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
         rospy.Subscriber('TargetGraspPose', PoseStamped, callback=self.target_pose_callback)
         rospy.Subscriber('TargetGraspPoses', PoseArray, callback=self.target_poses_callback)
         rospy.Subscriber('Robotiq3FGripperRobotIutput', inputMsg, callback=self.gripper_msg, queue_size=2)
         rospy.Subscriber('/keyboard', String, callback=self.keyboard_callback)
         rospy.Subscriber('/PoseToSend', String, callback=self.pose_to_send_callback)
-        self.pub_move_cmd = rospy.Publisher('/iiwa/command/CartesianPose', PoseStamped, queue_size=2)
+        self.pub_move_cmd = rospy.Publisher(f'/{robot_name}/command/CartesianPose', PoseStamped, queue_size=2)
         self.pub_gripper_cmd = rospy.Publisher('Robotiq3FGripperRobotOutput', outputMsg, queue_size=2)
         self.pub_attempt_finished = rospy.Publisher('AttemptFinished', Bool, queue_size=2)
         self.current_pose_msg = PoseStamped()

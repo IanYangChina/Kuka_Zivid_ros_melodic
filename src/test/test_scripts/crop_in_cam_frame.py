@@ -3,19 +3,21 @@ import numpy as np
 import open3d as o3d  # 0.9.0
 
 cwd = os.getcwd()
-object = 'part'
+object = 'part_ref_grasp'
 
 # load hand-calibrated transformation matrices
 transform_base_to_cam_fine_tuned = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
 transform_cam_to_base_fine_tuned = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_cam_to_base_fine_tuned.npy'))
-transform_base_to_reference_grasp = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_reference_grasp_cam_mount.npy'))
+transform_base_to_reference_grasp = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_reference_grasp_part.npy'))
 
 # load a bounding box and transform it into cam frame
 workspace_bounding_box_array = np.load(os.path.join(cwd, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
-workspace_bounding_box_array[4][-1] += 0.01
-workspace_bounding_box_array[5][-1] += 0.01
-workspace_bounding_box_array[6][-1] += 0.01
-workspace_bounding_box_array[7][-1] += 0.01
+workspace_bounding_box_array[4][-1] -= 0.016
+workspace_bounding_box_array[5][-1] -= 0.016
+workspace_bounding_box_array[6][-1] -= 0.016
+workspace_bounding_box_array[7][-1] -= 0.016
+print(workspace_bounding_box_array)
+# exit()
 # workspace_bounding_box_array[2][1] = -0.2
 # workspace_bounding_box_array[3][1] = -0.2
 # workspace_bounding_box_array[6][1] = -0.2
@@ -43,7 +45,7 @@ reference_grasp_frame.transform(transform_base_to_reference_grasp)
 # reference_grasp_frame.transform(transform_base_to_cam_fine_tuned)
 
 pcd_id = 4
-pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', object, f'pcd_reference_{pcd_id}.ply'))
+pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', object, f'pcd_reference.ply'))
 pcd.transform(transform_cam_to_base_fine_tuned)
 o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, pcd, workspace_bounding_box])
 # exit()
@@ -64,4 +66,4 @@ cropped = pcd.crop(workspace_bounding_box)
 # new_pcd, ind = cropped.remove_statistical_outlier(nb_neighbors=100, std_ratio=0.4)
 bounding_box = cropped.get_axis_aligned_bounding_box()
 o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, cropped, workspace_bounding_box, bounding_box])
-o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', object, f'pcd_reference_{pcd_id}_crop.ply'), cropped)
+o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', object, f'pcd_reference_crop.ply'), cropped)

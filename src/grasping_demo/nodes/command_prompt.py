@@ -53,13 +53,14 @@ if __name__ == '__main__':
     launch_pcd.start()
     rospy.sleep(5)
     capture_helper = CaptureHelper()
+    robot_name = 'iiwa_2'
     ROSSMartServo_on = False
     while not ROSSMartServo_on:
         rospy.loginfo('Please make sure you have started the ROSSMartServo application on the Sunrise Cabinet')
         ans = input(
             '[USER INPUT] Type [y] and press [enter] if you have started the ROSSMartServo, otherwise exit the program: ')
         if ans == 'y':
-            if '/iiwa/iiwa_subscriber' in rosnode.get_node_names():
+            if f'/{robot_name}/iiwa_subscriber' in rosnode.get_node_names():
                 ROSSMartServo_on = True
             else:
                 rospy.loginfo('IIWA topics not detected, check network connection if you have started the SmartServo')
@@ -95,7 +96,7 @@ if __name__ == '__main__':
         else:
             close_smart_servo = False
             while not close_smart_servo:
-                if not ('/iiwa/iiwa_subscriber' in rosnode.get_node_names()):
+                if not (f'/{robot_name}/iiwa_subscriber' in rosnode.get_node_names()):
                     close_smart_servo = True
                 else:
                     print('[INFO]Please **now** shutdown the SmartServo application on Sunrise Cabinet')

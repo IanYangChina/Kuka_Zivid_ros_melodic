@@ -20,10 +20,9 @@ reference_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0
 reference_grasp_frame.transform(transform_base_to_reference_grasp)
 
 target = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}_ref_grasp', 'pcd_reference_crop.ply'))
-pcd_0 = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', f'pcd_reference_4_crop.ply'))
-pcd_1 = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', f'pcd_reference_6_crop_registered.ply'))
+pcd_0 = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', f'pcd_reference_5_crop_registered.ply'))
 
-fused = target + pcd_1
+fused = target + pcd_0
 fused = fused.voxel_down_sample(voxel_size=0.0005)
 
 o3d.visualization.draw_geometries([robot_frame, fused, workspace_bounding_box,cam_frame])

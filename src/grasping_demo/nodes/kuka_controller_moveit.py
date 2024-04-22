@@ -31,10 +31,10 @@ def qmul(q, r):
 
 
 class Controller:
-    def __init__(self, translation_speed=0.05, rotation_speed=0.05*np.pi):
+    def __init__(self, translation_speed=0.05, rotation_speed=0.05*np.pi, robot_name='iiwa_2'):
         rospy.init_node('controller_node', anonymous=True)
-        rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
-        self.pub_move_cmd = rospy.Publisher('/iiwa/command/CartesianPose', PoseStamped, queue_size=2)
+        rospy.Subscriber(f'/{robot_name}/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
+        self.pub_move_cmd = rospy.Publisher(f'/{robot_name}/command/CartesianPose', PoseStamped, queue_size=2)
 
         self.current_pose_msg = PoseStamped()
         self.current_xyz = np.array([0.0, 0.0, 0.0])
@@ -51,7 +51,7 @@ class Controller:
         ROSSMartServo_on = False
         while not ROSSMartServo_on:
             rospy.loginfo('Please start the ROSSMartServo application on the Sunrise Cabinet')
-            if '/iiwa/iiwa_subscriber' in rosnode.get_node_names():
+            if f'/{robot_name}/iiwa_subscriber' in rosnode.get_node_names():
                 ROSSMartServo_on = True
             else:
                 rospy.sleep(1)

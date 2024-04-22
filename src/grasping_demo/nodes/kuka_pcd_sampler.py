@@ -33,10 +33,10 @@ def construct_homogeneous_transform_matrix(translation, orientation):
 
 
 class KukaPcdSampler:
-    def __init__(self):
+    def __init__(self, robot_name='iiwa_2'):
         rospy.init_node('kuka_pcd_sampler_node', anonymous=True)
-        rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
-        self.pub_move_cmd = rospy.Publisher('/iiwa/command/CartesianPose', PoseStamped, queue_size=2)
+        rospy.Subscriber(f'/{robot_name}/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
+        self.pub_move_cmd = rospy.Publisher(f'/{robot_name}/command/CartesianPose', PoseStamped, queue_size=2)
         self.pub_attempt_finished = rospy.Publisher('AttemptFinished', Bool, queue_size=2)
         self.current_pose_msg = PoseStamped()
         self.current_xyz = np.array([0.0, 0.0, 0.0])

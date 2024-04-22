@@ -6,9 +6,9 @@ from geometry_msgs.msg import PoseStamped
 
 
 class StateListener:
-    def __init__(self):
+    def __init__(self, robot_name="iiwa_2"):
         rospy.init_node('listener_node', anonymous=True)
-        rospy.Subscriber('/iiwa/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
+        rospy.Subscriber(f'/{robot_name}/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
         self.current_pose_msg = PoseStamped()
         self.current_xyz = np.array([0.0, 0.0, 0.0])
         self.current_header_seq = 0

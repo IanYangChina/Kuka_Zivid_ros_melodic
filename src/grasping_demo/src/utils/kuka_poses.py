@@ -11,13 +11,12 @@ waiting_pose_calibration.pose.orientation.z = -0.30311
 
 waiting_pose_away = PoseStamped()
 waiting_pose_away.pose.position.x = 0.0
-waiting_pose_away.pose.position.y = -0.55
+waiting_pose_away.pose.position.y = 0.55
 waiting_pose_away.pose.position.z = 0.6
-waiting_pose_away.pose.orientation.w = -0.00011712055935420784
-waiting_pose_away.pose.orientation.x = -0.7022300705536323
-waiting_pose_away.pose.orientation.y = 0.7119500637054443
-waiting_pose_away.pose.orientation.z = -7.08482120089869e-05
-
+waiting_pose_away.pose.orientation.w = -0.00037261825312656774
+waiting_pose_away.pose.orientation.x = 0.7065257344455111
+waiting_pose_away.pose.orientation.y = 0.7076871395111084
+waiting_pose_away.pose.orientation.z = 0.0003568553224218168
 
 waiting_pose = PoseStamped()
 waiting_pose.pose.position.x = -0.55
@@ -128,10 +127,9 @@ new_capture_pose_4.pose.orientation.x = 0.04239197487957916
 new_capture_pose_4.pose.orientation.y = 0.9884285926818848
 new_capture_pose_4.pose.orientation.z = 0.12467662341429372
 
-
 pre_grasping_pose = PoseStamped()
 pre_grasping_pose.pose.position.x = -0.55
-pre_grasping_pose.pose.position.y = -0.0
+pre_grasping_pose.pose.position.y = 0.0
 pre_grasping_pose.pose.position.z = 0.6
 pre_grasping_pose.pose.orientation.w = 0.0000
 pre_grasping_pose.pose.orientation.x = 0.0000
@@ -139,22 +137,22 @@ pre_grasping_pose.pose.orientation.y = 1.0000
 pre_grasping_pose.pose.orientation.z = 0.0000
 
 left_placing_pose = PoseStamped()
-left_placing_pose.pose.position.x = -0.59
-left_placing_pose.pose.position.y = -0.30
-left_placing_pose.pose.position.z = 0.31
-left_placing_pose.pose.orientation.w = -0.0123448805919
-left_placing_pose.pose.orientation.x = -0.691465195872
-left_placing_pose.pose.orientation.y = 0.722219705582
-left_placing_pose.pose.orientation.z = 0.0110529923381
+left_placing_pose.pose.position.x = -0.5685117610446104
+left_placing_pose.pose.position.y = 0.27101085879836345
+left_placing_pose.pose.position.z = 0.3083037176074502
+left_placing_pose.pose.orientation.w = -0.0005123721552670982
+left_placing_pose.pose.orientation.x = 0.05396740898515964
+left_placing_pose.pose.orientation.y = 0.9985425472259521
+left_placing_pose.pose.orientation.z = 3.693590491151026e-06
 
 right_placing_pose = PoseStamped()
-right_placing_pose.pose.position.x = -0.63
-right_placing_pose.pose.position.y = 0.2775
-right_placing_pose.pose.position.z = 0.29
-right_placing_pose.pose.orientation.w = -0.00509371623762
-right_placing_pose.pose.orientation.x = 0.704621165094
-right_placing_pose.pose.orientation.y = 0.709524989128
-right_placing_pose.pose.orientation.z = 0.00757522078764
+right_placing_pose.pose.position.x = -0.5684574251095325
+right_placing_pose.pose.position.y = -0.34047163501280236
+right_placing_pose.pose.position.z = 0.3102703330420835
+right_placing_pose.pose.orientation.w = -0.0004671748870701299
+right_placing_pose.pose.orientation.x = 0.053993896978467834
+right_placing_pose.pose.orientation.y = 0.9985411763191223
+right_placing_pose.pose.orientation.z = -6.494793274270028e-05
 
 qingmeng_demo_pose_1 = PoseStamped()
 qingmeng_demo_pose_1.pose.position.x = -0.49069478328237903
