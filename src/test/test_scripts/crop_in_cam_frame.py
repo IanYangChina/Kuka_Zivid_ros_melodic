@@ -3,12 +3,12 @@ import numpy as np
 import open3d as o3d  # 0.9.0
 
 cwd = os.getcwd()
-object = 'part_ref_grasp'
+object = 'brash_ref_grasp'
 
 # load hand-calibrated transformation matrices
 transform_base_to_cam_fine_tuned = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
 transform_cam_to_base_fine_tuned = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_cam_to_base_fine_tuned.npy'))
-transform_base_to_reference_grasp = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_reference_grasp_part.npy'))
+transform_base_to_reference_grasp = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_reference_grasp_brash.npy'))
 
 # load a bounding box and transform it into cam frame
 workspace_bounding_box_array = np.load(os.path.join(cwd, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))

@@ -26,10 +26,10 @@ identity_transform = np.array([
 # load and create a bounding box
 workspace_bounding_box_array = np.load(
     os.path.join(script_dir, '../transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
-# workspace_bounding_box_array[4][-1] += 0.005
-# workspace_bounding_box_array[5][-1] += 0.005
-# workspace_bounding_box_array[6][-1] += 0.005
-# workspace_bounding_box_array[7][-1] += 0.005
+# workspace_bounding_box_array[4][-1] += 0.03
+# workspace_bounding_box_array[5][-1] += 0.03
+# workspace_bounding_box_array[6][-1] += 0.03
+# workspace_bounding_box_array[7][-1] += 0.03
 
 workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float64'))
 workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
@@ -47,7 +47,7 @@ config_file = os.path.join(script_dir, 'registration_configs.json')
 
 ICP_REFINE_DISTANCE_THRESHOLD = 0.002
 GLOBAL_REGISTRATION_MAX_ITER = 100
-GLOBAL_REGISTRATION_RMSE_THRESHOLD = 0.005
+GLOBAL_REGISTRATION_RMSE_THRESHOLD = 0.003
 
 
 def preprocess_point_cloud(pcd, voxel_size, radius_normal, radius_feature):
@@ -178,13 +178,23 @@ def get_target_grasp_pose(source_pcd):
     part_grasp_frame.transform(transform_part_target_grasp)
     brash_grasp_frame.transform(transform_brash_target_grasp)
     print('[INFO] Visualizing the found grasping pose')
+
+    source_pcd_crop = source_pcd_original.crop(workspace_bounding_box)
+    source_after_icp_refinement_to_part = dcp(source_pcd_crop)
+    source_after_icp_refinement_to_part.transform(transform_source_to_part_target)
+    source_after_icp_refinement_to_part.paint_uniform_color([0.1, 0.7, 0.7])
     o3d.visualization.draw_geometries([robot_frame,
                                        part_grasp_frame,
-                                       source_pcd_original, part_target],
+                                       source_pcd_crop,
+                                       source_after_icp_refinement_to_part, part_target],
                                       window_name='Grasping pose proposal', width=1200, height=960)
+
+    source_after_icp_refinement_to_brash = dcp(source_pcd_crop)
+    source_after_icp_refinement_to_brash.transform(transform_source_to_brash_target)
+    source_after_icp_refinement_to_brash.paint_uniform_color([0.1, 0.7, 0.4])
     o3d.visualization.draw_geometries([robot_frame,
-                                       brash_grasp_frame,
-                                       source_pcd_original, brash_target],
+                                       brash_grasp_frame, source_pcd_crop,
+                                       source_after_icp_refinement_to_brash, brash_target],
                                       window_name='Grasping pose proposal', width=1200, height=960)
 
     part_pose_msg = get_pose_msg(transform_part_target_grasp)

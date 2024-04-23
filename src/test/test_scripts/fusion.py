@@ -3,7 +3,7 @@ import open3d as o3d
 import numpy as np
 
 cwd = os.getcwd()
-object_name = 'part'
+object_name = 'brash'
 
 # load hand-calibrated transformation matrices
 transform_base_to_cam_fine_tuned = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
@@ -24,6 +24,8 @@ pcd_0 = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_nam
 
 fused = target + pcd_0
 fused = fused.voxel_down_sample(voxel_size=0.0005)
+cl, ind = fused.remove_statistical_outlier(nb_neighbors=20, std_ratio=2.0)
+fused = fused.select_down_sample(ind)
 
 o3d.visualization.draw_geometries([robot_frame, fused, workspace_bounding_box,cam_frame])
 o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}_ref_grasp', 'pcd_reference_merged.ply'), fused)

@@ -27,7 +27,6 @@ waiting_pose.pose.orientation.x = 0.0
 waiting_pose.pose.orientation.y = 1.0
 waiting_pose.pose.orientation.z = 0.0
 
-
 capture_pose_1 = PoseStamped()
 capture_pose_1.pose.position.x = -0.33955532155200313
 capture_pose_1.pose.position.y = -0.4919240673409368
@@ -147,7 +146,7 @@ left_placing_pose.pose.orientation.z = 3.693590491151026e-06
 
 right_placing_pose = PoseStamped()
 right_placing_pose.pose.position.x = -0.5684574251095325
-right_placing_pose.pose.position.y = -0.34047163501280236
+right_placing_pose.pose.position.y = -0.3
 right_placing_pose.pose.position.z = 0.3102703330420835
 right_placing_pose.pose.orientation.w = -0.0004671748870701299
 right_placing_pose.pose.orientation.x = 0.053993896978467834
