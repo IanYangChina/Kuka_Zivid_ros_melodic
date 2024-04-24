@@ -37,15 +37,15 @@ def refine_registration(source, target, previous_transformation, distance_thresh
 
 cwd = os.getcwd()
 workspace_bounding_box_array = np.load(os.path.join(cwd, 'transformation_matrices', 'workspace_bounding_box_array_in_base.npy'))
-workspace_bounding_box_array[4][-1] += 0.03
-workspace_bounding_box_array[5][-1] += 0.03
-workspace_bounding_box_array[6][-1] += 0.03
-workspace_bounding_box_array[7][-1] += 0.03
+# workspace_bounding_box_array[4][-1] += 0.03
+# workspace_bounding_box_array[5][-1] += 0.03
+# workspace_bounding_box_array[6][-1] += 0.03
+# workspace_bounding_box_array[7][-1] += 0.03
 workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float64'))
 workspace_bounding_box = o3d.geometry.OrientedBoundingBox.create_from_points(points=workspace_bounding_box_array)
 workspace_bounding_box.color = (0, 1, 0)
 
-object_name = 'brash'
+object_name = 'shovel'
 # load hand-calibrated transformation matrices
 transform_base_to_cam_hand_calibrated = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
 transform_base_to_reference_grasp = np.load(os.path.join(cwd, 'transformation_matrices', f'transform_base_to_reference_grasp_{object_name}.npy'))
@@ -59,12 +59,12 @@ grip_frame_original.transform(transform_base_to_reference_grasp)
 
 # registration parameters unit: meter
 voxel_size = 0.002
-radius_normal = 0.005
+radius_normal = 0.004
 radius_feature = 0.06
 distance_threshold = 0.005
 
 # load, preprocess target point cloud (one with a reference grasp)
-target = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}_ref_grasp', 'pcd_reference_merged.ply'))
+target = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}_ref_grasp', 'pcd_reference_crop.ply'))
 target.paint_uniform_color([0, 0, 1])
 # target = target.crop(workspace_bounding_box)
 target_down, target_fpfh = preprocess_point_cloud(target, voxel_size=voxel_size, radius_normal=radius_normal, radius_feature=radius_feature)
@@ -73,7 +73,7 @@ target_down.paint_uniform_color([0, 0, 1])
 #                                    target_down, workspace_bounding_box])
 
 print(":: Load two point clouds and disturb initial pose.")
-index_source_pcd = '4'
+index_source_pcd = '3'
 # source_original = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', 'reference_grasp', 'cropped_pcd_reference_in_world_frame.ply'))
 source_original = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', 'pcd_reference_'+index_source_pcd+'_crop.ply'))
 
@@ -85,15 +85,16 @@ source.paint_uniform_color([0, 0, 0.2])
 # down-sample and compute fpfh features
 source_down, source_fpfh = preprocess_point_cloud(source, voxel_size=voxel_size, radius_normal=radius_normal, radius_feature=radius_feature)
 # fast global registration
-result_fast = execute_fast_global_registration(source_down, target_down,
-                                               source_fpfh, target_fpfh,
+result_fast = execute_fast_global_registration(target_down, source_down,
+                                               target_fpfh, source_fpfh,
                                                distance_threshold=distance_threshold)
 print(result_fast)
 # ICP refinement
-result_refine = refine_registration(source_down, target_down, result_fast.transformation, distance_threshold=0.002)
+result_refine = refine_registration(target_down, source_down, result_fast.transformation, distance_threshold=0.002)
+result_transform = np.linalg.inv(result_refine.transformation)
 print(result_refine)
 
-result_transform = np.matmul(result_refine.transformation, transform_base_to_cam_hand_calibrated)
+result_transform = np.matmul(result_transform, transform_base_to_cam_hand_calibrated)
 source_after_icp_refinement = copy.deepcopy(source_original)
 source_after_icp_refinement.transform(result_transform)
 source_after_icp_refinement.paint_uniform_color([1, 0, 0])
@@ -103,7 +104,7 @@ result_transform_inv = np.linalg.inv(result_transform)
 grip_frame.transform(result_transform_inv)
 
 o3d.visualization.draw_geometries([robot_frame, grip_frame, cam_frame, grip_frame_original,
-                                   source_down,
+                                   # source_down,
                                    target_down, source_after_icp_refinement])
 
 o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', f'{object_name}', 'pcd_reference_'+index_source_pcd+'_crop_registered.ply'), source_after_icp_refinement)

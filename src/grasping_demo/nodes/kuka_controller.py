@@ -213,6 +213,31 @@ class Controller:
         attempt_finished.data = False
         rospy.loginfo('Received two target poses')
 
+        ans = input("[USER INPUT] Execute part grasping? [y/n]")
+        if ans == 'y':
+            self.publish_pose(pre_grasping_pose)
+            pose = dcp(grasping_pose_msg)
+            pose.pose = data.poses[1]
+            self.publish_pose(pose)
+            rospy.sleep(0.5)
+
+            self.publish_grip_cmd(gripper_close)
+            ans = input("[USER INPUT] Would you like to place the object? [y/n]")
+            if ans == 'y':
+                # lift the object up for 0.1 meters
+                rospy.loginfo('Lifting the object...')
+                lifting_pose = dcp(pose)
+                lifting_pose.pose.position.z += 0.05
+                self.publish_pose(lifting_pose)
+                self.publish_pose(pre_grasping_pose)
+                # put down the object
+                rospy.loginfo('Placing back the object...')
+                self.publish_pose(left_placing_pose)
+            # release the gripper fingers
+            self.publish_grip_cmd(gripper_open)
+            rospy.loginfo("Move gripper to waiting pose...")
+            self.publish_pose(pre_grasping_pose)
+
         ans = input("[USER INPUT] Execute brash grasping? [y/n]")
         if ans == 'y':
             self.publish_pose(pre_grasping_pose)
@@ -238,11 +263,11 @@ class Controller:
             rospy.loginfo("Move gripper to waiting pose...")
             self.publish_pose(pre_grasping_pose)
 
-        ans = input("[USER INPUT] Execute part grasping? [y/n]")
+        ans = input("[USER INPUT] Execute shovel grasping? [y/n]")
         if ans == 'y':
             self.publish_pose(pre_grasping_pose)
             pose = dcp(grasping_pose_msg)
-            pose.pose = data.poses[1]
+            pose.pose = data.poses[2]
             self.publish_pose(pose)
             rospy.sleep(0.5)
 
@@ -257,7 +282,7 @@ class Controller:
                 self.publish_pose(pre_grasping_pose)
                 # put down the object
                 rospy.loginfo('Placing back the object...')
-                self.publish_pose(left_placing_pose)
+                self.publish_pose(middle_placing_pose)
             # release the gripper fingers
             self.publish_grip_cmd(gripper_open)
             rospy.loginfo("Move gripper to waiting pose...")

@@ -16,6 +16,9 @@ transform_base_to_part_reference_grasp = np.load(
     os.path.join(script_dir, '../transformation_matrices', 'transform_base_to_reference_grasp_part.npy'))
 transform_base_to_brash_reference_grasp = np.load(
     os.path.join(script_dir, '../transformation_matrices', 'transform_base_to_reference_grasp_brash.npy'))
+transform_base_to_shovel_reference_grasp = np.load(
+    os.path.join(script_dir, '../transformation_matrices', 'transform_base_to_reference_grasp_shovel.npy'))
+
 identity_transform = np.array([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
@@ -102,9 +105,12 @@ part_target = o3d.io.read_point_cloud(
     os.path.join(script_dir, '../reference_grasp', 'pcd_reference_part.ply'))
 brash_target = o3d.io.read_point_cloud(
     os.path.join(script_dir, '../reference_grasp', 'pcd_reference_brash.ply'))
+shovel_target = o3d.io.read_point_cloud(
+    os.path.join(script_dir, '../reference_grasp', 'pcd_reference_shovel.ply'))
 
 part_target.paint_uniform_color([0.6, 0.6, 0.6])
 brash_target.paint_uniform_color([0.3, 0.6, 0.3])
+shovel_target.paint_uniform_color([0.4, 0.3, 0.6])
 
 # use an identity transformation as the initial transform that moves the source pcd away from the target
 init_transformation_for_global_registration = identity_transform.copy()
@@ -127,6 +133,10 @@ def get_target_grasp_pose(source_pcd):
                                                                   config['brash']['VOXEL_SIZE'],
                                                                   config['brash']['RADIUS_NORMAL'],
                                                                   config['brash']['RADIUS_FEATURE'])
+    shovel_target_down, shovel_target_fpfh = preprocess_point_cloud(shovel_target,
+                                                                    config['shovel']['VOXEL_SIZE'],
+                                                                    config['shovel']['RADIUS_NORMAL'],
+                                                                    config['shovel']['RADIUS_FEATURE'])
 
     # copy the source pcd and transform into robot frame
     source_pcd_original = dcp(source_pcd)
@@ -149,6 +159,10 @@ def get_target_grasp_pose(source_pcd):
                                                                           config['brash']['VOXEL_SIZE'],
                                                                           config['brash']['RADIUS_NORMAL'],
                                                                           config['brash']['RADIUS_FEATURE'])
+    source_down_for_shovel, source_fpfh_for_shovel = preprocess_point_cloud(source_pcd_to_process,
+                                                                            config['shovel']['VOXEL_SIZE'],
+                                                                            config['shovel']['RADIUS_NORMAL'],
+                                                                            config['shovel']['RADIUS_FEATURE'])
 
     # global registration
     result_part_fast = execute_fast_global_registration(source_down_for_part, part_target_down,
@@ -157,26 +171,36 @@ def get_target_grasp_pose(source_pcd):
     result_brash_fast = execute_fast_global_registration(source_down_for_brash, brash_target_down,
                                                          source_fpfh_for_brash, brash_target_fpfh,
                                                          config['brash']['GLOBAL_DISTANCE_THRESHOLD'])
+    result_shovel_fast = execute_fast_global_registration(source_down_for_shovel, shovel_target_down,
+                                                            source_fpfh_for_shovel, shovel_target_fpfh,
+                                                            config['shovel']['GLOBAL_DISTANCE_THRESHOLD'])
     # icp refinement
     result_part_refine = refine_registration(source_down_for_part, part_target_down, result_part_fast.transformation)
     result_brash_refine = refine_registration(source_down_for_brash, brash_target_down, result_brash_fast.transformation)
+    result_shovel_refine = refine_registration(source_down_for_shovel, shovel_target_down, result_shovel_fast.transformation)
     # final transformation should includes the initial transformation
     transform_source_to_part_target = np.matmul(result_part_refine.transformation,
                                                 init_transformation_for_global_registration)
     # transform_source_to_sprayer_target = np.matmul(result_sprayer_refine.transformation, init_transformation_for_global_registration)
     transform_source_to_brash_target = np.matmul(result_brash_refine.transformation,
                                                  init_transformation_for_global_registration)
+    transform_source_to_shovel_target = np.matmul(result_shovel_refine.transformation,
+                                                    init_transformation_for_global_registration)
     # transform_source_to_cam_mount_target = np.matmul(result_cam_mount_refine.transformation, init_transformation_for_global_registration)
 
     # visualizing result
     part_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
     brash_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+    shovel_grasp_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
     transform_part_target_to_source = np.linalg.inv(transform_source_to_part_target)
     transform_brash_target_to_source = np.linalg.inv(transform_source_to_brash_target)
+    transform_shovel_target_to_source = np.linalg.inv(transform_source_to_shovel_target)
     transform_part_target_grasp = np.matmul(transform_part_target_to_source, transform_base_to_part_reference_grasp)
     transform_brash_target_grasp = np.matmul(transform_brash_target_to_source, transform_base_to_brash_reference_grasp)
+    transform_shovel_target_grasp = np.matmul(transform_shovel_target_to_source, transform_base_to_shovel_reference_grasp)
     part_grasp_frame.transform(transform_part_target_grasp)
     brash_grasp_frame.transform(transform_brash_target_grasp)
+    shovel_grasp_frame.transform(transform_shovel_target_grasp)
     print('[INFO] Visualizing the found grasping pose')
 
     source_pcd_crop = source_pcd_original.crop(workspace_bounding_box)
@@ -197,12 +221,20 @@ def get_target_grasp_pose(source_pcd):
                                        source_after_icp_refinement_to_brash, brash_target],
                                       window_name='Grasping pose proposal', width=1200, height=960)
 
+    source_after_icp_refinement_to_shovel = dcp(source_pcd_crop)
+    source_after_icp_refinement_to_shovel.transform(transform_source_to_shovel_target)
+    source_after_icp_refinement_to_shovel.paint_uniform_color([0.6, 0.2, 0.4])
+    o3d.visualization.draw_geometries([robot_frame,
+                                       shovel_grasp_frame, source_pcd_crop,
+                                       source_after_icp_refinement_to_shovel, shovel_target],
+                                      window_name='Grasping pose proposal', width=1200, height=960)
+
     part_pose_msg = get_pose_msg(transform_part_target_grasp)
-    # sprayer_pose_msg = get_pose_msg(transform_sprayer_target_grasp)
     brash_pose_msg = get_pose_msg(transform_brash_target_grasp)
-    # cam_mount_pose_msg = get_pose_msg(transform_cam_mount_target_grasp)
+    shovel_pose_msg = get_pose_msg(transform_shovel_target_grasp)
+
     poses_msg_to_go = dcp(poses_msg)
-    poses_msg_to_go.poses = [brash_pose_msg.pose, part_pose_msg.pose]
+    poses_msg_to_go.poses = [brash_pose_msg.pose, part_pose_msg.pose, shovel_pose_msg.pose]
 
     return poses_msg_to_go
 

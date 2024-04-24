@@ -3,7 +3,7 @@ import numpy as np
 import open3d as o3d  # 0.9.0
 
 cwd = os.getcwd()
-object = 'brash_ref_grasp'
+object = 'shovel_ref_grasp'
 
 # load hand-calibrated transformation matrices
 transform_base_to_cam_fine_tuned = np.load(os.path.join(cwd, 'transformation_matrices', 'transform_base_to_cam_fine_tuned.npy'))
@@ -45,7 +45,7 @@ reference_grasp_frame.transform(transform_base_to_reference_grasp)
 # reference_grasp_frame.transform(transform_base_to_cam_fine_tuned)
 
 pcd_id = 4
-pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', object, f'pcd_reference.ply'))
+pcd = o3d.io.read_point_cloud(os.path.join(cwd, '..', 'objects', object, f'pcd_reference_0.ply'))
 pcd.transform(transform_cam_to_base_fine_tuned)
 o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, pcd, workspace_bounding_box])
 # exit()
@@ -66,4 +66,4 @@ cropped = pcd.crop(workspace_bounding_box)
 # new_pcd, ind = cropped.remove_statistical_outlier(nb_neighbors=100, std_ratio=0.4)
 bounding_box = cropped.get_axis_aligned_bounding_box()
 o3d.visualization.draw_geometries([robot_frame, cam_frame, reference_grasp_frame, cropped, workspace_bounding_box, bounding_box])
-o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', object, f'pcd_reference_crop.ply'), cropped)
+o3d.io.write_point_cloud(os.path.join(cwd, '..', 'objects', object, f'pcd_reference_0_crop.ply'), cropped)

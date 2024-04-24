@@ -153,6 +153,15 @@ right_placing_pose.pose.orientation.x = 0.053993896978467834
 right_placing_pose.pose.orientation.y = 0.9985411763191223
 right_placing_pose.pose.orientation.z = -6.494793274270028e-05
 
+middle_placing_pose = PoseStamped()
+middle_placing_pose.pose.position.x = -0.7
+middle_placing_pose.pose.position.y = -0.0
+middle_placing_pose.pose.position.z = 0.3102703330420835
+middle_placing_pose.pose.orientation.w = -0.0004671748870701299
+middle_placing_pose.pose.orientation.x = 0.053993896978467834
+middle_placing_pose.pose.orientation.y = 0.9985411763191223
+middle_placing_pose.pose.orientation.z = -6.494793274270028e-05
+
 qingmeng_demo_pose_1 = PoseStamped()
 qingmeng_demo_pose_1.pose.position.x = -0.49069478328237903
 qingmeng_demo_pose_1.pose.position.y = 0.24141096361947367
