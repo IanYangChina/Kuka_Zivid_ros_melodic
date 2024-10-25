@@ -26,7 +26,7 @@ if __name__ == "__main__":
         if key == Key.esc:
             return False
 
-        if key.char in ['1', '2', '3', '4', '5', '6', '7', 'q', 'w', 'e']:
+        if key.char in ['1', '2', '3', '4', '5', '6']:
             sender_node.publish(key.char)
         else:
             rospy.loginfo('Unused key pressed.')

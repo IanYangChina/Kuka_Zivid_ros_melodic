@@ -51,15 +51,15 @@ gripper_reset.rFRA = 0
 
 
 class Controller:
-    def __init__(self, translation_speed=0.05, rotation_speed=0.05*np.pi, robot_name='iiwa_2'):
+    def __init__(self, translation_speed=0.05, rotation_speed=0.05*np.pi, robot_name='iiwa'):
         rospy.init_node('controller_node', anonymous=True)
-        rospy.Subscriber(f'/{robot_name}/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
+        rospy.Subscriber('/'+robot_name+'/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
         rospy.Subscriber('TargetGraspPose', PoseStamped, callback=self.target_pose_callback)
         rospy.Subscriber('TargetGraspPoses', PoseArray, callback=self.target_poses_callback)
         rospy.Subscriber('Robotiq3FGripperRobotIutput', inputMsg, callback=self.gripper_msg, queue_size=2)
         rospy.Subscriber('/keyboard', String, callback=self.keyboard_callback)
         rospy.Subscriber('/PoseToSend', String, callback=self.pose_to_send_callback)
-        self.pub_move_cmd = rospy.Publisher(f'/{robot_name}/command/CartesianPose', PoseStamped, queue_size=2)
+        self.pub_move_cmd = rospy.Publisher('/'+robot_name+'/command/CartesianPose', PoseStamped, queue_size=2)
         self.pub_gripper_cmd = rospy.Publisher('Robotiq3FGripperRobotOutput', outputMsg, queue_size=2)
         self.pub_attempt_finished = rospy.Publisher('AttemptFinished', Bool, queue_size=2)
         self.current_pose_msg = PoseStamped()
@@ -72,9 +72,9 @@ class Controller:
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
-        self.publish_pose(waiting_pose_away)
-        self.publish_grip_cmd(gripper_reset)
-        self.publish_grip_cmd(gripper_activation)
+        self.publish_pose(waiting_pose)
+        # self.publish_grip_cmd(gripper_reset)
+        # self.publish_grip_cmd(gripper_activation)
 
     def pose_to_send_callback(self, data):
         pose_to_send = data.data
@@ -90,14 +90,6 @@ class Controller:
             self.publish_pose(capture_pose_5)
         elif pose_to_send == '6':
             self.publish_pose(capture_pose_6)
-        elif pose_to_send == '7':
-            self.publish_pose(capture_pose_7)
-        elif pose_to_send == 'q':
-            self.publish_pose(new_capture_pose_1)
-        elif pose_to_send == 'w':
-            self.publish_pose(new_capture_pose_2)
-        elif pose_to_send == 'e':
-            self.publish_pose(new_capture_pose_3)
         else:
             return
 
@@ -148,6 +140,7 @@ class Controller:
 
     def keyboard_callback(self, data):
         key_pressed = data.data
+        print('executed')
 
         if key_pressed == '1':
             self.publish_pose(waiting_pose)
@@ -305,6 +298,7 @@ class Controller:
         data.header.frame_id = 'iiwa_link_0'
         rospy.sleep(0.5)
         self.pub_move_cmd.publish(data)
+        # rospy.sleep(0.5)
         done = False
         while not done:
             d = np.sqrt(np.sum(np.square(self.current_xyz - target_xyz)))

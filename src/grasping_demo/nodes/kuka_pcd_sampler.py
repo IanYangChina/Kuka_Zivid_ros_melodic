@@ -33,7 +33,7 @@ def construct_homogeneous_transform_matrix(translation, orientation):
 
 
 class KukaPcdSampler:
-    def __init__(self, robot_name='iiwa_2'):
+    def __init__(self, robot_name='iiwa'):
         rospy.init_node('kuka_pcd_sampler_node', anonymous=True)
         rospy.Subscriber(f'/{robot_name}/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
         self.pub_move_cmd = rospy.Publisher(f'/{robot_name}/command/CartesianPose', PoseStamped, queue_size=2)
@@ -64,6 +64,22 @@ class KukaPcdSampler:
                                                         'results_eye_on_hand',
                                                         'transform_ee_to_cam.npy'))
         self.transform_base_to_ee = None
+
+        self.transform_base_to_ee_1 = None
+        self.transform_base_to_ee_2 = None
+        self.transform_base_to_ee_3 = None
+        self.transform_base_to_ee_4 = None
+        self.transform_base_to_ee_5 = None
+        self.transform_base_to_ee_6 = None
+        self.transform_ee_1_to_ees = []
+        self.pcd_nudges = [
+            (0.0, 0.003, 0.001),
+            (0.0, 0.0, -0.001),
+            (0.0, 0.0, 0.0),
+            (0.0, 0.0, 0.0),
+            (0.0, -0.002, 0.001),
+            (-0.005, 0.004, 0.0)
+        ]
 
         self.workspace_bounding_box = None
         self.make_bounding_box()
@@ -113,21 +129,15 @@ class KukaPcdSampler:
         rospy.loginfo('Taking PCD samples for reconstruction...')
         self.pcd_list = []
         self.num_pcd_samples = 0
+        self.make_bounding_box()
         self.publish_pose(waiting_pose)
         rospy.sleep(0.2)
-
-        # self.publish_pose(new_capture_pose_1)
-        # rospy.sleep(2)
-        # self.transform_base_to_ee = construct_homogeneous_transform_matrix(
-        #     translation=self.current_xyz, orientation=self.current_quat)
-        # self.capture()
-        # while not self.num_pcd_samples == 1:
-        #     rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_1)
         rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
+        self.transform_base_to_ee_1 = self.transform_base_to_ee.copy()
         self.capture()
         while not self.num_pcd_samples == 1:
             rospy.sleep(0.2)
@@ -136,22 +146,20 @@ class KukaPcdSampler:
         rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
+        self.transform_base_to_ee_2 = self.transform_base_to_ee.copy()
+        self.transform_ee_1_to_ees.append(np.matmul(np.linalg.inv(self.transform_base_to_ee_1),
+                                                    self.transform_base_to_ee_2))
         self.capture()
         while not self.num_pcd_samples == 2:
             rospy.sleep(0.2)
-
-        # self.publish_pose(new_capture_pose_4)
-        # rospy.sleep(2)
-        # self.transform_base_to_ee = construct_homogeneous_transform_matrix(
-        #     translation=self.current_xyz, orientation=self.current_quat)
-        # self.capture()
-        # while not self.num_pcd_samples == 4:
-        #     rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_3)
         rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
+        self.transform_base_to_ee_3 = self.transform_base_to_ee.copy()
+        self.transform_ee_1_to_ees.append(np.matmul(np.linalg.inv(self.transform_base_to_ee_1),
+                                                self.transform_base_to_ee_3))
         self.capture()
         while not self.num_pcd_samples == 3:
             rospy.sleep(0.2)
@@ -160,6 +168,9 @@ class KukaPcdSampler:
         rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
+        self.transform_base_to_ee_4 = self.transform_base_to_ee.copy()
+        self.transform_ee_1_to_ees.append(np.matmul(np.linalg.inv(self.transform_base_to_ee_1),
+                                                self.transform_base_to_ee_4))
         self.capture()
         while not self.num_pcd_samples == 4:
             rospy.sleep(0.2)
@@ -168,33 +179,23 @@ class KukaPcdSampler:
         rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
+        self.transform_base_to_ee_5 = self.transform_base_to_ee.copy()
+        self.transform_ee_1_to_ees.append(np.matmul(np.linalg.inv(self.transform_base_to_ee_1),
+                                                self.transform_base_to_ee_5))
         self.capture()
         while not self.num_pcd_samples == 5:
             rospy.sleep(0.2)
-
-        # self.publish_pose(new_capture_pose_3)
-        # rospy.sleep(2)
-        # self.transform_base_to_ee = construct_homogeneous_transform_matrix(
-        #     translation=self.current_xyz, orientation=self.current_quat)
-        # self.capture()
-        # while not self.num_pcd_samples == 8:
-        #     rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_6)
         rospy.sleep(2)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
+        self.transform_base_to_ee_6 = self.transform_base_to_ee.copy()
+        self.transform_ee_1_to_ees.append(np.matmul(np.linalg.inv(self.transform_base_to_ee_1),
+                                                self.transform_base_to_ee_6))
         self.capture()
         while not self.num_pcd_samples == 6:
             rospy.sleep(0.2)
-
-        # self.publish_pose(new_capture_pose_2)
-        # rospy.sleep(2)
-        # self.transform_base_to_ee = construct_homogeneous_transform_matrix(
-        #     translation=self.current_xyz, orientation=self.current_quat)
-        # self.capture()
-        # while not self.num_pcd_samples == 10:
-        #     rospy.sleep(0.2)
 
         self.publish_pose(waiting_pose)
         rospy.sleep(0.1)
@@ -245,13 +246,23 @@ class KukaPcdSampler:
         points = ros_numpy.point_cloud2.get_xyz_points(cloud_array, remove_nans=True)
         pcd = o3d.geometry.PointCloud(points=o3d.utility.Vector3dVector(points)).voxel_down_sample(voxel_size=0.0001)
         self.original_pcd_list.append(dcp(pcd))
-        transform_base_to_cam = np.matmul(self.transform_base_to_ee.copy(), self.transform_ee_to_cam.copy())
-        pcd_in_world_frame = pcd.transform(transform_base_to_cam.copy())
+        if self.num_pcd_samples > 0:
+            transform_ee_1_to_cam_n = np.matmul(self.transform_ee_1_to_ees[self.num_pcd_samples - 1],
+                                                self.transform_ee_to_cam)
+            transform_base_to_cam_n = np.matmul(self.transform_base_to_ee_1,
+                                                transform_ee_1_to_cam_n)
+        else:
+            transform_base_to_cam_n = np.matmul(self.transform_base_to_ee_1,
+                                                self.transform_ee_to_cam)
+        pcd_in_world_frame = pcd.transform(transform_base_to_cam_n.copy())
         pcd_in_world_frame = pcd_in_world_frame.crop(self.workspace_bounding_box)
+        pcd_in_world_frame.translate(np.asarray(self.pcd_nudges[self.num_pcd_samples]))
         pcd_in_world_frame.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.001, max_nn=30))
-        pcd_in_world_frame.orient_normals_towards_camera_location(camera_location=transform_base_to_cam.copy()[:-1, -1])
+        pcd_in_world_frame.orient_normals_towards_camera_location(camera_location=transform_base_to_cam_n.copy()[:-1, -1])
         # o3d.visualization.draw_geometries([pcd_in_world_frame, self.workspace_bounding_box])
-        self.pcd_list.append(pcd_in_world_frame)
+        self.pcd_list.append(pcd_in_world_frame.paint_uniform_color([1.0,
+                                                                     1.0/(self.num_pcd_samples+1),
+                                                                     1.0/(self.num_pcd_samples+1)]))
         self.num_pcd_samples += 1
 
     def current_pose_callback(self, data):

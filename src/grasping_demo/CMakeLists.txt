@@ -33,6 +33,8 @@ catkin_install_python(PROGRAMS
     nodes/send_pose_cmd.py
     nodes/kuka_state_listener.py
     nodes/kuka_controller_moveit.py
+    nodes/imitation_learning_exp.py
+    nodes/kuka_controller_imitationlearng.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

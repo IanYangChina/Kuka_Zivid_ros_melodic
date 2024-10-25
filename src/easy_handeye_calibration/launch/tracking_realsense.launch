@@ -1,0 +1,62 @@
+<launch>
+    <arg name="marker_size" doc="Size of the ArUco marker used, in meters" value="0.05"/>
+    <arg name="marker_id" doc="The ID of the ArUco marker used" value="26"/>
+
+    <!-- start realsense camera driver node -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch" >
+        <arg name="color_height" value="1080" />
+        <arg name="color_width" value="1920" />
+        <arg name="color_fps" value="6" />
+        <arg name="tf_publish_rate" value="6" />
+        <arg name="align_depth" value="true" />
+        <arg name="enable_pointcloud" value="true" />
+    </include>
+<!--    for calibration using charuco-->
+<!--    <include file="$(find charuco_detector)/launch/charuco_detector.launch" >-->
+<!--    </include>-->
+
+
+<!--&lt;!&ndash;    &lt;!&ndash;detect the apriltag&ndash;&gt;&ndash;&gt;-->
+<!--    <include file="$(find apriltag_ros)/launch/continuous_detection.launch" >-->
+<!--    </include>-->
+  <node pkg="octomap_server" type="octomap_server_node" name="octomap_server_node" output="screen">
+    <param name="frame_id" value="camera_link"/>
+    <param name="resolution" value="0.05"/>
+    <remap from="cloud_in" to="/camera/depth/color/points"/>
+  </node>
+
+
+
+    <!-- start ArUco -->
+<!--    <node name="aruco_tracker" pkg="aruco_ros" type="single">-->
+<!--        <remap from="/camera_info" to="/camera/color/camera_info"/>-->
+<!--        <remap from="/image" to="/camera/color/image_raw"/>-->
+<!--        <param name="image_is_rectified" value="true"/>-->
+<!--        <param name="marker_size"        value="$(arg marker_size)"/>-->
+<!--        <param name="marker_id"          value="$(arg marker_id)"/>-->
+<!--        <param name="reference_frame"    value="camera_link"/>-->
+<!--        <param name="camera_frame"       value="camera_color_frame"/>-->
+<!--        <param name="marker_frame"       value="camera_marker"/>-->
+<!--    </node>-->
+
+
+
+<!--    <node name="easy_aruco_node" pkg="easy_aruco" type="easy_aruco_node">-->
+<!--        <param name="object_type" value="charuco_board" />-->
+
+<!--        <param name="camera_namespace" value="/camera/color" />-->
+<!--        <param name="dictionary" value="DICT_6X6_250" />-->
+
+<!--        <param name="camera_frame" value="camera_color_frame" />-->
+<!--        <param name="reference_frame" value="camera_color_frame" />-->
+
+<!--        <param name="marker_size" value="16" />-->
+<!--        <param name="square_size" value="20" />-->
+<!--        <param name="square_number_x" value="3" />-->
+<!--        <param name="square_number_y" value="3" />-->
+<!--    </node>-->
+
+<!--    <node name="dummy_aruco_subscriber" pkg="easy_handeye_calibration" type="dummy_aruco_subscriber.py" output="screen">-->
+<!--    </node>-->
+
+</launch>

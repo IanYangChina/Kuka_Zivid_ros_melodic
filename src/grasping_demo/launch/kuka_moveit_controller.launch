@@ -7,4 +7,5 @@
     </include>
 
     <node ns="iiwa" name="kuka_controller_moveit" pkg="grasping_demo" type="kuka_controller_moveit.py" output="screen"/>
+<!--    <node ns="grasping_demo" name="robotiq_3f_ctrl" pkg="robotiq_3f_gripper_control" type="Robotiq3FGripperRtuNode.py" output="screen"/>-->
 </launch>

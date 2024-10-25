@@ -6,7 +6,7 @@ from geometry_msgs.msg import PoseStamped
 
 
 class StateListener:
-    def __init__(self, robot_name="iiwa_2"):
+    def __init__(self, robot_name="iiwa"):
         rospy.init_node('listener_node', anonymous=True)
         rospy.Subscriber(f'/{robot_name}/state/CartesianPose', PoseStamped, callback=self.current_pose_callback)
         self.current_pose_msg = PoseStamped()
