@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import os
 import rospy
 import numpy as np
@@ -7,12 +6,17 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped, PoseArray
 import rosnode, roslaunch
 from grasping_demo.srv import Sample, SampleResponse
+from grasping_demo.srv import TrajectoryThree, TrajectoryThreeResponse
+from grasping_demo.srv import TrajectoryFour, TrajectoryFourResponse
 from zivid_camera.srv import *
 from sensor_msgs.msg import PointCloud2
 import ros_numpy
 import open3d as o3d
 from utils.kuka_poses import *
 from copy import deepcopy as dcp
+from pymeshfix import _meshfix
+import pyvista as pv
+import trimesh
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -82,13 +86,17 @@ class KukaPcdSampler:
         ]
 
         self.workspace_bounding_box = None
+        self.workspace_bounding_box_array = np.load(
+            os.path.join(script_path, '..', '..', 'test', 'test_scripts',
+                         'transformation_matrices', 'reconstruction_bounding_box_array_in_base.npy'))
         self.make_bounding_box()
 
         self.original_pcd_list = []
         self.pcd_list = []
         pcd_saving_path = str(rospy.get_param('/iiwa/kuka_pcd_sampler/pcd_saving_path'))
         if pcd_saving_path == 'none':
-            self.pcd_saving_path = os.path.join(script_path, '..', '..', 'test', 'objects', 'pcd_to_mesh')
+            self.pcd_saving_path = os.path.join(script_path, '..', '..', 'test',
+                                                'deformable_objects', 'pcd_to_mesh')
         else:
             self.pcd_saving_path = pcd_saving_path + '/pcd_to_mesh'
         self.save_original_pcd = rospy.get_param('/iiwa/kuka_pcd_sampler/save_original_pcd')
@@ -99,6 +107,16 @@ class KukaPcdSampler:
             os.makedirs(self.original_pcd_saving_path, exist_ok=True)
             rospy.loginfo("Original pcd will be saved in " + str(self.original_pcd_saving_path))
 
+        self.check_rosapp_on()
+        self.init_robot()
+
+        self.tr1_service = rospy.ServiceProxy('trajectory_3', TrajectoryThree)
+        self.tr2_service = rospy.ServiceProxy('trajectory_4', TrajectoryFour)
+
+        self.sample_service = rospy.Service('kuka_pcd_sample_service', Sample, self.sample)
+        rospy.loginfo("Sampling service ready to be called...")
+
+    def check_rosapp_on(self):
         ROSSMartServo_on = False
         while not ROSSMartServo_on:
             rospy.loginfo('Please start the ROSSMartServo application on the Sunrise Cabinet')
@@ -106,10 +124,6 @@ class KukaPcdSampler:
                 ROSSMartServo_on = True
             else:
                 rospy.sleep(1)
-        self.init_robot()
-
-        self.sample_service = rospy.Service('kuka_pcd_sample_service', Sample, self.sample)
-        rospy.loginfo("Sampling service ready to be called...")
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
@@ -117,10 +131,10 @@ class KukaPcdSampler:
         rospy.sleep(0.1)
 
     def make_bounding_box(self):
-        workspace_bounding_box_array = np.load(
+        self.workspace_bounding_box_array = np.load(
             os.path.join(script_path, '..', '..', 'test', 'test_scripts',
                          'transformation_matrices', 'reconstruction_bounding_box_array_in_base.npy'))
-        workspace_bounding_box_array = o3d.utility.Vector3dVector(workspace_bounding_box_array.astype('float'))
+        workspace_bounding_box_array = o3d.utility.Vector3dVector(self.workspace_bounding_box_array.astype('float'))
         self.workspace_bounding_box = o3d.geometry.AxisAlignedBoundingBox.create_from_points(
             points=workspace_bounding_box_array)
         self.workspace_bounding_box.color = (0, 1, 0)
@@ -134,7 +148,7 @@ class KukaPcdSampler:
         rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_1)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_1 = self.transform_base_to_ee.copy()
@@ -143,7 +157,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_2)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_2 = self.transform_base_to_ee.copy()
@@ -154,7 +168,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_3)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_3 = self.transform_base_to_ee.copy()
@@ -165,7 +179,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_4)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_4 = self.transform_base_to_ee.copy()
@@ -176,7 +190,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_5)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_5 = self.transform_base_to_ee.copy()
@@ -187,7 +201,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_6)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_6 = self.transform_base_to_ee.copy()
@@ -208,12 +222,11 @@ class KukaPcdSampler:
                 i += 1
 
         fused_pcd = self.pcd_list[0] + self.pcd_list[1] + self.pcd_list[2] + \
-                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5] #+ \
-                    # self.pcd_list[6] + self.pcd_list[7] + self.pcd_list[8] + \
-                    # self.pcd_list[9]
-        world_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2)
+                    self.pcd_list[3] + self.pcd_list[4] + self.pcd_list[5]
         fused_pcd = fused_pcd.voxel_down_sample(voxel_size=0.0001)
-        o3d.visualization.draw_geometries([world_frame, fused_pcd, self.workspace_bounding_box])
+        fused_pcd.translate([-0.004, 0, 0])
+        o3d.visualization.draw_geometries([fused_pcd, self.workspace_bounding_box],
+                                          width=800, height=800)
         path_to_save_pcd = os.path.join(self.pcd_saving_path, 'pcd_0.ply')
         i = 0
         while True:
@@ -224,7 +237,31 @@ class KukaPcdSampler:
                 break
         o3d.io.write_point_cloud(path_to_save_pcd, fused_pcd)
         rospy.loginfo("Point cloud \'pcd_" + str(i) + ".ply\' has been saved in " + path_to_save_pcd)
+        rospy.loginfo("Generating mesh")
+        self.pcd_to_mesh(i)
+
+        self.find_best_action_mpm(i, target_ind=0)
         return SampleResponse()
+
+    def find_best_action_mpm(self, pcd_id ,target_ind):
+        from utils.simulation import find_best_action, simulate
+        from utils.generate_hm import show_hm
+        show_hm(self.pcd_saving_path, pcd_id)
+
+        best_action, _, _, _ = find_best_action(pcd_id, target_ind)
+        eef_target_xyz = np.load(os.path.join(self.pcd_saving_path,
+                                              'pcd_' + str(pcd_id) + '_end_effector_target.npy'))
+        eef_target_xyz += np.array([best_action[1] * 0.02, 0, 0])
+        sim = input("Simulate the best action? [Y/N")
+        if sim in ['Y', 'y']:
+            simulate(best_action, pcd_id, target_ind)
+        print("Make sure you start ROSSmartServo and restart moveit node")
+        input("Press enter to continue...")
+        self.move_to_target(eef_target_xyz)
+        if best_action[0] == 1:
+            self.tr1_service()
+        else:
+            self.tr2_service()
 
     def capture_assistant_suggest_settings(self):
         max_capture_time = rospy.Duration.from_sec(1)
@@ -264,6 +301,77 @@ class KukaPcdSampler:
                                                                      1.0/(self.num_pcd_samples+1),
                                                                      1.0/(self.num_pcd_samples+1)]))
         self.num_pcd_samples += 1
+
+    def pcd_to_mesh(self, pcd_id):
+        pcd = o3d.io.read_point_cloud(os.path.join(self.pcd_saving_path, 'pcd_'+str(pcd_id)+'.ply'))
+        original_pcd = dcp(pcd)
+        centre = np.asarray(pcd.points).mean(0)
+        pcd = pcd.voxel_down_sample(voxel_size=0.002)
+        _, ind = pcd.remove_radius_outlier(nb_points=8, radius=0.003)
+        outliner = pcd.select_by_index(ind, invert=True).paint_uniform_color([1, 0, 0])
+        pcd = pcd.select_by_index(ind).paint_uniform_color([0, 0.5, 0.5])
+
+        new_points = np.asarray(pcd.points).copy()
+        new_points[:, -1] = np.min(self.workspace_bounding_box_array[:, -1])
+        addition_pcd_vec = o3d.utility.Vector3dVector(new_points)
+        addition_pcd = o3d.geometry.PointCloud(addition_pcd_vec)
+        addition_pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.001, max_nn=30))
+        addition_pcd.orient_normals_towards_camera_location(camera_location=[centre[0], centre[1], -0.1])
+        pcd = pcd + addition_pcd
+
+        radii = [0.004]
+        mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(pcd, o3d.utility.DoubleVector(radii))
+        o3d.visualization.draw_geometries([mesh, pcd, outliner, self.workspace_bounding_box],
+                                          width=800, height=800,
+                                          mesh_show_back_face=True,
+                                          mesh_show_wireframe=True)
+
+        mesh_path = os.path.join(self.pcd_saving_path, 'mesh.ply')
+        o3d.io.write_triangle_mesh(mesh_path, mesh)
+        mesh = pv.read(mesh_path)
+        os.remove(mesh_path)
+        mesh.save(mesh_path)
+
+        mesh_to_fix = _meshfix.PyTMesh()
+        mesh_to_fix.load_file(mesh_path)
+        os.remove(mesh_path)
+        mesh_to_fix.join_closest_components()
+        mesh_to_fix.fill_small_boundaries()
+        repaired_mesh_path = os.path.join(self.pcd_saving_path,
+                                          'mesh_' + str(pcd_id) + '0_repaired.ply')
+        mesh_to_fix.save_file(repaired_mesh_path)
+
+        points, faces = mesh_to_fix.return_arrays()
+        mesh_centre = (points.max(0) + points.min(0)) / 2
+        np.save(os.path.join(self.pcd_saving_path, 'mesh_' + str(pcd_id) + '0_repaired_centre.npy'), mesh_centre)
+        mesh_top_centre = mesh_centre.copy()
+        mesh_top_centre[-1] = points.max(0)[-1]
+        end_effector_target_xyz = mesh_top_centre.copy()
+        end_effector_target_xyz[0] += 0.011  # real robot eef link offset = 0.008 m
+        end_effector_target_xyz[-1] += 0.094  # real robot eef link offset = 0.0935 m
+        print(f"Real end effector frame location: {end_effector_target_xyz}")
+        np.save(os.path.join(self.pcd_saving_path,
+                             'pcd_' + str(pcd_id) + '_end_effector_target.npy'), end_effector_target_xyz)
+
+        repaired_mesh_0_to_normalised = trimesh.load(repaired_mesh_path, force='mesh', skip_texture=True)
+        repaired_mesh_0_to_normalised.vertices -= mesh_centre
+        normalised_mesh_path = os.path.join(self.pcd_saving_path,
+                                            'mesh_' + str(pcd_id) + '0_repaired_normalised.obj')
+        repaired_mesh_0_to_normalised.export(normalised_mesh_path, file_type='obj')
+        normalised_mesh_top_centre = mesh_top_centre.copy() - mesh_centre
+        np.save((os.path.join(self.pcd_saving_path,
+                              'mesh_' + str(pcd_id)) + '0_repaired_normalised_centre_top.npy'),
+                normalised_mesh_top_centre)
+
+    def move_to_target(self, xyz):
+        p = dcp(waiting_pose)
+        p.pose.position.x = xyz[0]
+        p.pose.position.y = xyz[1]
+        p.pose.position.z = xyz[2] + 0.01
+        self.publish_pose(p)
+
+        p.pose.position.z = xyz[2]
+        self.publish_pose(p)
 
     def current_pose_callback(self, data):
         self.current_pose_msg = data
