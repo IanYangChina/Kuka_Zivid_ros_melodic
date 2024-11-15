@@ -148,7 +148,7 @@ class KukaPcdSampler:
         rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_1)
-        rospy.sleep(1)
+        rospy.sleep(0.5)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_1 = self.transform_base_to_ee.copy()
@@ -157,7 +157,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_2)
-        rospy.sleep(1)
+        rospy.sleep(0.5)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_2 = self.transform_base_to_ee.copy()
@@ -168,7 +168,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_3)
-        rospy.sleep(1)
+        rospy.sleep(0.5)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_3 = self.transform_base_to_ee.copy()
@@ -179,7 +179,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_4)
-        rospy.sleep(1)
+        rospy.sleep(0.5)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_4 = self.transform_base_to_ee.copy()
@@ -190,7 +190,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_5)
-        rospy.sleep(1)
+        rospy.sleep(0.5)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_5 = self.transform_base_to_ee.copy()
@@ -201,7 +201,7 @@ class KukaPcdSampler:
             rospy.sleep(0.2)
 
         self.publish_pose(capture_pose_6)
-        rospy.sleep(1)
+        rospy.sleep(0.5)
         self.transform_base_to_ee = construct_homogeneous_transform_matrix(
             translation=self.current_xyz, orientation=self.current_quat)
         self.transform_base_to_ee_6 = self.transform_base_to_ee.copy()
@@ -240,7 +240,7 @@ class KukaPcdSampler:
         rospy.loginfo("Generating mesh")
         self.pcd_to_mesh(i)
 
-        self.find_best_action_mpm(i, target_ind=0)
+        self.find_best_action_mpm(i, target_ind=1)
         return SampleResponse()
 
     def find_best_action_mpm(self, pcd_id ,target_ind):

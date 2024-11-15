@@ -26,7 +26,7 @@ data_cfg = {
 }
 
 env_cfg = {
-    'p_density': 3e7,
+    'p_density': 2e7,
     'horizon': 500,
     'dt_global': 0.01,
     'n_substeps': 50,
@@ -60,9 +60,9 @@ gf = np.array([1.6], dtype=DTYPE_NP)
 def reset_ti_and_env():
     ti.reset()
     ti.init(arch=ti.cuda, default_fp=DTYPE_TI, default_ip=ti.i32, fast_math=True, random_seed=0,
-            debug=False, check_out_of_bound=False, device_memory_GB=cuda_GB)
+            debug=False, check_out_of_bound=False, device_memory_GB=cuda_GB,
+            advanced_optimization=True)
     env, mpm_env, _ = make_env(data_cfg, env_cfg, loss_cfg, cam_cfg)
-    mpm_env.agent.effectors[0].mesh.update_color((0.2, 0.2, 0.2, 1.0))
     set_parameters(mpm_env, env_cfg['material_id'],
                    e=E.copy(), nu=nu.copy(), yield_stress=yield_stress.copy(), rho=rho.copy(),
                    ground_friction=gf.copy(),
@@ -75,6 +75,7 @@ def forward(mpm_env, init_state, init_agent_pos, trajectory, render=False):
     mpm_env.set_state(init_state['state'], grad_enabled=False)
     init_agent_p = np.append(init_agent_pos, mpm_env.agent.effectors[0].init_rot)
     mpm_env.agent.effectors[0].set_state(0, init_agent_p)
+    mpm_env.agent.effectors[0].mesh.update_color((0.2, 0.2, 0.2, 1.0))
     if render:
         mpm_env.render("human")
     for i in range(trajectory.shape[0]):
@@ -92,7 +93,8 @@ def simulate(action, data_ind, target_ind):
     loss_cfg['target_ind'] = target_ind
     ti.reset()
     ti.init(arch=ti.cuda, default_fp=DTYPE_TI, default_ip=ti.i32, fast_math=True, random_seed=0,
-            debug=False, check_out_of_bound=False, device_memory_GB=cuda_GB)
+            debug=False, check_out_of_bound=False, device_memory_GB=cuda_GB,
+            advanced_optimization=True)
     env, mpm_env, new_init_state = make_env(data_cfg, env_cfg, loss_cfg, cam_cfg)
     init_agent_pos = np.asarray(mpm_env.agent.effectors[0].init_pos)
     agent_init_pos = init_agent_pos + np.array([action[1] * 0.02, 0, 0])
