@@ -30,6 +30,7 @@ catkin_install_python(PROGRAMS
     nodes/command_prompt.py
     nodes/keyboard_event_node.py
     nodes/kuka_pcd_sampler.py
+    nodes/kuka_follow_qrcode.py
     nodes/send_pose_cmd.py
     nodes/kuka_state_listener.py
     nodes/kuka_controller_moveit.py
@@ -44,5 +45,6 @@ install(FILES
     launch/kuka_moveit_controller.launch
     launch/kuka_pcd_sampler.launch
     launch/camera.launch
+    launch/kuka_follow_qrcode.launch
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

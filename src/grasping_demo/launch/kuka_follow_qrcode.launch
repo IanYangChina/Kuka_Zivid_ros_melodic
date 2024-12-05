@@ -1,0 +1,11 @@
+<launch>
+    <include file="$(find iiwa_moveit)/launch/moveit_planning_execution.launch">
+        <arg name="sim" value="false" />
+        <arg name="robot_name" value="iiwa" />
+        <arg name="model" value="iiwa14" />
+        <arg name="rviz" value="false" />
+    </include>
+
+    <node ns="iiwa" name="kuka_follow_qrcode" pkg="grasping_demo" type="kuka_follow_qrcode.py" output="screen"/>
+<!--    <node ns="grasping_demo" name="robotiq_3f_ctrl" pkg="robotiq_3f_gripper_control" type="Robotiq3FGripperRtuNode.py" output="screen"/>-->
+</launch>

@@ -9,12 +9,13 @@ catkin_install_python(PROGRAMS
     nodes/calibration_cmd_prompt.py
     nodes/sample_capture_2d.py
     nodes/sample_pcd.py
+    nodes/sample_pcd_realsense.py
     nodes/extrinsic_fine_tuning_prompt.py
     nodes/sample_two_pcd.py
     nodes/verify_eye_on_hand_result_aruco.py
     nodes/verify_eye_on_hand_result_pcd.py
     nodes/dummy_aruco_subscriber.py
-    nodes/kuka_controller_imitationlearng.py
+#    nodes/kuka_controller_imitationlearng.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
