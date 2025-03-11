@@ -6,7 +6,7 @@
         <arg name="sim" value="false" />
         <arg name="robot_name" value="iiwa" />
         <arg name="model" value="iiwa14" />
-        <arg name="rviz" value="false" />
+        <arg name="rviz" value="True" />
     </include>
 
     <group if="$(arg zivid)">

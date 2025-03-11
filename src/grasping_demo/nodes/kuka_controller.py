@@ -72,9 +72,9 @@ class Controller:
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
-        self.publish_pose(waiting_pose)
-        # self.publish_grip_cmd(gripper_reset)
-        # self.publish_grip_cmd(gripper_activation)
+        self.publish_pose(waiting_pose_away)
+        self.publish_grip_cmd(gripper_reset)
+        self.publish_grip_cmd(gripper_activation)
 
     def pose_to_send_callback(self, data):
         pose_to_send = data.data

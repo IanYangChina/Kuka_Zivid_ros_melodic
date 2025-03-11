@@ -83,8 +83,8 @@ class Controller:
 
     def init_robot(self):
         rospy.loginfo("Initializing robot...")
-        self.publish_pose(waiting_pose_vs)
-        rospy.sleep(2)
+        # self.publish_pose(waiting_pose_vs)
+        # rospy.sleep(2)
 
     def plan_and_show(self, waypoints, show=False, save_tr=False, tr_name='tr'):
         (plan, fraction) = self.moveit_group.compute_cartesian_path(
