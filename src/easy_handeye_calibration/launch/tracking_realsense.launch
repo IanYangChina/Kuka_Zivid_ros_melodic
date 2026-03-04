@@ -40,7 +40,6 @@
     </node>
 
 
-
 <!--    <node name="easy_aruco_node" pkg="easy_aruco" type="easy_aruco_node">-->
 <!--        <param name="object_type" value="charuco_board" />-->
 

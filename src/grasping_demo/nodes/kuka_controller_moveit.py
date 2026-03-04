@@ -7,7 +7,7 @@ import math
 import rospy, rosnode
 import numpy as np
 from geometry_msgs.msg import PoseStamped
-from utils.kuka_poses import *
+from utils.poses import *
 import moveit_commander
 from scipy.spatial.transform import Rotation
 from grasping_demo.srv import TargetPose, TargetPoseResponse, Reset, ResetResponse, MoveDistance, MoveDistanceResponse
